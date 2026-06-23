@@ -46,7 +46,8 @@ const uploadAttachment = async (req, res) => {
         });
     }
 };
-
+console.log('ATTACHMENT FILE:', req.file);
+console.log('ATTACHMENT URL:', `/uploads/${req.file.filename}`);
 const getAttachments = async (req, res) => {
     try {
         const { id } = req.params;
