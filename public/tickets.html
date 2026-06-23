@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tickets | Sistema de Tickets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100" data-page="tickets">
+
+<div class="min-h-screen">
+
+    <aside id="sidebar"></aside>
+
+    <main class="flex-1 p-8 min-w-0">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-3xl font-bold text-slate-800">Gestión de Tickets</h2>
+                <p class="text-slate-500">Consulta, seguimiento y administración de solicitudes</p>
+            </div>
+
+            <a href="create-ticket.html" class="bg-slate-900 text-white px-5 py-3 rounded-xl hover:bg-slate-800">
+                Nuevo Ticket
+            </a>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow mb-6">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-lg font-bold text-slate-800">
+                    Búsqueda Avanzada
+                </h3>
+
+                <button
+                    id="clearFiltersBtn"
+                    class="px-4 py-2 border rounded-xl hover:bg-slate-50">
+                    Limpiar filtros
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+                <input
+                    id="searchInput"
+                    type="text"
+                    placeholder="Ticket, asunto o usuario..."
+                    class="border rounded-xl p-3"
+                >
+
+                <select id="statusFilter" class="border rounded-xl p-3">
+                    <option value="">Todos los estados</option>
+                    <option value="PENDIENTE">Pendiente</option>
+                    <option value="EN_REVISION">En revisión</option>
+                    <option value="FINALIZADO">Finalizado</option>
+                </select>
+
+                <select id="priorityFilter" class="border rounded-xl p-3">
+                    <option value="">Todas las prioridades</option>
+                    <option value="BAJA">Baja</option>
+                    <option value="MEDIA">Media</option>
+                    <option value="ALTA">Alta</option>
+                </select>
+
+                <select id="typeFilter" class="border rounded-xl p-3">
+                    <option value="">Todos los tipos</option>
+                </select>
+
+                <select id="assigneeFilter" class="border rounded-xl p-3">
+                    <option value="">Todos los responsables</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow overflow-hidden">
+            <div class="w-full overflow-x-auto">
+                <table class="min-w-[1100px] w-full text-left text-sm">
+                    <thead class="bg-slate-900 text-white">
+                        <tr>
+                            <th class="p-4 whitespace-nowrap">Ticket</th>
+                            <th class="p-4 whitespace-nowrap">Asunto</th>
+                            <th class="p-4 whitespace-nowrap">Tipo</th>
+                            <th class="p-4 whitespace-nowrap">País</th>
+                            <th id="requesterHeader" class="p-4 whitespace-nowrap">Solicitante</th>
+                            <th class="p-4 whitespace-nowrap">Responsable</th>
+                            <th class="p-4 whitespace-nowrap">Estado</th>
+                            <th class="p-4 whitespace-nowrap">SLA</th>
+                            <th class="p-4 whitespace-nowrap">Fecha</th>
+                            <th class="p-4 whitespace-nowrap">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="ticketsTable" class="divide-y"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+</div>
+
+<script src="js/layout.js"></script>
+<script src="js/api.js"></script>
+<script src="js/tickets.js"></script>
+
+<script>
+    renderLayout('tickets');
+</script>
+
+</body>
+</html>

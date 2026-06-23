@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Tickets</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-slate-100">
+
+<div class="min-h-screen flex">
+
+    <!-- Panel izquierdo -->
+    <div class="hidden lg:flex lg:w-1/2 bg-slate-900 text-white items-center justify-center">
+
+        <div class="max-w-md">
+
+            <h1 class="text-5xl font-bold mb-6">
+                Sistema de Soporte
+            </h1>
+
+            <p class="text-slate-300 text-lg">
+                Plataforma centralizada para la gestión de incidentes,
+                requerimientos y soporte técnico empresarial.
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- Panel derecho -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center">
+
+        <div class="w-full max-w-md bg-white p-10 rounded-2xl shadow-xl">
+
+            <h2 class="text-3xl font-bold text-slate-800 mb-2">
+                Bienvenido
+            </h2>
+
+            <p class="text-slate-500 mb-8">
+                Inicia sesión para continuar
+            </p>
+
+            <form id="loginForm">
+
+                <div class="mb-4">
+                    <label class="block mb-2 text-sm font-medium">
+                        Correo electrónico
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        class="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-slate-800"
+                        required
+                    >
+                </div>
+
+                <div class="mb-6">
+                    <label class="block mb-2 text-sm font-medium">
+                        Contraseña
+                    </label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        class="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-slate-800"
+                        required
+                    >
+                </div>
+
+                <button
+                    type="submit"
+                    class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl font-semibold transition"
+                >
+                    Ingresar
+                </button>
+
+            </form>
+
+            <div id="errorMessage"
+                 class="hidden mt-4 text-red-600 text-sm">
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+
+</body>
+</html>

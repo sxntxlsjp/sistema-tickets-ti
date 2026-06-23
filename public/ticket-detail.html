@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle Ticket | Sistema de Tickets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100" data-page="tickets">
+
+<div class="min-h-screen">
+
+<aside id="sidebar"></aside>
+
+    <main class="flex-1 p-8 min-w-0">
+
+        <div class="mb-6">
+            <a href="tickets.html" class="text-slate-600 hover:underline">
+                ← Volver a tickets
+            </a>
+        </div>
+
+        <div id="ticketHeader" class="bg-white rounded-2xl shadow p-8 mb-6"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <section class="lg:col-span-2 space-y-6">
+
+                <div class="bg-white rounded-2xl shadow p-6">
+                    <h3 class="text-xl font-bold mb-4">Descripción</h3>
+                    <p id="ticketDescription" class="text-slate-600 leading-relaxed"></p>
+                </div>
+                <div id="satisfactionCard" class="hidden bg-gradient-to-br from-slate-900 to-slate-700 text-white rounded-2xl shadow p-6">
+                    <h3 class="text-2xl font-bold mb-2">
+                        ¿Cómo fue tu experiencia?
+                    </h3>
+
+                    <p class="text-slate-300 mb-5">
+                        Tu opinión nos ayuda a mejorar el servicio de soporte.
+                    </p>
+
+                    <div id="ratingOptions" class="flex gap-3 mb-5">
+                        <button type="button" data-rating="1" class="rating-btn text-4xl opacity-60 hover:opacity-100 transition">😡</button>
+                        <button type="button" data-rating="2" class="rating-btn text-4xl opacity-60 hover:opacity-100 transition">😕</button>
+                        <button type="button" data-rating="3" class="rating-btn text-4xl opacity-60 hover:opacity-100 transition">😐</button>
+                        <button type="button" data-rating="4" class="rating-btn text-4xl opacity-60 hover:opacity-100 transition">😊</button>
+                        <button type="button" data-rating="5" class="rating-btn text-4xl opacity-60 hover:opacity-100 transition">🤩</button>
+                    </div>
+
+                    <textarea
+                        id="satisfactionComment"
+                        rows="3"
+                        class="w-full text-slate-800 border rounded-xl p-3 mb-4"
+                        placeholder="Cuéntanos brevemente cómo fue la atención..."
+                    ></textarea>
+
+                    <button
+                        id="sendSatisfactionBtn"
+                        class="bg-white text-slate-900 font-semibold px-5 py-3 rounded-xl hover:bg-slate-100">
+                        Enviar evaluación
+                    </button>
+
+                    <p id="satisfactionMessage" class="mt-4 text-sm"></p>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-6">
+                    <h3 class="text-xl font-bold mb-4">Comentarios</h3>
+
+                    <div id="commentsList" class="space-y-4 mb-6"></div>
+
+                    <form id="commentForm">
+                        <textarea
+                            id="commentText"
+                            rows="4"
+                            class="w-full border rounded-xl p-3 mb-3"
+                            placeholder="Escribe un comentario..."
+                            required
+                        ></textarea>
+
+                        <button class="bg-slate-900 text-white px-5 py-3 rounded-xl hover:bg-slate-800">
+                            Agregar comentario
+                        </button>
+                    </form>
+                </div>
+
+            </section>
+
+            <aside class="space-y-6">
+
+                <div id="statusCard" class="bg-white rounded-2xl shadow p-6">
+                    <h3 class="text-xl font-bold mb-4">Estado</h3>
+
+                    <select id="statusSelect" class="w-full border rounded-xl p-3 mb-4">
+                        <option value="EN_REVISION">En revisión</option>
+                        <option value="PENDIENTE">Pendiente</option>
+                        <option value="FINALIZADO">Finalizado</option>
+                    </select>
+
+                    <button
+                        onclick="updateStatus()"
+                        class="w-full bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800">
+                        Actualizar estado
+                    </button>
+                </div>
+                <div id="assignCard" class="bg-white rounded-2xl shadow p-6">
+                    <h3 class="text-xl font-bold mb-4">Responsable</h3>
+
+                    <p id="currentAssignee" class="text-slate-600 mb-4"></p>
+
+                    <select id="assignSelect" class="w-full border rounded-xl p-3 mb-4">
+                    </select>
+
+                    <button
+                        onclick="reassignTicket()"
+                        class="w-full bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800">
+                        Reasignar responsable
+                    </button>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-6">
+                    <h3 class="text-xl font-bold mb-4">Adjuntos</h3>
+
+                <form id="attachmentForm" class="mb-4">
+
+                    <div
+                        id="dropZone"
+                        class="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center cursor-pointer hover:bg-slate-50 transition">
+
+                        <div class="text-4xl mb-3">
+                            📁
+                        </div>
+
+                        <p class="font-semibold text-slate-700">
+                            Arrastra archivos aquí
+                        </p>
+
+                        <p class="text-sm text-slate-500 mt-1">
+                            o haz clic para seleccionarlos
+                        </p>
+
+                        <input
+                            id="fileInput"
+                            type="file"
+                            multiple
+                            class="hidden"
+                        >
+                    </div>
+
+                    <div
+                        id="selectedFilesList"
+                        class="mt-4 space-y-2">
+                    </div>
+
+                    <button
+                        id="uploadFilesBtn"
+                        type="submit"
+                        class="hidden w-full bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800 mt-4">
+                        Subir archivos
+                    </button>
+
+                    <p
+                        id="attachmentMessage"
+                        class="mt-3 text-sm">
+                    </p>
+
+                </form>
+
+                    <div id="attachmentsList" class="space-y-3"></div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow p-6">
+                    <h3 class="text-xl font-bold mb-4">Historial</h3>
+                    <div id="historyList" class="space-y-3 text-sm"></div>
+                </div>
+
+            </aside>
+
+        </div>
+
+    </main>
+
+</div>
+<script src="js/layout.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ticket-detail.js"></script>
+<script>
+    renderLayout('ticket');
+</script>
+</body>
+</html>

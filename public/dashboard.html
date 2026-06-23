@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Ejecutivo | Sistema de Tickets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100" data-page="dashboard">
+
+<div class="min-h-screen">
+
+<aside id="sidebar"></aside>
+
+    <main class="flex-1 p-8 min-w-0">
+        <div id="adminAlertsContainer" class="mb-8"></div>
+
+        <div class="flex items-center gap-4">
+
+            <button
+                id="exportManagementReportBtn"
+                class="bg-slate-900 text-white px-5 py-3 rounded-xl hover:bg-slate-800">
+                📄 Exportar Reporte Gerencial
+            </button>
+
+        </div>
+        <div class="flex flex-wrap gap-3 mb-8">
+
+            <button onclick="loadDashboard('today')" data-range="today"
+                class="range-btn px-4 py-2 bg-white rounded-xl shadow hover:bg-slate-50">
+                Hoy
+            </button>
+
+            <button onclick="loadDashboard('7d')" data-range="7d"
+                class="range-btn px-4 py-2 bg-white rounded-xl shadow hover:bg-slate-50">
+                Últimos 7 días
+            </button>
+
+            <button onclick="loadDashboard('30d')" data-range="30d"
+                class="range-btn px-4 py-2 bg-white rounded-xl shadow hover:bg-slate-50">
+                Últimos 30 días
+            </button>
+
+            <button onclick="loadDashboard('month')" data-range="month"
+                class="range-btn px-4 py-2 bg-white rounded-xl shadow hover:bg-slate-50">
+                Este mes
+            </button>
+
+            <button onclick="loadDashboard('all')" data-range="all"
+                class="range-btn px-4 py-2 bg-slate-900 text-white rounded-xl shadow">
+                Todo
+            </button>
+
+        </div>
+        <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-5 mb-8">
+
+            <div class="bg-white p-6 rounded-2xl shadow">
+                <p class="text-slate-500">Total Tickets</p>
+                <h3 id="totalTickets" class="text-4xl font-bold mt-2">0</h3>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow">
+                <p class="text-slate-500">En revisión</p>
+                <h3 id="openTickets" class="text-4xl font-bold mt-2 text-blue-600">0</h3>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow">
+                <p class="text-slate-500">Pendientes</p>
+                <h3 id="pendingTickets" class="text-4xl font-bold mt-2 text-yellow-600">0</h3>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow">
+                <p class="text-slate-500">Finalizados</p>
+                <h3 id="closedTickets" class="text-4xl font-bold mt-2 text-green-600">0</h3>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow">
+                <p class="text-slate-500">Satisfacción</p>
+                <h3 id="satisfactionAverage" class="text-4xl font-bold mt-2 text-amber-500">
+                    0.0 ⭐
+                </h3>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow">
+                <p class="text-slate-500">SLA vencidos</p>
+                <h3 id="overdueTickets" class="text-4xl font-bold mt-2 text-red-600">0</h3>
+            </div>
+
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+            <div class="bg-white rounded-2xl shadow p-6">
+                <h3 class="text-xl font-bold mb-4">
+                    Tickets por Estado
+                </h3>
+
+                <canvas id="statusChart"></canvas>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow p-6">
+                <h3 class="text-xl font-bold mb-4">
+                    Tickets por Prioridad
+                </h3>
+
+                <canvas id="priorityChart"></canvas>
+            </div>
+
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+            <div class="bg-white rounded-2xl shadow p-6">
+                <h3 class="text-xl font-bold mb-4">Tickets por Tipo</h3>
+                <div id="ticketsByType" class="space-y-4"></div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow p-6">
+                <h3 class="text-xl font-bold mb-4">Tickets por Departamento</h3>
+                <div id="ticketsByDepartment" class="space-y-4"></div>
+            </div>
+
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <div class="bg-white rounded-2xl shadow p-6">
+                <h3 class="text-xl font-bold mb-4">Últimos Tickets</h3>
+                <div id="latestTickets" class="space-y-3"></div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow p-6">
+                <h3 class="text-xl font-bold mb-4">Últimas Evaluaciones</h3>
+                <div id="latestSatisfactions" class="space-y-3"></div>
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/api.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/dashboard.js"></script>
+
+<script>
+    renderLayout('dashboard');
+</script>
+</body>
+</html>

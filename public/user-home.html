@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio | Sistema de Tickets</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100" data-page="user-home">
+
+<div class="min-h-screen">
+
+<aside id="sidebar"></aside>
+
+    <main class="flex-1 p-8 min-w-0">
+
+        <div class="mb-8">
+
+            <h2 class="text-3xl font-bold text-slate-800">
+                Bienvenido
+            </h2>
+
+            <p id="userName"
+               class="text-slate-500 mt-2">
+            </p>
+
+        </div>
+
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+            <div class="bg-white p-6 rounded-2xl shadow">
+                <p class="text-slate-500">Mis Tickets</p>
+                <h3 id="totalTickets"
+                    class="text-4xl font-bold mt-2">
+                    0
+                </h3>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow">
+                <p class="text-slate-500">Pendientes</p>
+                <h3 id="pendingTickets"
+                    class="text-4xl font-bold mt-2">
+                    0
+                </h3>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow">
+                <p class="text-slate-500">Finalizados</p>
+                <h3 id="closedTickets"
+                    class="text-4xl font-bold mt-2">
+                    0
+                </h3>
+            </div>
+
+        </section>
+
+        <section class="bg-white rounded-2xl shadow p-6">
+
+            <h3 class="text-xl font-bold mb-4">
+                Mis últimos tickets
+            </h3>
+
+            <div id="latestTickets"
+                 class="space-y-3">
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+<script src="js/layout.js"></script>
+<script src="js/api.js"></script>
+<script src="js/user-home.js"></script>
+<script>
+    renderLayout('user-home');
+</script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil | Sistema de Tickets</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100" data-page="profile">
+
+<div class="min-h-screen">
+
+    <aside id="sidebar"></aside>
+
+    <main class="flex-1 p-8 min-w-0">
+
+        <div class="mb-8">
+
+            <h2 class="text-3xl font-bold text-slate-800">
+                Mi Perfil
+            </h2>
+
+            <p class="text-slate-500">
+                Administra tu información personal y seguridad.
+            </p>
+
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+            <!-- TARJETA PERFIL -->
+            <div class="bg-white rounded-3xl shadow p-8">
+
+                <div class="flex flex-col items-center">
+
+                <div class="relative mb-5">
+
+                    <img
+                        id="profileImage"
+                        class="hidden w-32 h-32 rounded-full object-cover border-4 border-slate-200 shadow-lg"
+                    >
+
+                    <div
+                        id="profileAvatar"
+                        class="w-32 h-32 rounded-full bg-slate-800 text-white text-4xl font-bold flex items-center justify-center">
+                    </div>
+
+                </div>
+
+                    <div class="flex flex-col items-center gap-3">
+
+                        <label
+                            class="cursor-pointer bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition">
+
+                            Seleccionar foto
+
+                            <input
+                                id="profilePhotoInput"
+                                type="file"
+                                accept="image/*"
+                                class="hidden">
+                        </label>
+
+                        <button
+                            id="savePhotoBtn"
+                            class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl transition">
+                            Guardar foto
+                        </button>
+
+                        <p
+                            id="photoUploadMessage"
+                            class="text-sm text-slate-500">
+                        </p>
+
+                    </div>
+
+                    <h3 id="profileName"
+                        class="text-2xl font-bold text-center">
+                    </h3>
+
+                    <p id="profileJobTitle"
+                       class="text-slate-500 mt-2 text-center">
+                    </p>
+
+                    <p id="profileDepartment"
+                       class="text-slate-400 text-sm text-center mt-1">
+                    </p>
+
+                </div>
+
+            </div>
+
+            <!-- DATOS -->
+            <div class="xl:col-span-2 bg-white rounded-3xl shadow p-8">
+
+                <h3 class="text-xl font-bold mb-6">
+                    Información Personal
+                </h3>
+
+                <form id="profileForm" class="space-y-5">
+
+                    <div>
+                        <label class="block text-sm text-slate-500 mb-2">
+                            Nombre completo
+                        </label>
+
+                        <input
+                            id="name"
+                            type="text"
+                            class="w-full border rounded-2xl p-4"
+                        >
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                        <div>
+                            <label class="block text-sm text-slate-500 mb-2">
+                                Departamento
+                            </label>
+
+                            <input
+                                id="department"
+                                type="text"
+                                class="w-full border rounded-2xl p-4"
+                                readonly
+                            >
+                        </div>
+
+                        <div>
+                            <label class="block text-sm text-slate-500 mb-2">
+                                Cargo
+                            </label>
+
+                            <input
+                                id="jobTitle"
+                                type="text"
+                                class="w-full border rounded-2xl p-4"
+                                readonly
+                            >
+                        </div>
+
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-slate-500 mb-2">
+                            Correo electrónico
+                        </label>
+
+                        <input
+                            id="email"
+                            type="email"
+                            class="w-full border rounded-2xl p-4"
+                            readonly
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-slate-500 mb-2">
+                            Teléfono
+                        </label>
+
+                        <input
+                            id="phone"
+                            type="text"
+                            class="w-full border rounded-2xl p-4"
+                        >
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="bg-slate-900 text-white px-6 py-4 rounded-2xl hover:bg-slate-800">
+                        Guardar cambios
+                    </button>
+
+                </form>
+                <hr class="my-8">
+
+                <h3 class="text-xl font-bold mb-6">
+                    Seguridad
+                </h3>
+
+                <form id="passwordForm" class="space-y-5">
+
+                    <div>
+                        <label class="block text-sm text-slate-500 mb-2">
+                            Contraseña actual
+                        </label>
+
+                        <input
+                            id="currentPassword"
+                            type="password"
+                            class="w-full border rounded-2xl p-4"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-slate-500 mb-2">
+                            Nueva contraseña
+                        </label>
+
+                        <input
+                            id="newPassword"
+                            type="password"
+                            class="w-full border rounded-2xl p-4"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-slate-500 mb-2">
+                            Confirmar nueva contraseña
+                        </label>
+
+                        <input
+                            id="confirmPassword"
+                            type="password"
+                            class="w-full border rounded-2xl p-4"
+                        >
+                    </div>
+
+                    <div
+                        id="passwordMessage"
+                        class="hidden rounded-xl p-4 text-sm">
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="bg-indigo-600 text-white px-6 py-4 rounded-2xl hover:bg-indigo-700">
+                        Actualizar contraseña
+                    </button>
+
+                </form>
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+<script src="js/layout.js"></script>
+<script src="js/api.js"></script>
+<script src="js/profile.js"></script>
+
+<script>
+    renderLayout('profile');
+</script>
+
+</body>
+</html>

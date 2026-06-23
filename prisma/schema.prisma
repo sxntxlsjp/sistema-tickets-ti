@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  USER
+  SUPPORT
+  ADMIN
+}
+
+enum TicketStatus {
+  EN_REVISION
+  PENDIENTE
+  FINALIZADO
+}
+
+enum TicketPriority {
+  BAJA
+  MEDIA
+  ALTA
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(100)
+  email        String   @unique @db.VarChar(150)
+  department   String?
+  jobTitle     String?  @map("job_title")
+  phone        String?
+  profileImage String?  @map("profile_image")
+  passwordHash String   @map("password_hash")
+  role         Role     @default(USER)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  requestedTickets Ticket[] @relation("RequestedTickets")
+  assignedTickets  Ticket[] @relation("AssignedTickets")
+  comments         TicketComment[]
+  histories        TicketHistory[]
+  satisfactions TicketSatisfaction[]
+  attachments TicketAttachment[]
+  @@map("users")
+}
+
+model TicketType {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(100)
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+
+  tickets Ticket[]
+
+  @@map("ticket_types")
+}
+
+model Ticket {
+  id           Int            @id @default(autoincrement())
+  ticketNumber String         @unique @map("ticket_number") @db.VarChar(30)
+  requestedBy  Int            @map("requested_by")
+  typeId       Int            @map("type_id")
+  subject      String         @db.VarChar(200)
+  assignedTo   Int?           @map("assigned_to")
+  description  String
+  status       TicketStatus   @default(EN_REVISION)
+  priority     TicketPriority @default(MEDIA)
+  slaDueAt     DateTime?      @map("sla_due_at")
+  slaStatus    String         @default("ON_TIME") @map("sla_status") @db.VarChar(30)
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  closedAt     DateTime?      @map("closed_at")
+  countryId    Int?
+
+  country     Country?   @relation(fields: [countryId], references: [id])
+  requester   User       @relation("RequestedTickets", fields: [requestedBy], references: [id])
+  assignee    User?      @relation("AssignedTickets", fields: [assignedTo], references: [id])
+  type        TicketType @relation(fields: [typeId], references: [id])
+  attachments TicketAttachment[]
+  comments    TicketComment[]
+  histories   TicketHistory[]
+  satisfaction TicketSatisfaction?
+  @@map("tickets")
+  @@index([countryId])
+}
+
+model TicketAttachment {
+  id         Int      @id @default(autoincrement())
+  ticketId   Int      @map("ticket_id")
+
+uploadedBy Int?       @map("uploaded_by")
+
+  fileName   String   @map("file_name") @db.VarChar(255)
+  filePath   String   @map("file_path")
+  mimeType   String   @map("mime_type") @db.VarChar(100)
+  fileSize   Int      @map("file_size")
+  uploadedAt DateTime @default(now()) @map("uploaded_at")
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  uploader User? @relation(fields: [uploadedBy], references: [id])
+
+  @@map("ticket_attachments")
+}
+
+model TicketComment {
+  id        Int      @id @default(autoincrement())
+  ticketId  Int      @map("ticket_id")
+  userId    Int      @map("user_id")
+  comment   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("ticket_comments")
+}
+
+model TicketHistory {
+  id            Int           @id @default(autoincrement())
+  ticketId      Int           @map("ticket_id")
+  changedBy     Int           @map("changed_by")
+  oldStatus     TicketStatus? @map("old_status")
+  newStatus     TicketStatus? @map("new_status")
+  oldAssignedTo Int?          @map("old_assigned_to")
+  newAssignedTo Int?          @map("new_assigned_to")
+  createdAt     DateTime      @default(now()) @map("created_at")
+
+  ticket  Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  changer User   @relation(fields: [changedBy], references: [id])
+
+  @@map("ticket_history")
+}
+
+model TicketSatisfaction {
+  id        Int      @id @default(autoincrement())
+  ticketId  Int      @unique @map("ticket_id")
+  userId    Int      @map("user_id")
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("ticket_satisfaction")
+}
+
+model Country {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  code      String   @unique
+  flagEmoji String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tickets   Ticket[]
+
+  @@map("countries")
+}

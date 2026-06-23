@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Países | Sistema de Tickets</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100" data-page="countries">
+
+<div class="min-h-screen">
+
+    <aside id="sidebar"></aside>
+
+    <main class="flex-1 p-8 min-w-0">
+
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-slate-800">
+                Gestión de Países
+            </h2>
+
+            <p class="text-slate-500">
+                Administra los países disponibles para la creación de tickets
+            </p>
+        </div>
+
+        <div class="space-y-6">
+
+            <div class="bg-white rounded-2xl shadow p-6">
+                <h3 class="text-xl font-bold mb-4">
+                    Nuevo País
+                </h3>
+
+                <form id="countryForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                    <select
+                        id="countrySelect"
+                        class="w-full border rounded-xl p-3"
+                        required
+                    >
+                        <option value="">Seleccione un país de Latinoamérica</option>
+                    </select>
+
+                    <button
+                        class="w-full bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800">
+                        Agregar País
+                    </button>
+
+                </form>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow p-6">
+
+                <div class="flex justify-between items-center mb-5">
+                    <div>
+                        <h3 class="text-xl font-bold">
+                            Países Registrados
+                        </h3>
+
+                        <p class="text-slate-500 text-sm">
+                            Países disponibles para el selector de creación de tickets
+                        </p>
+                    </div>
+                </div>
+
+                <div class="w-full overflow-x-auto">
+                    <table class="min-w-[800px] w-full text-left text-sm">
+
+                        <thead class="bg-slate-900 text-white">
+                            <tr>
+                                <th class="p-4 whitespace-nowrap">Bandera</th>
+                                <th class="p-4 whitespace-nowrap">País</th>
+                                <th class="p-4 whitespace-nowrap">Código</th>
+                                <th class="p-4 whitespace-nowrap">Estado</th>
+                                <th class="p-4 whitespace-nowrap">Acciones</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="countriesList" class="divide-y"></tbody>
+
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+<div id="deleteCountryModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+
+        <h3 class="text-2xl font-bold mb-2">
+            Eliminar país
+        </h3>
+
+        <p id="deleteCountryText" class="text-slate-500 mb-5"></p>
+
+        <input type="hidden" id="deleteCountryId">
+
+        <div class="flex justify-end gap-3">
+            <button onclick="closeDeleteCountryModal()" class="px-4 py-2 border rounded-xl">
+                Cancelar
+            </button>
+
+            <button
+                onclick="confirmDeleteCountry()"
+                class="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700">
+                Eliminar
+            </button>
+        </div>
+
+    </div>
+</div>
+<div
+    id="duplicateCountryModal"
+    class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 transition-opacity duration-300">
+
+    <div
+        id="duplicateCountryModalContent"
+        class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md transform scale-95 opacity-0 transition-all duration-300">
+
+        <h3 class="text-2xl font-bold mb-2">
+            País ya registrado
+        </h3>
+
+        <p id="duplicateCountryText" class="text-slate-500 mb-5">
+            Este país ya se encuentra registrado.
+        </p>
+
+        <div class="flex justify-end">
+            <button
+                onclick="closeDuplicateCountryModal()"
+                class="px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800">
+                Entendido
+            </button>
+        </div>
+
+    </div>
+</div>
+<script src="js/layout.js"></script>
+<script src="js/api.js"></script>
+<script src="js/countries.js"></script>
+
+<script>
+    renderLayout('countries');
+</script>
+
+</body>
+</html>

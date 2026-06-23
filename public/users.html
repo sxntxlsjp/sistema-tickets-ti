@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios | Sistema de Tickets</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100" data-page="user">
+
+<div class="min-h-screen">
+
+<aside id="sidebar"></aside>
+
+    <main class="flex-1 p-8 min-w-0">
+
+        <div class="mb-8">
+
+            <h2 class="text-3xl font-bold text-slate-800">
+                Administración de Usuarios
+            </h2>
+
+            <p class="text-slate-500">
+                Gestión de usuarios del sistema
+            </p>
+
+        </div>
+
+<div class="space-y-6">
+
+    <div class="bg-white rounded-2xl shadow p-6">
+
+        <h3 class="text-xl font-bold mb-4">
+            Nuevo Usuario
+        </h3>
+
+        <form id="userForm" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+
+            <input
+                id="name"
+                type="text"
+                placeholder="Nombre y Apellido"
+                class="w-full border rounded-xl p-3"
+                required
+            >
+
+            <input
+                id="department"
+                type="text"
+                placeholder="Departamento"
+                class="w-full border rounded-xl p-3"
+            >
+
+            <input
+                id="jobTitle"
+                type="text"
+                placeholder="Cargo / Puesto"
+                class="w-full border rounded-xl p-3"
+            >
+
+            <input
+                id="email"
+                type="email"
+                placeholder="Correo electrónico"
+                class="w-full border rounded-xl p-3"
+                required
+            >
+
+            <input
+                id="phone"
+                type="text"
+                placeholder="Celular"
+                class="w-full border rounded-xl p-3"
+            >
+
+            <input
+                id="password"
+                type="password"
+                placeholder="Contraseña"
+                class="w-full border rounded-xl p-3"
+                required
+            >
+
+            <select
+                id="role"
+                class="w-full border rounded-xl p-3">
+
+                <option value="USER">
+                    Usuario
+                </option>
+
+                <option value="ADMIN">
+                    Administrador
+                </option>
+
+            </select>
+
+            <button
+                class="w-full bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800">
+                Crear Usuario
+            </button>
+
+        </form>
+
+    </div>
+
+    <div class="bg-white rounded-2xl shadow p-6">
+
+        <div class="flex justify-between items-center mb-5">
+            <div>
+                <h3 class="text-xl font-bold">
+                    Usuarios Registrados
+                </h3>
+
+                <p class="text-slate-500 text-sm">
+                    Administración de cuentas, roles y estado de acceso
+                </p>
+            </div>
+        </div>
+
+        <div class="w-full overflow-x-auto">
+            <table class="min-w-[1100px] w-full text-left text-sm">
+
+                <thead class="bg-slate-900 text-white">
+                    <tr>
+                        <th class="p-4 whitespace-nowrap">Usuario</th>
+                        <th class="p-4 whitespace-nowrap">Departamento</th>
+                        <th class="p-4 whitespace-nowrap">Cargo</th>
+                        <th class="p-4 whitespace-nowrap">Correo</th>
+                        <th class="p-4 whitespace-nowrap">Celular</th>
+                        <th class="p-4 whitespace-nowrap">Rol</th>
+                        <th class="p-4 whitespace-nowrap">Estado</th>
+                        <th class="p-4 whitespace-nowrap">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody id="usersList" class="divide-y"></tbody>
+
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+    </main>
+
+</div>
+<div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg">
+
+        <h3 class="text-2xl font-bold mb-5">Editar Usuario</h3>
+
+        <input type="hidden" id="editUserId">
+
+        <div class="space-y-4">
+            <input id="editName" type="text" placeholder="Nombre" class="w-full border rounded-xl p-3">
+            <input id="editDepartment" type="text" placeholder="Departamento" class="w-full border rounded-xl p-3">
+            <input id="editJobTitle" type="text" placeholder="Cargo" class="w-full border rounded-xl p-3">
+            <input id="editEmail" type="email" placeholder="Correo" class="w-full border rounded-xl p-3">
+            <input id="editPhone" type="text" placeholder="Celular" class="w-full border rounded-xl p-3">
+
+            <select id="editRole" class="w-full border rounded-xl p-3">
+                <option value="USER">Usuario</option>
+                <option value="ADMIN">Administrador</option>
+            </select>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-6">
+            <button onclick="closeEditModal()" class="px-4 py-2 border rounded-xl">
+                Cancelar
+            </button>
+
+            <button onclick="saveUserChanges()" class="px-4 py-2 bg-slate-900 text-white rounded-xl">
+                Guardar cambios
+            </button>
+        </div>
+
+    </div>
+</div>
+<div id="passwordModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+
+        <h3 class="text-2xl font-bold mb-2">Resetear contraseña</h3>
+
+        <p id="passwordModalUser" class="text-slate-500 mb-5"></p>
+
+        <input type="hidden" id="passwordUserId">
+
+        <input
+            id="newPassword"
+            type="password"
+            placeholder="Nueva contraseña"
+            class="w-full border rounded-xl p-3 mb-4"
+        >
+
+        <input
+            id="confirmPassword"
+            type="password"
+            placeholder="Confirmar contraseña"
+            class="w-full border rounded-xl p-3 mb-4"
+        >
+
+        <p id="passwordMessage" class="hidden text-sm mb-4"></p>
+
+        <div class="flex justify-end gap-3">
+            <button onclick="closePasswordModal()" class="px-4 py-2 border rounded-xl">
+                Cancelar
+            </button>
+
+            <button onclick="saveNewPassword()" class="px-4 py-2 bg-slate-900 text-white rounded-xl">
+                Guardar contraseña
+            </button>
+        </div>
+
+    </div>
+</div>
+<div id="statusModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+
+        <h3 id="statusModalTitle" class="text-2xl font-bold mb-2">
+            Confirmar acción
+        </h3>
+
+        <p id="statusModalText" class="text-slate-500 mb-5"></p>
+
+        <input type="hidden" id="statusUserId">
+
+        <div class="flex justify-end gap-3">
+            <button onclick="closeStatusModal()" class="px-4 py-2 border rounded-xl">
+                Cancelar
+            </button>
+
+            <button
+                id="confirmStatusBtn"
+                onclick="confirmToggleUser()"
+                class="px-4 py-2 text-white rounded-xl">
+                Confirmar
+            </button>
+        </div>
+
+    </div>
+</div>
+<script src="js/layout.js"></script>
+<script src="js/api.js"></script>
+<script src="js/users.js"></script>
+<script>
+    renderLayout('users');
+</script>
+</body>
+</html>
