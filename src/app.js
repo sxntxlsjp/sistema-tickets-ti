@@ -39,6 +39,20 @@ app.use(
     '/uploads',
     express.static(ticketUploadsPath)
 );
+
+app.get('/debug/uploads', (req, res) => {
+    res.json({
+        ticketUploadsPath,
+        profileUploadsPath,
+        ticketFiles: fs.existsSync(ticketUploadsPath)
+            ? fs.readdirSync(ticketUploadsPath)
+            : [],
+        profileFiles: fs.existsSync(profileUploadsPath)
+            ? fs.readdirSync(profileUploadsPath)
+            : []
+    });
+});
+
 app.get('/', (req, res) => {
     res.json({
         message: 'API Sistema de Tickets funcionando correctamente'
