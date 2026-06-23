@@ -2,9 +2,9 @@ const multer = require('multer');
 const path = require('path');
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'public/uploads/profiles/');
-    },
+destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../../public/uploads/profiles'));
+},
 
     filename: (req, file, cb) => {
         const uniqueName =
