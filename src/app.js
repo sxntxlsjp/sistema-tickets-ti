@@ -11,6 +11,7 @@ const dashboardRoutes = require('./routes/dashboard.routes');
 const ticketCommentRoutes = require('./routes/ticketComment.routes');
 const ticketDetailRoutes = require('./routes/ticketDetail.routes');
 const path = require('path');
+const fs = require('fs');
 const ticketAttachmentRoutes = require('./routes/ticketAttachment.routes');
 const ticketSatisfactionRoutes = require('./routes/ticketSatisfaction.routes');
 const ticketAssignRoutes = require('./routes/ticketAssign.routes');
@@ -19,20 +20,25 @@ const managementReportRoutes = require('./routes/managementReport.routes');
 const countryRoutes = require('./routes/country.routes');
 
 const app = express();
+const ticketUploadsPath = path.join(__dirname, 'uploads');
+const profileUploadsPath = path.join(__dirname, '../public/uploads/profiles');
 
+fs.mkdirSync(ticketUploadsPath, { recursive: true });
+fs.mkdirSync(profileUploadsPath, { recursive: true });
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '../public')));
 app.use(
     '/uploads/profiles',
-    express.static(path.join(__dirname, '../public/uploads/profiles'))
-);
-app.use(
-    '/uploads',
-    express.static(path.join(__dirname, 'uploads'))
+    express.static(profileUploadsPath)
 );
 
+app.use(
+    '/uploads',
+    express.static(ticketUploadsPath)
+);
 app.get('/', (req, res) => {
     res.json({
         message: 'API Sistema de Tickets funcionando correctamente'
