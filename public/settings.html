@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración | Sistema de Tickets</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100" data-page="settings">
+
+<div class="min-h-screen">
+
+    <aside id="sidebar"></aside>
+
+    <main class="p-8 min-w-0">
+
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-slate-800">
+                Configuración del Sistema
+            </h2>
+
+            <p class="text-slate-500">
+                Administra el comportamiento general de la plataforma.
+            </p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow p-8">
+
+            <h3 class="text-xl font-bold mb-6">
+                Configuración General
+            </h3>
+
+            <div class="flex items-center justify-between border rounded-2xl p-6">
+
+                <div>
+
+                    <h4 class="font-semibold text-lg">
+                        Mostrar campo Prioridad
+                    </h4>
+
+                    <p class="text-slate-500 mt-1">
+                        Permite que el usuario seleccione la prioridad al crear un ticket.
+                    </p>
+
+                </div>
+
+                <label class="relative inline-flex items-center cursor-pointer">
+
+                    <input
+                        type="checkbox"
+                        id="showPriorityField"
+                        class="sr-only peer">
+
+                    <div class="w-14 h-8 bg-slate-300 rounded-full peer peer-checked:bg-green-500 transition-all"></div>
+
+                    <div class="absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-all peer-checked:translate-x-6"></div>
+
+                </label>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+<script src="js/layout.js"></script>
+<script src="js/api.js"></script>
+<script src="js/settings.js"></script>
+
+<script>
+    renderLayout('settings');
+</script>
+
+</body>
+</html>

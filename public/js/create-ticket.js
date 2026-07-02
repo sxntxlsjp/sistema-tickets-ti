@@ -11,23 +11,23 @@ if (!token) {
 const typeSelect = document.getElementById('typeId');
 const assignedSelect = document.getElementById('assignedTo');
 const countrySelect = document.getElementById('countryId');
+const priorityContainer =
+    document.getElementById('priorityContainer');
 const form = document.getElementById('ticketForm');
 const message = document.getElementById('message');
 
 const loadTicketTypes = async () => {
-
-    const response = await fetch(
-        `${API_URL}/ticket-types`,
-        {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+    const response = await fetch(`${API_URL}/ticket-types/active`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
         }
-    );
+    });
 
-    const types = await response.json();
+    const result = await response.json();
+    const types = result.data || result;
 
-    typeSelect.innerHTML = '';
+    typeSelect.innerHTML =
+        '<option value="">Seleccione un tipo de reporte</option>';
 
     types.forEach(type => {
         typeSelect.innerHTML += `
@@ -431,9 +431,44 @@ const loadCountries = async () => {
         console.error('Error cargando países:', error);
     }
 };
+const loadPrioritySetting = async () => {
+    try {
 
+        const response = await fetch(
+            `${API_URL}/system-settings/showPriorityField`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+
+        const result = await response.json();
+
+        const setting = result.data || result;
+
+        if (setting.value === 'true') {
+
+            priorityContainer.classList.remove('hidden');
+
+        } else {
+
+            priorityContainer.classList.add('hidden');
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            'Error cargando configuración de prioridad:',
+            error
+        );
+
+    }
+};
 renderMenu();
 loadTicketTypes();
 loadSupportUsers();
 loadCountries();
+loadPrioritySetting();
 

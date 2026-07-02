@@ -21,15 +21,24 @@ const renderLayout = (activePage = '') => {
             .toUpperCase()
         : 'US';
 
-    const menuItems = user.role === 'ADMIN'
-        ? [
-            { key: 'dashboard', label: 'Dashboard', icon: '📊', href: 'dashboard.html' },
-            { key: 'tickets', label: 'Tickets', icon: '🎫', href: 'tickets.html' },
-            { key: 'create-ticket', label: 'Nuevo Ticket', icon: '➕', href: 'create-ticket.html' },
-            { key: 'users', label: 'Usuarios', icon: '👥', href: 'users.html' },
-            { key: 'countries', label: 'Países', icon: '🌎', href: 'countries.html' },
-            { key: 'profile', label: 'Mi Perfil', icon: '👤', href: 'profile.html' }
-        ]
+const menuItems = user.role === 'ADMIN'
+    ? [
+        { key: 'dashboard', label: 'Dashboard', icon: '📊', href: 'dashboard.html' },
+        { key: 'tickets', label: 'Tickets', icon: '🎫', href: 'tickets.html' },
+        { key: 'create-ticket', label: 'Nuevo Ticket', icon: '➕', href: 'create-ticket.html' },
+        {
+            key: 'admin',
+            label: 'Administración',
+            icon: '🛠️',
+            children: [
+                { key: 'users', label: 'Usuarios', icon: '👥', href: 'users.html' },
+                { key: 'countries', label: 'Países', icon: '🌎', href: 'countries.html' },
+                { key: 'ticket-types', label: 'Tipos de Ticket', icon: '🏷️', href: 'ticket-types.html' },
+                { key: 'settings', label: 'Configuración', icon: '⚙️', href: 'settings.html' }
+            ]
+        },
+        { key: 'profile', label: 'Mi Perfil', icon: '👤', href: 'profile.html' }
+    ]
         : [
             { key: 'user-home', label: 'Dashboard', icon: '📊', href: 'user-home.html' },
             { key: 'tickets', label: 'Mis Tickets', icon: '🎫', href: 'tickets.html' },
@@ -52,18 +61,93 @@ const renderLayout = (activePage = '') => {
             </a>
 
             <nav class="hidden lg:flex items-center gap-2 ml-auto">
-                ${menuItems.map(item => `
+            ${menuItems.map(item => {
+
+                if (item.children) {
+
+                    const childActive = item.children.some(
+                        child => child.key === activePage
+                    );
+
+                    return `
+                        <div class="relative group">
+
+                            <button
+                                class="flex items-center gap-2 px-4 py-3 rounded-xl transition-all ${
+                                    childActive
+                                        ? 'bg-white shadow-sm'
+                                        : 'hover:bg-white hover:shadow-sm'
+                                }">
+
+                                <span class="text-xl">${item.icon}</span>
+
+                                <span class="font-semibold">
+                                    ${item.label}
+                                </span>
+
+                                <svg
+                                    class="w-4 h-4 transition-transform group-hover:rotate-180"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    viewBox="0 0 24 24">
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M19 9l-7 7-7-7">
+                                    </path>
+
+                                </svg>
+
+                            </button>
+
+                            <div
+                                class="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+
+                                ${item.children.map(child => `
+                                    <a
+                                        href="${child.href}"
+                                        class="flex items-center gap-3 px-5 py-3 hover:bg-slate-100 first:rounded-t-2xl last:rounded-b-2xl transition">
+
+                                        <span class="text-lg">
+                                            ${child.icon}
+                                        </span>
+
+                                        <span class="font-medium">
+                                            ${child.label}
+                                        </span>
+
+                                    </a>
+                                `).join('')}
+
+                            </div>
+
+                        </div>
+                    `;
+                }
+
+                return `
                     <a href="${item.href}"
-                       title="${item.label}"
-                       class="flex items-center gap-2 px-4 py-2 rounded-xl transition-all text-sm font-semibold ${
+                    title="${item.label}"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                             activePage === item.key
                                 ? 'bg-white shadow-sm'
                                 : 'hover:bg-white hover:shadow-sm'
                         }">
-                        <span>${item.icon}</span>
-                        <span>${item.label}</span>
+
+                        <span class="text-xl">
+                            ${item.icon}
+                        </span>
+
+                        <span class="font-semibold">
+                            ${item.label}
+                        </span>
+
                     </a>
-                `).join('')}
+                `;
+
+            }).join('')}
 
                 <button onclick="logout()"
                         title="Cerrar sesión"

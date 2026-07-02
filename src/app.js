@@ -18,6 +18,7 @@ const ticketAssignRoutes = require('./routes/ticketAssign.routes');
 const profileRoutes = require('./routes/profile.routes');
 const managementReportRoutes = require('./routes/managementReport.routes');
 const countryRoutes = require('./routes/country.routes');
+const systemSettingRoutes = require('./routes/systemSetting.routes');
 
 const app = express();
 const ticketUploadsPath = path.join(__dirname, 'uploads');
@@ -75,5 +76,6 @@ app.use('/api/tickets', ticketAssignRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api', managementReportRoutes);
 app.use('/api/countries', countryRoutes);
+app.use('/api/system-settings', systemSettingRoutes);
 
 module.exports = app;

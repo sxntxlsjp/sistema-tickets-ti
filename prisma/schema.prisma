@@ -26,6 +26,26 @@ enum TicketPriority {
   ALTA
 }
 
+enum SettingType {
+  BOOLEAN
+  STRING
+  NUMBER
+  JSON
+}
+
+model SystemSetting {
+  id          Int         @id @default(autoincrement())
+  key         String      @unique
+  value       String
+  type        SettingType
+  description String?
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("system_settings")
+}
+
 model User {
   id           Int      @id @default(autoincrement())
   name         String   @db.VarChar(100)

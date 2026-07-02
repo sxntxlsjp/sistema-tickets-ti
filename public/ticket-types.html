@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tipos de Ticket | Sistema de Tickets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100" data-page="ticket-types">
+
+<div class="min-h-screen">
+
+    <aside id="sidebar"></aside>
+
+    <main class="p-8 min-w-0">
+
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-slate-800">
+                Tipos de Ticket
+            </h2>
+            <p class="text-slate-500">
+                Administra los tipos disponibles para la creación de tickets
+            </p>
+        </div>
+
+        <div class="space-y-6">
+
+            <div class="bg-white rounded-2xl shadow p-6">
+                <h3 class="text-xl font-bold mb-4">
+                    Nuevo Tipo de Ticket
+                </h3>
+
+                <form id="ticketTypeForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <input
+                        id="name"
+                        type="text"
+                        placeholder="Nombre del tipo"
+                        class="w-full border rounded-xl p-3"
+                        required
+                    >
+
+                    <input
+                        id="description"
+                        type="text"
+                        placeholder="Descripción"
+                        class="w-full border rounded-xl p-3 md:col-span-1"
+                    >
+
+                    <button
+                        class="w-full bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800">
+                        Crear Tipo
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow p-6">
+                <div class="flex justify-between items-center mb-5">
+                    <div>
+                        <h3 class="text-xl font-bold">
+                            Tipos Registrados
+                        </h3>
+                        <p class="text-slate-500 text-sm">
+                            Gestión de tipos activos e inactivos para tickets
+                        </p>
+                    </div>
+                </div>
+
+                <div class="w-full overflow-x-auto">
+                    <table class="min-w-[900px] w-full text-left text-sm">
+                        <thead class="bg-slate-900 text-white">
+                            <tr>
+                                <th class="p-4 whitespace-nowrap">Nombre</th>
+                                <th class="p-4 whitespace-nowrap">Descripción</th>
+                                <th class="p-4 whitespace-nowrap">Estado</th>
+                                <th class="p-4 whitespace-nowrap">Acciones</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="ticketTypesList" class="divide-y"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+<div id="editTicketTypeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg">
+
+        <h3 class="text-2xl font-bold mb-5">Editar Tipo de Ticket</h3>
+
+        <input type="hidden" id="editTicketTypeId">
+
+        <div class="space-y-4">
+            <input
+                id="editTicketTypeName"
+                type="text"
+                placeholder="Nombre del tipo"
+                class="w-full border rounded-xl p-3"
+            >
+
+            <textarea
+                id="editTicketTypeDescription"
+                rows="4"
+                placeholder="Descripción"
+                class="w-full border rounded-xl p-3"
+            ></textarea>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-6">
+            <button onclick="closeEditTicketTypeModal()" class="px-4 py-2 border rounded-xl">
+                Cancelar
+            </button>
+
+            <button onclick="saveTicketTypeChanges()" class="px-4 py-2 bg-slate-900 text-white rounded-xl">
+                Guardar cambios
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<div id="successTicketTypeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
+    <div id="successTicketTypeModalContent" class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md text-center transform scale-95 opacity-0 transition-all duration-300">
+
+        <div class="w-20 h-20 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-4xl mx-auto mb-5">
+            ✓
+        </div>
+
+            <h3
+                id="successTicketTypeTitle"
+                class="text-2xl font-bold text-slate-800 mb-2">
+                Operación realizada correctamente
+            </h3>
+
+        <p id="successTicketTypeText" class="text-slate-500 mb-6">
+            El tipo de ticket fue creado correctamente.
+        </p>
+
+        <button
+            onclick="closeSuccessTicketTypeModal()"
+            class="w-full bg-slate-900 text-white py-3 rounded-2xl hover:bg-slate-800">
+            Entendido
+        </button>
+
+    </div>
+</div>
+<div id="deleteTicketTypeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
+    <div id="deleteTicketTypeModalContent" class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md transform scale-95 opacity-0 transition-all duration-300">
+
+        <h3 class="text-2xl font-bold text-slate-800 mb-2">
+            Eliminar tipo de ticket
+        </h3>
+
+        <p id="deleteTicketTypeText" class="text-slate-500 mb-6"></p>
+
+        <input type="hidden" id="deleteTicketTypeId">
+
+        <div class="flex justify-end gap-3">
+            <button
+                onclick="closeDeleteTicketTypeModal()"
+                class="px-5 py-3 border rounded-xl hover:bg-slate-50">
+                Cancelar
+            </button>
+
+            <button
+                onclick="confirmDeleteTicketType()"
+                class="px-5 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700">
+                Eliminar
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<div id="errorTicketTypeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
+    <div id="errorTicketTypeModalContent" class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md text-center transform scale-95 opacity-0 transition-all duration-300">
+
+        <div class="w-20 h-20 bg-red-100 text-red-700 rounded-full flex items-center justify-center text-4xl mx-auto mb-5">
+            !
+        </div>
+
+        <h3 class="text-2xl font-bold text-slate-800 mb-2">
+            No se pudo completar la acción
+        </h3>
+
+        <p id="errorTicketTypeText" class="text-slate-500 mb-6"></p>
+
+        <button
+            onclick="closeErrorTicketTypeModal()"
+            class="w-full bg-slate-900 text-white py-3 rounded-2xl hover:bg-slate-800">
+            Entendido
+        </button>
+
+    </div>
+</div>
+
+<script src="js/layout.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ticket-types.js"></script>
+
+<script>
+    renderLayout('ticket-types');
+</script>
+
+</body>
+</html>

@@ -37,7 +37,22 @@ const createTicket = async (req, res) => {
 
         const ticketNumber = await generateTicketNumber();
 
-        const sla = calculateSla(priority || 'MEDIA');
+        const prioritySetting = await prisma.systemSetting.findUnique({
+    where: {
+        key: 'showPriorityField'
+    }
+});
+
+        const showPriorityField =
+            prioritySetting &&
+            prioritySetting.isActive &&
+            prioritySetting.value === 'true';
+
+        const finalPriority = showPriorityField
+            ? (priority || 'MEDIA')
+            : 'BAJA';
+
+        const sla = calculateSla(finalPriority);
         let validCountryId = null;
 
         if (countryId) {
@@ -65,7 +80,7 @@ const createTicket = async (req, res) => {
                 subject,
                 assignedTo: Number(assignedTo),
                 description,
-                priority: priority || 'MEDIA',
+                priority: finalPriority,
                 status: 'PENDIENTE',
                 slaDueAt: sla.slaDueAt,
                 slaStatus: sla.slaStatus,
