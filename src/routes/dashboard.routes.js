@@ -7,20 +7,22 @@ const {
 } = require('../controllers/dashboard.controller');
 
 const {
-    authenticateToken,
-    authorizeRoles
+    authenticateToken
 } = require('../middlewares/auth.middleware');
+const { resolveTenant, authorizeTenantRoles } = require('../middlewares/tenant.middleware');
 
 router.get(
     '/summary',
     authenticateToken,
-    authorizeRoles('ADMIN'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN'),
     getDashboardSummary
 );
 router.get(
     '/my-alerts',
     authenticateToken,
-    authorizeRoles('ADMIN'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN'),
     getMyAdminAlerts
 );
 module.exports = router;

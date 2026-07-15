@@ -10,46 +10,52 @@ const {
     toggleUserStatus
 } = require('../controllers/user.controller');
 
-const { authenticateToken, authorizeRoles } = require('../middlewares/auth.middleware');
+const { authenticateToken } = require('../middlewares/auth.middleware');
+const { resolveTenant, authorizeTenantRoles } = require('../middlewares/tenant.middleware');
 
 router.get(
     '/',
     authenticateToken,
-    authorizeRoles('ADMIN'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN'),
     getAllUsers
 );
 
 router.get(
     '/support',
     authenticateToken,
-    authorizeRoles('ADMIN', 'USER'),
+    resolveTenant,
     getSupportUsers
 );
 
 router.post(
     '/',
     authenticateToken,
-    authorizeRoles('ADMIN'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN'),
     createUser
 );
 router.put(
     '/:id',
     authenticateToken,
-    authorizeRoles('ADMIN'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN'),
     updateUser
 );
 
 router.put(
     '/:id/reset-password',
     authenticateToken,
-    authorizeRoles('ADMIN'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN'),
     resetUserPassword
 );
 
 router.patch(
     '/:id/toggle-status',
     authenticateToken,
-    authorizeRoles('ADMIN'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN'),
     toggleUserStatus
 );
 

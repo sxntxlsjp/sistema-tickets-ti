@@ -8,10 +8,12 @@ const {
 const {
     authenticateToken
 } = require('../middlewares/auth.middleware');
+const { resolveTenant } = require('../middlewares/tenant.middleware');
 
 router.post(
     '/:ticketId/satisfaction',
     authenticateToken,
+    resolveTenant,
     createSatisfaction
 );
 

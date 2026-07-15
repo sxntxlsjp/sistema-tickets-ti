@@ -1,5 +1,6 @@
 const prisma = require('../config/prisma');
 const ticketInclude = require('../utils/ticketInclude.util');
+const { findTenantTicket } = require('../utils/ticketTenant.util');
 
 const {
     notifyAdminNewTicket
@@ -34,6 +35,34 @@ const {
             });
         }
 
+        const ticketType = await prisma.ticketType.findFirst({
+            where: {
+                id: Number(typeId),
+                tenantId: req.tenantId
+            }
+        });
+
+        if (!ticketType) {
+            return res.status(400).json({
+                message: 'El tipo de reporte seleccionado no pertenece a esta empresa'
+            });
+        }
+
+        const assigneeMembership = await prisma.tenantUser.findFirst({
+            where: {
+                tenantId: req.tenantId,
+                userId: Number(assignedTo),
+                isActive: true,
+                role: { in: ['TENANT_ADMIN', 'AGENT'] }
+            }
+        });
+
+        if (!assigneeMembership) {
+            return res.status(400).json({
+                message: 'El responsable asignado debe pertenecer a esta empresa con un rol válido'
+            });
+        }
+
         const ticketNumber = await generateTicketNumber();
 
 
@@ -64,6 +93,7 @@ const {
                 const subtype = await prisma.ticketSubtype.findFirst({
                     where: {
                         id: validTicketSubtypeId,
+                        tenantId: req.tenantId,
                         ticketTypeId: Number(typeId),
                         isActive: true
                     }
@@ -78,6 +108,7 @@ const {
             }
         const ticket = await prisma.ticket.create({
             data: {
+                tenantId: req.tenantId,
                 ticketNumber,
                 requestedBy: req.user.id,
                 typeId: Number(typeId),
@@ -116,11 +147,7 @@ const takeTicket = async (req, res) => {
 
         const ticketId = Number(req.params.id);
 
-        const ticket = await prisma.ticket.findUnique({
-            where: {
-                id: ticketId
-            }
-        });
+        const ticket = await findTenantTicket(ticketId, req.tenantId);
 
         if (!ticket) {
             return res.status(404).json({
@@ -181,11 +208,7 @@ const assignTicketPriority = async (req, res) => {
             });
         }
 
-        const ticket = await prisma.ticket.findUnique({
-            where: {
-                id: ticketId
-            }
-        });
+        const ticket = await findTenantTicket(ticketId, req.tenantId);
 
         if (!ticket) {
             return res.status(404).json({
@@ -209,6 +232,7 @@ const assignTicketPriority = async (req, res) => {
         const priority = await prisma.ticketPriority.findFirst({
             where: {
                 id: Number(priorityId),
+                tenantId: req.tenantId,
                 isActive: true
             }
         });

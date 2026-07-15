@@ -4,6 +4,9 @@ const prisma = require('../config/prisma');
 const getTicketSubtypes = async (req, res) => {
     try {
         const subtypes = await prisma.ticketSubtype.findMany({
+            where: {
+                tenantId: req.tenantId
+            },
             include: {
                 ticketType: {
                     select: {
@@ -47,6 +50,7 @@ const getTicketSubtypesByType = async (req, res) => {
 
         const subtypes = await prisma.ticketSubtype.findMany({
             where: {
+                tenantId: req.tenantId,
                 ticketTypeId: Number(ticketTypeId)
             },
             include: {
@@ -89,6 +93,7 @@ const getActiveTicketSubtypesByType = async (req, res) => {
 
         const subtypes = await prisma.ticketSubtype.findMany({
             where: {
+                tenantId: req.tenantId,
                 ticketTypeId: Number(ticketTypeId),
                 isActive: true,
                 ticketType: {
@@ -148,9 +153,10 @@ const createTicketSubtype = async (req, res) => {
         const normalizedName = name.trim();
         const parsedTicketTypeId = Number(ticketTypeId);
 
-        const ticketType = await prisma.ticketType.findUnique({
+        const ticketType = await prisma.ticketType.findFirst({
             where: {
-                id: parsedTicketTypeId
+                id: parsedTicketTypeId,
+                tenantId: req.tenantId
             }
         });
 
@@ -163,6 +169,7 @@ const createTicketSubtype = async (req, res) => {
 
         const duplicateSubtype = await prisma.ticketSubtype.findFirst({
             where: {
+                tenantId: req.tenantId,
                 ticketTypeId: parsedTicketTypeId,
                 name: normalizedName
             }
@@ -177,6 +184,7 @@ const createTicketSubtype = async (req, res) => {
 
         const subtype = await prisma.ticketSubtype.create({
             data: {
+                tenantId: req.tenantId,
                 ticketTypeId: parsedTicketTypeId,
                 name: normalizedName,
                 description: description ? description.trim() : null,
@@ -230,9 +238,10 @@ const updateTicketSubtype = async (req, res) => {
         const subtypeId = Number(id);
         const normalizedName = name.trim();
 
-        const subtype = await prisma.ticketSubtype.findUnique({
+        const subtype = await prisma.ticketSubtype.findFirst({
             where: {
-                id: subtypeId
+                id: subtypeId,
+                tenantId: req.tenantId
             }
         });
 
@@ -247,9 +256,10 @@ const updateTicketSubtype = async (req, res) => {
             ? Number(ticketTypeId)
             : subtype.ticketTypeId;
 
-        const ticketType = await prisma.ticketType.findUnique({
+        const ticketType = await prisma.ticketType.findFirst({
             where: {
-                id: parsedTicketTypeId
+                id: parsedTicketTypeId,
+                tenantId: req.tenantId
             }
         });
 
@@ -262,6 +272,7 @@ const updateTicketSubtype = async (req, res) => {
 
         const duplicateSubtype = await prisma.ticketSubtype.findFirst({
             where: {
+                tenantId: req.tenantId,
                 ticketTypeId: parsedTicketTypeId,
                 name: normalizedName,
                 NOT: {
@@ -328,9 +339,10 @@ const toggleTicketSubtypeStatus = async (req, res) => {
 
         const subtypeId = Number(id);
 
-        const subtype = await prisma.ticketSubtype.findUnique({
+        const subtype = await prisma.ticketSubtype.findFirst({
             where: {
-                id: subtypeId
+                id: subtypeId,
+                tenantId: req.tenantId
             }
         });
 
@@ -379,9 +391,10 @@ const deleteTicketSubtype = async (req, res) => {
         const { id } = req.params;
         const subtypeId = Number(id);
 
-        const subtype = await prisma.ticketSubtype.findUnique({
+        const subtype = await prisma.ticketSubtype.findFirst({
             where: {
-                id: subtypeId
+                id: subtypeId,
+                tenantId: req.tenantId
             },
             include: {
                 _count: {

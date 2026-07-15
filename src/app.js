@@ -21,6 +21,7 @@ const countryRoutes = require('./routes/country.routes');
 const systemSettingRoutes = require('./routes/systemSetting.routes');
 const ticketSubtypeRoutes = require('./routes/ticketSubtype.routes');
 const ticketPriorityRoutes = require('./routes/ticketPriority.routes');
+const tenantRoutes = require('./routes/tenant.routes');
 
 const app = express();
 const ticketUploadsPath = path.join(__dirname, 'uploads');
@@ -81,5 +82,6 @@ app.use('/api/countries', countryRoutes);
 app.use('/api/system-settings', systemSettingRoutes);
 app.use('/api/ticket-subtypes', ticketSubtypeRoutes);
 app.use('/api/ticket-priorities', ticketPriorityRoutes);
+app.use('/api/tenants', tenantRoutes);
 
 module.exports = app;

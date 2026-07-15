@@ -4,6 +4,9 @@ const prisma = require('../config/prisma');
 const getTicketTypes = async (req, res) => {
     try {
         const ticketTypes = await prisma.ticketType.findMany({
+            where: {
+                tenantId: req.tenantId
+            },
             include: {
                 subtypes: {
                     select: {
@@ -49,6 +52,7 @@ const getActiveTicketTypes = async (req, res) => {
     try {
         const ticketTypes = await prisma.ticketType.findMany({
             where: {
+                tenantId: req.tenantId,
                 isActive: true
             },
             orderBy: {
@@ -85,8 +89,9 @@ const createTicketType = async (req, res) => {
 
         const normalizedName = name.trim();
 
-        const existingType = await prisma.ticketType.findUnique({
+        const existingType = await prisma.ticketType.findFirst({
             where: {
+                tenantId: req.tenantId,
                 name: normalizedName
             }
         });
@@ -100,6 +105,7 @@ const createTicketType = async (req, res) => {
 
         const ticketType = await prisma.ticketType.create({
             data: {
+                tenantId: req.tenantId,
                 name: normalizedName,
                 description: description ? description.trim() : null
             }
@@ -136,9 +142,10 @@ const updateTicketType = async (req, res) => {
         const ticketTypeId = Number(id);
         const normalizedName = name.trim();
 
-        const ticketType = await prisma.ticketType.findUnique({
+        const ticketType = await prisma.ticketType.findFirst({
             where: {
-                id: ticketTypeId
+                id: ticketTypeId,
+                tenantId: req.tenantId
             }
         });
 
@@ -151,6 +158,7 @@ const updateTicketType = async (req, res) => {
 
         const duplicateType = await prisma.ticketType.findFirst({
             where: {
+                tenantId: req.tenantId,
                 name: normalizedName,
                 NOT: {
                     id: ticketTypeId
@@ -206,9 +214,10 @@ const toggleTicketTypeStatus = async (req, res) => {
 
         const ticketTypeId = Number(id);
 
-        const ticketType = await prisma.ticketType.findUnique({
+        const ticketType = await prisma.ticketType.findFirst({
             where: {
-                id: ticketTypeId
+                id: ticketTypeId,
+                tenantId: req.tenantId
             }
         });
 
@@ -249,9 +258,10 @@ const deleteTicketType = async (req, res) => {
         const { id } = req.params;
         const ticketTypeId = Number(id);
 
-        const ticketType = await prisma.ticketType.findUnique({
+        const ticketType = await prisma.ticketType.findFirst({
             where: {
-                id: ticketTypeId
+                id: ticketTypeId,
+                tenantId: req.tenantId
             },
             include: {
                 _count: {

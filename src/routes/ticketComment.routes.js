@@ -9,16 +9,19 @@ const {
 const {
     authenticateToken
 } = require('../middlewares/auth.middleware');
+const { resolveTenant } = require('../middlewares/tenant.middleware');
 
 router.post(
     '/:id/comments',
     authenticateToken,
+    resolveTenant,
     addComment
 );
 
 router.get(
     '/:id/comments',
     authenticateToken,
+    resolveTenant,
     getComments
 );
 

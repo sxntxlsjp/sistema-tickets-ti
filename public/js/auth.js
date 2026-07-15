@@ -33,12 +33,22 @@ if (loginForm) {
 
             setToken(data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
+            clearActiveTenant();
 
-            if (data.user.role === 'ADMIN') {
-                window.location.href = 'dashboard.html';
-                } else {
-                 window.location.href = 'user-home.html';
-                }
+            const tenants = data.tenants || [];
+
+            if (tenants.length === 0) {
+                errorMessage.textContent = 'Tu cuenta no tiene ninguna empresa asignada. Contacta al administrador de MasterDiv.';
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+
+            if (tenants.length === 1) {
+                applyTenantSelection(tenants[0]);
+                return;
+            }
+
+            window.location.href = 'select-tenant.html';
 
         } catch (error) {
             errorMessage.textContent = 'No se pudo conectar con el servidor';

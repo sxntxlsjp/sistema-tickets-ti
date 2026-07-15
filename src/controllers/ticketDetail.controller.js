@@ -5,9 +5,10 @@ const getTicketById = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const ticket = await prisma.ticket.findUnique({
+        const ticket = await prisma.ticket.findFirst({
             where: {
-                id: Number(id)
+                id: Number(id),
+                tenantId: req.tenantId
             },
             include: {
                 ...ticketInclude,

@@ -1,27 +1,41 @@
 const prisma = require('../config/prisma');
 const bcrypt = require('bcrypt');
 
+const TENANT_ROLES = ['TENANT_ADMIN', 'AGENT', 'USER'];
+
 const getSupportUsers = async (req, res) => {
     try {
-        const users = await prisma.user.findMany({
+        const memberships = await prisma.tenantUser.findMany({
             where: {
-                role: {
-                    in: ['SUPPORT', 'ADMIN']
-                },
-                isActive: true
+                tenantId: req.tenantId,
+                isActive: true,
+                role: { in: ['TENANT_ADMIN', 'AGENT'] },
+                user: { isActive: true }
             },
-            select: {
-                id: true,
-                name: true,
-                jobTitle: true,
-                email: true,
-                profileImage: true,
-                role: true
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        jobTitle: true,
+                        email: true,
+                        profileImage: true
+                    }
+                }
             },
             orderBy: {
-                name: 'asc'
+                user: { name: 'asc' }
             }
         });
+
+        const users = memberships.map(membership => ({
+            id: membership.user.id,
+            name: membership.user.name,
+            jobTitle: membership.user.jobTitle,
+            email: membership.user.email,
+            profileImage: membership.user.profileImage,
+            role: membership.role
+        }));
 
         return res.json(users);
 
@@ -32,6 +46,7 @@ const getSupportUsers = async (req, res) => {
         });
     }
 };
+
 const createUser = async (req, res) => {
     try {
         const {
@@ -50,44 +65,65 @@ const createUser = async (req, res) => {
             });
         }
 
-        const existingUser = await prisma.user.findUnique({
+        const tenantRole = TENANT_ROLES.includes(role) ? role : 'USER';
+
+        let user = await prisma.user.findUnique({
             where: { email }
         });
 
-        if (existingUser) {
-            return res.status(400).json({
-                message: 'Ya existe un usuario con este correo'
+        if (user) {
+            const existingMembership = await prisma.tenantUser.findUnique({
+                where: {
+                    tenantId_userId: {
+                        tenantId: req.tenantId,
+                        userId: user.id
+                    }
+                }
+            });
+
+            if (existingMembership) {
+                return res.status(400).json({
+                    message: 'Este usuario ya pertenece a esta empresa'
+                });
+            }
+        } else {
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            user = await prisma.user.create({
+                data: {
+                    name,
+                    department,
+                    jobTitle,
+                    email,
+                    phone,
+                    passwordHash: hashedPassword,
+                    role: 'USER'
+                }
             });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const user = await prisma.user.create({
+        await prisma.tenantUser.create({
             data: {
-                name,
-                department,
-                jobTitle,
-                email,
-                phone,
-                passwordHash: hashedPassword,
-                role: role || 'USER'
-            },
-            select: {
-                id: true,
-                name: true,
-                department: true,
-                jobTitle: true,
-                email: true,
-                phone: true,
-                role: true,
-                isActive: true,
-                createdAt: true
+                tenantId: req.tenantId,
+                userId: user.id,
+                role: tenantRole,
+                isActive: true
             }
         });
 
         return res.status(201).json({
             message: 'Usuario creado correctamente',
-            user
+            user: {
+                id: user.id,
+                name: user.name,
+                department: user.department,
+                jobTitle: user.jobTitle,
+                email: user.email,
+                phone: user.phone,
+                role: tenantRole,
+                isActive: true,
+                createdAt: user.createdAt
+            }
         });
 
     } catch (error) {
@@ -100,23 +136,41 @@ const createUser = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
     try {
-        const users = await prisma.user.findMany({
-            select: {
-                id: true,
-                name: true,
-                department: true,
-                jobTitle: true,
-                email: true,
-                phone: true,
-                role: true,
-                isActive: true,
-                profileImage: true,
-                createdAt: true
+        const memberships = await prisma.tenantUser.findMany({
+            where: {
+                tenantId: req.tenantId
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        department: true,
+                        jobTitle: true,
+                        email: true,
+                        phone: true,
+                        profileImage: true,
+                        createdAt: true
+                    }
+                }
             },
             orderBy: {
                 createdAt: 'desc'
             }
         });
+
+        const users = memberships.map(membership => ({
+            id: membership.user.id,
+            name: membership.user.name,
+            department: membership.user.department,
+            jobTitle: membership.user.jobTitle,
+            email: membership.user.email,
+            phone: membership.user.phone,
+            role: membership.role,
+            isActive: membership.isActive,
+            profileImage: membership.user.profileImage,
+            createdAt: membership.user.createdAt
+        }));
 
         return res.json(users);
 
@@ -131,6 +185,7 @@ const getAllUsers = async (req, res) => {
 const updateUser = async (req, res) => {
     try {
         const { id } = req.params;
+        const userId = Number(id);
 
         const {
             name,
@@ -142,18 +197,31 @@ const updateUser = async (req, res) => {
             isActive
         } = req.body;
 
-        const user = await prisma.user.update({
+        const membership = await prisma.tenantUser.findUnique({
             where: {
-                id: Number(id)
+                tenantId_userId: {
+                    tenantId: req.tenantId,
+                    userId
+                }
+            }
+        });
+
+        if (!membership) {
+            return res.status(404).json({
+                message: 'Usuario no encontrado en esta empresa'
+            });
+        }
+
+        const updatedUser = await prisma.user.update({
+            where: {
+                id: userId
             },
             data: {
                 name,
                 department,
                 jobTitle,
                 email,
-                phone,
-                role,
-                isActive
+                phone
             },
             select: {
                 id: true,
@@ -161,15 +229,27 @@ const updateUser = async (req, res) => {
                 department: true,
                 jobTitle: true,
                 email: true,
-                phone: true,
-                role: true,
-                isActive: true
+                phone: true
+            }
+        });
+
+        const updatedMembership = await prisma.tenantUser.update({
+            where: {
+                id: membership.id
+            },
+            data: {
+                role: TENANT_ROLES.includes(role) ? role : membership.role,
+                isActive: isActive !== undefined ? Boolean(isActive) : membership.isActive
             }
         });
 
         return res.json({
             message: 'Usuario actualizado correctamente',
-            user
+            user: {
+                ...updatedUser,
+                role: updatedMembership.role,
+                isActive: updatedMembership.isActive
+            }
         });
 
     } catch (error) {
@@ -184,6 +264,7 @@ const updateUser = async (req, res) => {
 const resetUserPassword = async (req, res) => {
     try {
         const { id } = req.params;
+        const userId = Number(id);
         const { password } = req.body;
 
         if (!password) {
@@ -192,11 +273,26 @@ const resetUserPassword = async (req, res) => {
             });
         }
 
+        const membership = await prisma.tenantUser.findUnique({
+            where: {
+                tenantId_userId: {
+                    tenantId: req.tenantId,
+                    userId
+                }
+            }
+        });
+
+        if (!membership) {
+            return res.status(404).json({
+                message: 'Usuario no encontrado en esta empresa'
+            });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
 
         await prisma.user.update({
             where: {
-                id: Number(id)
+                id: userId
             },
             data: {
                 passwordHash: hashedPassword
@@ -219,45 +315,51 @@ const resetUserPassword = async (req, res) => {
 const toggleUserStatus = async (req, res) => {
     try {
         const { id } = req.params;
+        const userId = Number(id);
 
-        if (Number(id) === req.user.id) {
+        if (userId === req.user.id) {
             return res.status(400).json({
                 message: 'No puedes desactivar tu propia cuenta'
             });
         }
 
-        const user = await prisma.user.findUnique({
+        const membership = await prisma.tenantUser.findUnique({
             where: {
-                id: Number(id)
+                tenantId_userId: {
+                    tenantId: req.tenantId,
+                    userId
+                }
             }
         });
 
-        if (!user) {
+        if (!membership) {
             return res.status(404).json({
-                message: 'Usuario no encontrado'
+                message: 'Usuario no encontrado en esta empresa'
             });
         }
 
-        const updatedUser = await prisma.user.update({
+        const updatedMembership = await prisma.tenantUser.update({
             where: {
-                id: Number(id)
+                id: membership.id
             },
             data: {
-                isActive: !user.isActive
-            },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                isActive: true
+                isActive: !membership.isActive
             }
         });
 
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { id: true, name: true, email: true }
+        });
+
         return res.json({
-            message: updatedUser.isActive
+            message: updatedMembership.isActive
                 ? 'Usuario activado correctamente'
                 : 'Usuario desactivado correctamente',
-            user: updatedUser
+            user: {
+                ...user,
+                isActive: updatedMembership.isActive
+            }
         });
 
     } catch (error) {

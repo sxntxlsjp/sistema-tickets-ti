@@ -6,14 +6,15 @@ const {
 } = require('../controllers/managementReport.controller');
 
 const {
-    authenticateToken,
-    authorizeRoles
+    authenticateToken
 } = require('../middlewares/auth.middleware');
+const { resolveTenant, authorizeTenantRoles } = require('../middlewares/tenant.middleware');
 
 router.get(
     '/management-report',
     authenticateToken,
-    authorizeRoles('ADMIN'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN'),
     generateManagementReport
 );
 

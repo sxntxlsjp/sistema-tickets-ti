@@ -10,17 +10,17 @@ const {
 } = require('../controllers/systemSetting.controller');
 
 const {
-    authenticateToken,
-    authorizeRoles
+    authenticateToken
 } = require('../middlewares/auth.middleware');
+const { resolveTenant, authorizeTenantRoles } = require('../middlewares/tenant.middleware');
 
 // Consultas de configuraciones
-router.get('/', authenticateToken, authorizeRoles('ADMIN'), getSystemSettings);
-router.get('/:key', authenticateToken, getSystemSettingByKey);
+router.get('/', authenticateToken, resolveTenant, authorizeTenantRoles('TENANT_ADMIN'), getSystemSettings);
+router.get('/:key', authenticateToken, resolveTenant, getSystemSettingByKey);
 
 // Administración de configuraciones
-router.post('/', authenticateToken, authorizeRoles('ADMIN'), createSystemSetting);
-router.put('/:id', authenticateToken, authorizeRoles('ADMIN'), updateSystemSetting);
-router.patch('/:key/value', authenticateToken, authorizeRoles('ADMIN'), updateSystemSettingValueByKey);
+router.post('/', authenticateToken, resolveTenant, authorizeTenantRoles('TENANT_ADMIN'), createSystemSetting);
+router.put('/:id', authenticateToken, resolveTenant, authorizeTenantRoles('TENANT_ADMIN'), updateSystemSetting);
+router.patch('/:key/value', authenticateToken, resolveTenant, authorizeTenantRoles('TENANT_ADMIN'), updateSystemSettingValueByKey);
 
 module.exports = router;

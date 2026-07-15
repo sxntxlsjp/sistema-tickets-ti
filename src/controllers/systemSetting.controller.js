@@ -4,6 +4,9 @@ const prisma = require('../config/prisma');
 const getSystemSettings = async (req, res) => {
     try {
         const settings = await prisma.systemSetting.findMany({
+            where: {
+                tenantId: req.tenantId
+            },
             orderBy: {
                 key: 'asc'
             }
@@ -29,8 +32,9 @@ const getSystemSettingByKey = async (req, res) => {
     try {
         const { key } = req.params;
 
-        const setting = await prisma.systemSetting.findUnique({
+        const setting = await prisma.systemSetting.findFirst({
             where: {
+                tenantId: req.tenantId,
                 key
             }
         });
@@ -77,6 +81,7 @@ const createSystemSetting = async (req, res) => {
 
         const setting = await prisma.systemSetting.create({
             data: {
+                tenantId: req.tenantId,
                 key,
                 value: String(value),
                 type,
@@ -112,6 +117,20 @@ const updateSystemSetting = async (req, res) => {
             description,
             isActive
         } = req.body;
+
+        const existingSetting = await prisma.systemSetting.findFirst({
+            where: {
+                id: Number(id),
+                tenantId: req.tenantId
+            }
+        });
+
+        if (!existingSetting) {
+            return res.status(404).json({
+                success: false,
+                message: 'Configuración no encontrada'
+            });
+        }
 
         const setting = await prisma.systemSetting.update({
             where: {
@@ -156,7 +175,10 @@ const updateSystemSettingValueByKey = async (req, res) => {
 
         const setting = await prisma.systemSetting.update({
             where: {
-                key
+                tenantId_key: {
+                    tenantId: req.tenantId,
+                    key
+                }
             },
             data: {
                 value: String(value)

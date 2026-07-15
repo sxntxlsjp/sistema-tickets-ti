@@ -4,14 +4,15 @@ const router = express.Router();
 const { updateTicketStatus } = require('../controllers/ticketStatus.controller');
 
 const {
-    authenticateToken,
-    authorizeRoles
+    authenticateToken
 } = require('../middlewares/auth.middleware');
+const { resolveTenant, authorizeTenantRoles } = require('../middlewares/tenant.middleware');
 
 router.put(
     '/:id/status',
     authenticateToken,
-    authorizeRoles('ADMIN', 'SUPPORT'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN', 'AGENT'),
     updateTicketStatus
 );
 

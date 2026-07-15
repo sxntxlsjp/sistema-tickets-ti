@@ -13,14 +13,15 @@ const getDashboardSummary = async (req, res) => {
         const startDate =
             getDateRange(range);
 
-        const dateFilter =
-            startDate
-                ? {
-                    createdAt: {
-                        gte: startDate
-                    }
-                }
-                : {};
+        const dateFilter = {
+            tenantId: req.tenantId,
+            ...(startDate ? { createdAt: { gte: startDate } } : {})
+        };
+
+        const satisfactionFilter = {
+            ticket: { tenantId: req.tenantId },
+            ...(startDate ? { createdAt: { gte: startDate } } : {})
+        };
 
         const now = new Date();
 
@@ -59,9 +60,9 @@ const getDashboardSummary = async (req, res) => {
             prisma.ticket.count({ where: { ...dateFilter, status: 'PENDIENTE' } }),
             prisma.ticket.count({ where: { ...dateFilter, status: 'FINALIZADO' } }),
             prisma.ticket.count({ where: { ...dateFilter, priorityId: null } }),
-            prisma.ticket.count({ where: { createdAt: { gte: startOfToday } } }),
-            prisma.ticket.count({ where: { createdAt: { gte: startOfWeek } } }),
-            prisma.ticket.count({ where: { status: 'FINALIZADO', closedAt: { gte: startOfWeek } } }),
+            prisma.ticket.count({ where: { tenantId: req.tenantId, createdAt: { gte: startOfToday } } }),
+            prisma.ticket.count({ where: { tenantId: req.tenantId, createdAt: { gte: startOfWeek } } }),
+            prisma.ticket.count({ where: { tenantId: req.tenantId, status: 'FINALIZADO', closedAt: { gte: startOfWeek } } }),
             prisma.ticket.groupBy({ by: ['status'], where: dateFilter, _count: true }),
             prisma.ticket.groupBy({ by: ['priorityId'], where: dateFilter, _count: true }),
             prisma.ticket.groupBy({ by: ['typeId'], where: dateFilter, _count: true }),
@@ -72,13 +73,16 @@ const getDashboardSummary = async (req, res) => {
                 where: { ...dateFilter, status: { not: 'FINALIZADO' } },
                 _count: true
             }),
-            prisma.ticketPriority.findMany({ select: { id: true, name: true, color: true } }),
-            prisma.ticketType.findMany({ select: { id: true, name: true } }),
-            prisma.ticketSubtype.findMany({ select: { id: true, name: true } }),
+            prisma.ticketPriority.findMany({ where: { tenantId: req.tenantId }, select: { id: true, name: true, color: true } }),
+            prisma.ticketType.findMany({ where: { tenantId: req.tenantId }, select: { id: true, name: true } }),
+            prisma.ticketSubtype.findMany({ where: { tenantId: req.tenantId }, select: { id: true, name: true } }),
             prisma.country.findMany({ select: { id: true, name: true, flagEmoji: true } }),
-            prisma.user.findMany({ select: { id: true, name: true } }),
+            prisma.user.findMany({
+                where: { tenantMemberships: { some: { tenantId: req.tenantId } } },
+                select: { id: true, name: true }
+            }),
             prisma.ticketSatisfaction.aggregate({
-                where: dateFilter,
+                where: satisfactionFilter,
                 _avg: { rating: true },
                 _count: { rating: true }
             }),
@@ -94,7 +98,7 @@ const getDashboardSummary = async (req, res) => {
                 }
             }),
             prisma.ticketSatisfaction.findMany({
-                where: dateFilter,
+                where: satisfactionFilter,
                 take: 5,
                 orderBy: { createdAt: 'desc' },
                 include: {
@@ -280,6 +284,7 @@ const getMyAdminAlerts = async (req, res) => {
     try {
         const pendingAssignedTickets = await prisma.ticket.findMany({
             where: {
+                tenantId: req.tenantId,
                 assignedTo: req.user.id,
                 status: 'PENDIENTE'
             },

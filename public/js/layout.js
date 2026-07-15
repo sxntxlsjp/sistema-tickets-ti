@@ -1,5 +1,15 @@
 let mobileMenuOpen = false;
 
+const escapeLayoutHtml = (value) => {
+    if (value === null || value === undefined) return '';
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+};
+
 const renderLayout = (activePage = '') => {
     const sidebar = document.getElementById('sidebar');
 
@@ -21,6 +31,20 @@ const renderLayout = (activePage = '') => {
             .toUpperCase()
         : 'US';
 
+const activeTenant = typeof getActiveTenant === 'function' ? getActiveTenant() : null;
+
+const adminChildren = [
+    { key: 'users', label: 'Usuarios', icon: '👥', href: 'users.html' },
+    { key: 'countries', label: 'Países', icon: '🌎', href: 'countries.html' },
+    { key: 'ticket-types', label: 'Tipos de Ticket', icon: '🏷️', href: 'ticket-types.html' },
+    { key: 'priorities', label: 'Prioridades', icon: '🚦', href: 'priorities.html' },
+    { key: 'settings', label: 'Configuración', icon: '⚙️', href: 'settings.html' }
+];
+
+if (user.isSuperAdmin) {
+    adminChildren.push({ key: 'tenants', label: 'Empresas', icon: '🏢', href: 'tenants.html' });
+}
+
 const menuItems = user.role === 'ADMIN'
     ? [
         { key: 'dashboard', label: 'Dashboard', icon: '📊', href: 'dashboard.html' },
@@ -30,13 +54,7 @@ const menuItems = user.role === 'ADMIN'
             key: 'admin',
             label: 'Administración',
             icon: '🛠️',
-            children: [
-                { key: 'users', label: 'Usuarios', icon: '👥', href: 'users.html' },
-                { key: 'countries', label: 'Países', icon: '🌎', href: 'countries.html' },
-                { key: 'ticket-types', label: 'Tipos de Ticket', icon: '🏷️', href: 'ticket-types.html' },
-                { key: 'priorities', label: 'Prioridades', icon: '🚦', href: 'priorities.html' },
-                { key: 'settings', label: 'Configuración', icon: '⚙️', href: 'settings.html' }
-            ]
+            children: adminChildren
         },
         { key: 'profile', label: 'Mi Perfil', icon: '👤', href: 'profile.html' }
     ]
@@ -150,6 +168,16 @@ const menuItems = user.role === 'ADMIN'
 
             }).join('')}
 
+                ${activeTenant ? `
+                    <a href="select-tenant.html"
+                       title="Cambiar de empresa"
+                       class="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-white hover:shadow-sm transition-all text-sm">
+                        <span>🏢</span>
+                        <span class="font-semibold">${escapeLayoutHtml(activeTenant.name)}</span>
+                        <span class="text-xs text-slate-400">· Cambiar</span>
+                    </a>
+                ` : ''}
+
                 <button onclick="logout()"
                         title="Cerrar sesión"
                         class="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-white hover:shadow-sm transition-all text-sm font-semibold">
@@ -203,6 +231,14 @@ const menuItems = user.role === 'ADMIN'
                 </a>
             `).join('')}
 
+            ${activeTenant ? `
+                <a href="select-tenant.html"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white hover:shadow-sm transition-all">
+                    <span class="text-xl">🏢</span>
+                    <span class="font-semibold">Cambiar empresa (${escapeLayoutHtml(activeTenant.name)})</span>
+                </a>
+            ` : ''}
+
             <button onclick="logout()"
                     title="Cerrar sesión"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white hover:shadow-sm w-full transition-all">
@@ -225,5 +261,8 @@ const toggleMobileMenu = () => {
 const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    if (typeof clearActiveTenant === 'function') {
+        clearActiveTenant();
+    }
     window.location.href = 'index.html';
 };

@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const { findTenantTicket } = require('../utils/ticketTenant.util');
 
 const assignTicket = async (req, res) => {
     try {
@@ -11,11 +12,7 @@ const assignTicket = async (req, res) => {
             });
         }
 
-        const ticket = await prisma.ticket.findUnique({
-            where: {
-                id: Number(id)
-            }
-        });
+        const ticket = await findTenantTicket(Number(id), req.tenantId);
 
         if (!ticket) {
             return res.status(404).json({
@@ -23,15 +20,18 @@ const assignTicket = async (req, res) => {
             });
         }
 
-        const newAssignee = await prisma.user.findUnique({
+        const membership = await prisma.tenantUser.findFirst({
             where: {
-                id: Number(assignedTo)
+                tenantId: req.tenantId,
+                userId: Number(assignedTo),
+                isActive: true,
+                role: { in: ['TENANT_ADMIN', 'AGENT'] }
             }
         });
 
-        if (!newAssignee || newAssignee.role !== 'ADMIN') {
+        if (!membership) {
             return res.status(400).json({
-                message: 'El responsable asignado debe ser un administrador válido'
+                message: 'El responsable asignado debe pertenecer a esta empresa con un rol válido'
             });
         }
 

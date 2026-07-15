@@ -5,6 +5,9 @@ const getTicketPriorities = async (req, res) => {
     try {
 
         const priorities = await prisma.ticketPriority.findMany({
+            where: {
+                tenantId: req.tenantId
+            },
             orderBy: [
                 {
                     displayOrder: 'asc'
@@ -38,6 +41,7 @@ const getActiveTicketPriorities = async (req, res) => {
 
         const priorities = await prisma.ticketPriority.findMany({
             where: {
+                tenantId: req.tenantId,
                 isActive: true
             },
             orderBy: [
@@ -94,8 +98,9 @@ const createTicketPriority = async (req, res) => {
             });
         }
 
-        const exists = await prisma.ticketPriority.findUnique({
+        const exists = await prisma.ticketPriority.findFirst({
             where: {
+                tenantId: req.tenantId,
                 name: name.trim()
             }
         });
@@ -109,6 +114,7 @@ const createTicketPriority = async (req, res) => {
 
         const priority = await prisma.ticketPriority.create({
             data: {
+                tenantId: req.tenantId,
                 name: name.trim(),
                 description: description ? description.trim() : null,
                 slaDurationMinutes: Number(slaDurationMinutes),
@@ -164,9 +170,10 @@ const updateTicketPriority = async (req, res) => {
 
         const priorityId = Number(id);
 
-        const priority = await prisma.ticketPriority.findUnique({
+        const priority = await prisma.ticketPriority.findFirst({
             where: {
-                id: priorityId
+                id: priorityId,
+                tenantId: req.tenantId
             }
         });
 
@@ -179,6 +186,7 @@ const updateTicketPriority = async (req, res) => {
 
         const duplicate = await prisma.ticketPriority.findFirst({
             where: {
+                tenantId: req.tenantId,
                 name: name.trim(),
                 NOT: {
                     id: priorityId
@@ -237,9 +245,10 @@ const toggleTicketPriorityStatus = async (req, res) => {
 
         const priorityId = Number(id);
 
-        const priority = await prisma.ticketPriority.findUnique({
+        const priority = await prisma.ticketPriority.findFirst({
             where: {
-                id: priorityId
+                id: priorityId,
+                tenantId: req.tenantId
             }
         });
 
@@ -280,9 +289,10 @@ const deleteTicketPriority = async (req, res) => {
         const { id } = req.params;
         const priorityId = Number(id);
 
-        const priority = await prisma.ticketPriority.findUnique({
+        const priority = await prisma.ticketPriority.findFirst({
             where: {
-                id: priorityId
+                id: priorityId,
+                tenantId: req.tenantId
             },
             include: {
                 _count: {

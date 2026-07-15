@@ -8,6 +8,9 @@ const generateManagementReport = async (req, res) => {
     try {
 
         const tickets = await prisma.ticket.findMany({
+            where: {
+                tenantId: req.tenantId
+            },
             include: {
                 requester: true,
                 assignee: true,

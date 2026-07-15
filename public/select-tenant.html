@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selecciona tu empresa | MasterDiv Desk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+<div class="max-w-4xl mx-auto px-6 py-16">
+
+    <div class="mb-10 text-center">
+        <h1 class="text-3xl font-bold text-slate-800">Selecciona tu empresa</h1>
+        <p class="text-slate-500 mt-2">
+            Elige la empresa con la que quieres trabajar en MasterDiv Desk.
+        </p>
+    </div>
+
+    <div id="tenantCards" class="grid grid-cols-1 sm:grid-cols-2 gap-5"></div>
+
+    <div id="emptyState" class="hidden text-center text-slate-500 mt-10">
+        No tienes empresas asignadas. Contacta al administrador de MasterDiv.
+    </div>
+
+    <div class="text-center mt-10">
+        <button onclick="logout()" class="text-sm text-slate-500 hover:text-slate-800 font-semibold">
+            Cerrar sesión
+        </button>
+    </div>
+
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/select-tenant.js"></script>
+</body>
+</html>

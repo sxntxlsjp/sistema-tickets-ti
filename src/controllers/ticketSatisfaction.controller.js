@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const { findTenantTicket } = require('../utils/ticketTenant.util');
 
 const createSatisfaction = async (req, res) => {
     try {
@@ -16,11 +17,7 @@ const createSatisfaction = async (req, res) => {
             });
         }
 
-        const ticket = await prisma.ticket.findUnique({
-            where: {
-                id: ticketId
-            }
-        });
+        const ticket = await findTenantTicket(ticketId, req.tenantId);
 
         if (!ticket) {
             return res.status(404).json({

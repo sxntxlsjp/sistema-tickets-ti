@@ -7,11 +7,13 @@ const {
 } = require('../controllers/ticketAttachment.controller');
 
 const { authenticateToken } = require('../middlewares/auth.middleware');
+const { resolveTenant } = require('../middlewares/tenant.middleware');
 const upload = require('../middlewares/upload.middleware');
 
 router.post(
     '/:id/attachments',
     authenticateToken,
+    resolveTenant,
     upload.single('file'),
     uploadAttachment
 );
@@ -19,6 +21,7 @@ router.post(
 router.get(
     '/:id/attachments',
     authenticateToken,
+    resolveTenant,
     getAttachments
 );
 

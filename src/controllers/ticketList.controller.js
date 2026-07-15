@@ -7,6 +7,7 @@ const getMyTickets = async (req, res) => {
     try {
         const tickets = await prisma.ticket.findMany({
             where: {
+                tenantId: req.tenantId,
                 requestedBy: req.user.id
             },
             include: ticketInclude,
@@ -28,6 +29,9 @@ const getMyTickets = async (req, res) => {
 const getAllTickets = async (req, res) => {
     try {
         const tickets = await prisma.ticket.findMany({
+            where: {
+                tenantId: req.tenantId
+            },
             include: ticketInclude,
             orderBy: {
                 createdAt: 'desc'

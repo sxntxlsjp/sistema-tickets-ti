@@ -7,16 +7,17 @@ const {
 } = require('../controllers/ticketList.controller');
 
 const {
-    authenticateToken,
-    authorizeRoles
+    authenticateToken
 } = require('../middlewares/auth.middleware');
+const { resolveTenant, authorizeTenantRoles } = require('../middlewares/tenant.middleware');
 
-router.get('/my', authenticateToken, getMyTickets);
+router.get('/my', authenticateToken, resolveTenant, getMyTickets);
 
 router.get(
     '/',
     authenticateToken,
-    authorizeRoles('ADMIN'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN'),
     getAllTickets
 );
 

@@ -7,21 +7,23 @@ const {
     assignTicketPriority
 } = require('../controllers/ticket.controller');
 const {
-    authenticateToken,
-    authorizeRoles
+    authenticateToken
 } = require('../middlewares/auth.middleware');
+const { resolveTenant, authorizeTenantRoles } = require('../middlewares/tenant.middleware');
 
-router.post('/', authenticateToken, createTicket);
+router.post('/', authenticateToken, resolveTenant, createTicket);
 router.put(
     '/:id/take',
     authenticateToken,
-    authorizeRoles('ADMIN'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN'),
     takeTicket
 );
 router.patch(
     '/:id/priority',
     authenticateToken,
-    authorizeRoles('ADMIN'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN'),
     assignTicketPriority
 );
 module.exports = router;

@@ -10,3 +10,14 @@ public/uploads/*
 
 src/uploads/*
 !src/uploads/.gitkeep
+
+# AI
+.claude/
+.codex/
+
+# Graphify
+graphify-out/
+
+# Branding temporal
+Branding.png
+logo.png

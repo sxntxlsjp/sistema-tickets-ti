@@ -8,9 +8,50 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model Tenant {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(150)
+  slug         String   @unique @db.VarChar(150)
+  legalName    String?
+  taxId        String?
+  logoUrl      String?
+  primaryColor String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberships     TenantUser[]
+  tickets         Ticket[]
+  ticketTypes     TicketType[]
+  ticketSubtypes  TicketSubtype[]
+  ticketPriorities TicketPriority[]
+  systemSettings  SystemSetting[]
+
+  @@map("tenants")
+}
+
+model TenantUser {
+  id        Int        @id @default(autoincrement())
+  tenantId  Int
+  userId    Int
+  role      TenantRole @default(USER)
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([tenantId, userId])
+  @@index([tenantId])
+  @@index([userId])
+  @@map("tenant_users")
+}
+
 model SystemSetting {
   id          Int         @id @default(autoincrement())
-  key         String      @unique
+  tenantId    Int
+  key         String
   value       String
   type        SettingType
   description String?
@@ -18,6 +59,10 @@ model SystemSetting {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, key])
+  @@index([tenantId])
   @@map("system_settings")
 }
 
@@ -27,6 +72,7 @@ model User {
   email            String               @unique @db.VarChar(150)
   passwordHash     String               @map("password_hash")
   role             Role                 @default(USER)
+  isSuperAdmin     Boolean              @default(false)
   isActive         Boolean              @default(true) @map("is_active")
   createdAt        DateTime             @default(now()) @map("created_at")
   updatedAt        DateTime             @updatedAt @map("updated_at")
@@ -40,22 +86,29 @@ model User {
   satisfactions    TicketSatisfaction[]
   assignedTickets  Ticket[]             @relation("AssignedTickets")
   requestedTickets Ticket[]             @relation("RequestedTickets")
+  tenantMemberships TenantUser[]
 
   @@map("users")
 }
 
 model TicketType {
   id          Int      @id @default(autoincrement())
-  name        String   @unique @db.VarChar(100)
+  tenantId    Int
+  name        String   @db.VarChar(100)
   description String?
   isActive    Boolean  @default(true) @map("is_active")
   tickets     Ticket[]
   subtypes TicketSubtype[]
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
   @@map("ticket_types")
 }
 
 model TicketSubtype {
   id           Int      @id @default(autoincrement())
+  tenantId     Int
   ticketTypeId Int
   name         String
   description  String?
@@ -64,10 +117,12 @@ model TicketSubtype {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  tenant     Tenant     @relation(fields: [tenantId], references: [id])
   ticketType TicketType @relation(fields: [ticketTypeId], references: [id])
   tickets    Ticket[]
 
   @@unique([ticketTypeId, name])
+  @@index([tenantId])
   @@index([ticketTypeId])
   @@index([isActive])
   @@index([displayOrder])
@@ -76,7 +131,8 @@ model TicketSubtype {
 
 model TicketPriority {
   id                 Int      @id @default(autoincrement())
-  name               String   @unique
+  tenantId           Int
+  name               String
   description        String?
   slaDurationMinutes Int
   color              String?
@@ -85,8 +141,11 @@ model TicketPriority {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
+  tenant  Tenant   @relation(fields: [tenantId], references: [id])
   tickets Ticket[]
 
+  @@unique([tenantId, name])
+  @@index([tenantId])
   @@index([isActive])
   @@index([displayOrder])
   @@map("ticket_priorities")
@@ -94,6 +153,7 @@ model TicketPriority {
 
 model Ticket {
   id              Int                  @id @default(autoincrement())
+  tenantId        Int
   ticketNumber    String               @unique @map("ticket_number") @db.VarChar(30)
   requestedBy     Int                  @map("requested_by")
   typeId          Int                  @map("type_id")
@@ -117,6 +177,7 @@ model Ticket {
   slaStartedAt    DateTime?
   slaResolvedAt   DateTime?
 
+  tenant          Tenant               @relation(fields: [tenantId], references: [id])
   assignee        User?                @relation("AssignedTickets", fields: [assignedTo], references: [id])
   requester       User                 @relation("RequestedTickets", fields: [requestedBy], references: [id])
   type            TicketType           @relation(fields: [typeId], references: [id])
@@ -129,6 +190,10 @@ model Ticket {
   histories       TicketHistory[]
   satisfaction    TicketSatisfaction?
 
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, assignedTo])
   @@index([countryId])
   @@index([ticketSubtypeId])
   @@index([priorityId])
@@ -208,6 +273,12 @@ enum Role {
   USER
   SUPPORT
   ADMIN
+}
+
+enum TenantRole {
+  TENANT_ADMIN
+  AGENT
+  USER
 }
 
 enum TicketStatus {

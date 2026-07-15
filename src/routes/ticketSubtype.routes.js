@@ -12,9 +12,9 @@ const {
 } = require('../controllers/ticketSubtype.controller');
 
 const {
-    authenticateToken,
-    authorizeRoles
+    authenticateToken
 } = require('../middlewares/auth.middleware');
+const { resolveTenant, authorizeTenantRoles } = require('../middlewares/tenant.middleware');
 
 // ===== API para usuarios autenticados =====
 
@@ -22,16 +22,18 @@ const {
 router.get(
     '/active/:ticketTypeId',
     authenticateToken,
+    resolveTenant,
     getActiveTicketSubtypesByType
 );
 
-// ===== Administración (ADMIN) =====
+// ===== Administración (TENANT_ADMIN) =====
 
 // Listar todos los subtipos
 router.get(
     '/',
     authenticateToken,
-    authorizeRoles('ADMIN'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN'),
     getTicketSubtypes
 );
 
@@ -39,7 +41,8 @@ router.get(
 router.get(
     '/type/:ticketTypeId',
     authenticateToken,
-    authorizeRoles('ADMIN'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN'),
     getTicketSubtypesByType
 );
 
@@ -47,7 +50,8 @@ router.get(
 router.post(
     '/',
     authenticateToken,
-    authorizeRoles('ADMIN'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN'),
     createTicketSubtype
 );
 
@@ -55,7 +59,8 @@ router.post(
 router.put(
     '/:id',
     authenticateToken,
-    authorizeRoles('ADMIN'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN'),
     updateTicketSubtype
 );
 
@@ -63,7 +68,8 @@ router.put(
 router.patch(
     '/:id/status',
     authenticateToken,
-    authorizeRoles('ADMIN'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN'),
     toggleTicketSubtypeStatus
 );
 
@@ -71,7 +77,8 @@ router.patch(
 router.delete(
     '/:id',
     authenticateToken,
-    authorizeRoles('ADMIN'),
+    resolveTenant,
+    authorizeTenantRoles('TENANT_ADMIN'),
     deleteTicketSubtype
 );
 

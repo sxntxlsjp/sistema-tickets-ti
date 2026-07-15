@@ -1,14 +1,11 @@
 const prisma = require('../config/prisma');
+const { findTenantTicket } = require('../utils/ticketTenant.util');
 
 const uploadAttachment = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const ticket = await prisma.ticket.findUnique({
-            where: {
-                id: Number(id)
-            }
-        });
+        const ticket = await findTenantTicket(Number(id), req.tenantId);
 
         if (!ticket) {
             return res.status(404).json({
@@ -50,6 +47,14 @@ const uploadAttachment = async (req, res) => {
 const getAttachments = async (req, res) => {
     try {
         const { id } = req.params;
+
+        const ticket = await findTenantTicket(Number(id), req.tenantId);
+
+        if (!ticket) {
+            return res.status(404).json({
+                message: 'Ticket no encontrado'
+            });
+        }
 
         const attachments = await prisma.ticketAttachment.findMany({
             where: {

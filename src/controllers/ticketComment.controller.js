@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const { findTenantTicket } = require('../utils/ticketTenant.util');
 
 const addComment = async (req, res) => {
     try {
@@ -12,11 +13,7 @@ const addComment = async (req, res) => {
             });
         }
 
-        const ticket = await prisma.ticket.findUnique({
-            where: {
-                id: Number(id)
-            }
-        });
+        const ticket = await findTenantTicket(Number(id), req.tenantId);
 
         if (!ticket) {
             return res.status(404).json({
@@ -63,6 +60,14 @@ const getComments = async (req, res) => {
     try {
 
         const { id } = req.params;
+
+        const ticket = await findTenantTicket(Number(id), req.tenantId);
+
+        if (!ticket) {
+            return res.status(404).json({
+                message: 'Ticket no encontrado'
+            });
+        }
 
         const comments = await prisma.ticketComment.findMany({
             where: {
