@@ -99,15 +99,15 @@ body {
 .btn-ghost:hover:not(:disabled) { background-color: var(--surface-sunken); color: var(--text-primary); }
 
 .btn-icon {
-    height: 40px;
-    width: 40px;
+    height: 44px;
+    width: 44px;
     padding: 0;
     border-radius: var(--radius-md);
     background-color: transparent;
     color: var(--text-secondary);
 }
 .btn-icon:hover:not(:disabled) { background-color: var(--surface-sunken); color: var(--text-primary); }
-.btn-icon.btn-icon-sm { height: 32px; width: 32px; }
+.btn-icon.btn-icon-sm { height: 36px; width: 36px; }
 
 .btn .icon,
 .btn svg {
@@ -418,6 +418,17 @@ body {
     width: 100%;
     overflow-x: auto;
     border-radius: var(--radius-xl);
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll-hint {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-default);
 }
 
 .table {
@@ -462,7 +473,7 @@ body {
 
 .table-actions {
     display: flex;
-    gap: var(--space-2);
+    gap: var(--space-3);
 }
 
 /* ============ FASE 9 — MODALES ============ */
@@ -524,6 +535,23 @@ body {
     padding: 0 var(--space-6) var(--space-6);
 }
 
+/* ============ CHARTS (Chart.js) — responsive real ============ */
+/* Altura fija en un contenedor con position:relative para que Chart.js
+   (responsive:true + maintainAspectRatio:false) recalcule el ancho vía
+   ResizeObserver sin depender del atributo height del <canvas>, que en
+   móvil producía gráficos diminutos o recortados. */
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 220px;
+}
+
+@media (min-width: 640px) {
+    .chart-container {
+        height: 260px;
+    }
+}
+
 /* ============ FASE 10 — ESTADOS ============ */
 
 .skeleton {
@@ -570,6 +598,34 @@ body {
     font-weight: var(--font-weight-semibold);
     color: var(--text-secondary);
     margin-bottom: var(--space-1);
+}
+
+/* ============ NAVBAR — ajuste de densidad horizontal ============ */
+/* El navbar desktop concentra muchos elementos (5 enlaces + selector de
+   empresa + tema + logout + usuario). Con el padding estándar de .btn
+   desbordaba horizontalmente incluso en 1440px. Se reduce el padding
+   solo dentro del nav, sin tocar .btn en el resto de la aplicación. */
+.app-nav .btn {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+}
+
+/* ============ SAFE AREAS (iPhone notch / home indicator) ============ */
+/* viewport-fit=cover permite ir borde a borde; compensamos con env(safe-area-inset-*)
+   para no perder contenido bajo el notch, la isla dinámica o el home indicator. */
+#sidebar > div {
+    padding-top: max(var(--space-3), env(safe-area-inset-top));
+    padding-left: max(var(--space-4), env(safe-area-inset-left));
+    padding-right: max(var(--space-4), env(safe-area-inset-right));
+}
+
+body {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.fixed.top-5.right-5 {
+    top: max(1.25rem, calc(env(safe-area-inset-top) + 0.75rem));
+    right: max(1.25rem, calc(env(safe-area-inset-right) + 0.75rem));
 }
 
 /* ============ LOGO ============ */

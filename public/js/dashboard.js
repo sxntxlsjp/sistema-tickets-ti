@@ -302,10 +302,17 @@ const renderChart = (canvasId, labels, values, chartType = 'doughnut', colors = 
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
+            resizeDelay: 100,
             plugins: {
                 legend: {
                     position: 'bottom',
-                    display: hasData
+                    display: hasData,
+                    labels: {
+                        boxWidth: 12,
+                        padding: 12,
+                        font: { size: 11 }
+                    }
                 },
                 tooltip: {
                     enabled: hasData
@@ -521,6 +528,14 @@ document
 document.addEventListener('themechange', () => {
     const activeRange = document.querySelector('.range-btn.btn-secondary')?.dataset.range || 'all';
     loadDashboard(activeRange);
+});
+
+let orientationResizeTimeout;
+window.addEventListener('orientationchange', () => {
+    clearTimeout(orientationResizeTimeout);
+    orientationResizeTimeout = setTimeout(() => {
+        Object.values(chartInstances).forEach(chart => chart.resize());
+    }, 200);
 });
 
 loadDashboard('all');

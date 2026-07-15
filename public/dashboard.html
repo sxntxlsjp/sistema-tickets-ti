@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Dashboard Ejecutivo | MasterDiv Desk</title>
     <link rel="icon" type="image/png" href="assets/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -81,7 +82,7 @@
         </div>
 
         <p class="text-xs font-semibold uppercase tracking-wide mb-3" style="color: var(--text-muted);">General</p>
-        <section class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+        <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
 
             <div class="kpi-card">
                 <p class="kpi-label">Total Tickets</p>
@@ -118,7 +119,7 @@
         </section>
 
         <p class="text-xs font-semibold uppercase tracking-wide mb-3" style="color: var(--text-muted);">SLA</p>
-        <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
 
             <div class="kpi-card">
                 <p class="kpi-label">No iniciado</p>
@@ -143,7 +144,7 @@
         </section>
 
         <p class="text-xs font-semibold uppercase tracking-wide mb-3" style="color: var(--text-muted);">Actividad</p>
-        <section class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
+        <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
 
             <div class="kpi-card">
                 <p class="kpi-label">Creados hoy</p>
@@ -179,7 +180,9 @@
                     Tickets por Estado
                 </h3>
 
-                <canvas id="statusChart" height="200"></canvas>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
             </div>
 
             <div class="card">
@@ -187,7 +190,9 @@
                     Tickets por Prioridad
                 </h3>
 
-                <canvas id="priorityChart" height="200"></canvas>
+                <div class="chart-container">
+                    <canvas id="priorityChart"></canvas>
+                </div>
             </div>
 
             <div class="card">
@@ -195,7 +200,9 @@
                     Estado del SLA
                 </h3>
 
-                <canvas id="slaChart" height="200"></canvas>
+                <div class="chart-container">
+                    <canvas id="slaChart"></canvas>
+                </div>
             </div>
 
         </section>

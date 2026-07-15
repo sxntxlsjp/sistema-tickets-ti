@@ -106,7 +106,7 @@ const renderLayout = (activePage = '') => {
                     >
                 </a>
 
-                <nav class="hidden lg:flex items-center gap-1 ml-auto">
+                <nav class="app-nav hidden xl:flex items-center gap-1 ml-auto">
                 ${menuItems.map(item => {
 
                     if (item.children) {
@@ -173,7 +173,7 @@ const renderLayout = (activePage = '') => {
                            title="Cambiar de empresa"
                            class="btn btn-ghost hidden md:inline-flex ml-1">
                             <i data-lucide="repeat" class="icon-sm"></i>
-                            <span class="max-w-[9rem] truncate">${escapeLayoutHtml(activeTenant.name)}</span>
+                            <span class="max-w-[7rem] truncate">${escapeLayoutHtml(activeTenant.name)}</span>
                         </a>
                     ` : ''}
 
@@ -184,7 +184,7 @@ const renderLayout = (activePage = '') => {
                             aria-label="Cerrar sesión"
                             class="btn btn-ghost">
                         <i data-lucide="log-out" class="icon-sm"></i>
-                        <span class="hidden xl:inline">Cerrar sesión</span>
+                        <span class="hidden 2xl:inline">Cerrar sesión</span>
                     </button>
 
                     <div
@@ -207,7 +207,7 @@ const renderLayout = (activePage = '') => {
                                 `
                         }
 
-                        <div class="hidden xl:block leading-tight">
+                        <div class="hidden 2xl:block leading-tight">
                             <p class="text-sm font-semibold" style="color: var(--text-primary);">${escapeLayoutHtml(user.name)}</p>
                             <p class="text-xs" style="color: var(--text-muted);">
                                 ${escapeLayoutHtml(user.jobTitle || (user.role === 'ADMIN' ? 'Administrador' : 'Usuario'))}
@@ -216,7 +216,7 @@ const renderLayout = (activePage = '') => {
                     </div>
                 </nav>
 
-                <div class="flex items-center gap-2 lg:hidden">
+                <div class="flex items-center gap-2 xl:hidden">
                     ${themeToggleMarkup()}
 
                     <button onclick="toggleMobileMenu()"
@@ -229,7 +229,7 @@ const renderLayout = (activePage = '') => {
 
             </div>
 
-            <nav id="mobileMenu" class="${mobileMenuOpen ? 'block' : 'hidden'} lg:hidden mt-3 space-y-1 pb-2">
+            <nav id="mobileMenu" class="${mobileMenuOpen ? 'block' : 'hidden'} xl:hidden mt-3 space-y-1 pb-2">
                 ${menuItems.flatMap(item => item.children
                     ? item.children.map(child => ({ ...child }))
                     : [item]
