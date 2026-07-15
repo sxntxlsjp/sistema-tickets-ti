@@ -178,6 +178,72 @@
     </main>
 
 </div>
+
+<div id="priorityModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
+    <div id="priorityModalContent" class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-3xl transform scale-95 opacity-0 transition-all duration-300">
+
+        <div class="flex items-start justify-between mb-6">
+            <div>
+                <h3 class="text-2xl font-bold text-slate-800">
+                    Asignar prioridad
+                </h3>
+
+                <p class="text-slate-500 mt-1">
+                    Selecciona la prioridad que tendrá este ticket y se iniciará el SLA correspondiente.
+                </p>
+            </div>
+
+            <button
+                onclick="closePriorityModal()"
+                class="w-10 h-10 rounded-xl hover:bg-slate-100 text-slate-500">
+                ✕
+            </button>
+        </div>
+
+        <div id="priorityOptions" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        <div class="flex justify-end mt-6 gap-3">
+
+            <button
+                onclick="closePriorityModal()"
+                class="px-5 py-3 border rounded-xl hover:bg-slate-50">
+                Cancelar
+            </button>
+
+            <button
+                id="assignPriorityBtn"
+                onclick="assignPriority()"
+                disabled
+                class="px-5 py-3 bg-slate-900 text-white rounded-xl opacity-50 cursor-not-allowed">
+                Asignar prioridad
+            </button>
+
+        </div>
+
+    </div>
+</div>
+<div id="prioritySuccessModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
+    <div id="prioritySuccessModalContent" class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md text-center transform scale-95 opacity-0 transition-all duration-300">
+
+        <div class="w-20 h-20 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-4xl mx-auto mb-5">
+            ✓
+        </div>
+
+        <h3 class="text-2xl font-bold text-slate-800 mb-2">
+            Prioridad asignada
+        </h3>
+
+        <p class="text-slate-500 mb-6">
+            La prioridad fue asignada correctamente y el SLA ha iniciado.
+        </p>
+
+        <button
+            onclick="closePrioritySuccessModal()"
+            class="w-full bg-slate-900 text-white py-3 rounded-2xl hover:bg-slate-800">
+            Entendido
+        </button>
+
+    </div>
+</div>
 <script src="js/layout.js"></script>
 <script src="js/api.js"></script>
 <script src="js/ticket-detail.js"></script>

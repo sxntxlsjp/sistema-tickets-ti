@@ -9,10 +9,11 @@ if (!token) {
 }
 
 const typeSelect = document.getElementById('typeId');
+const ticketSubtypeSelect =
+    document.getElementById('ticketSubtypeId');
 const assignedSelect = document.getElementById('assignedTo');
 const countrySelect = document.getElementById('countryId');
-const priorityContainer =
-    document.getElementById('priorityContainer');
+
 const form = document.getElementById('ticketForm');
 const message = document.getElementById('message');
 
@@ -37,7 +38,44 @@ const loadTicketTypes = async () => {
         `;
     });
 };
+const loadTicketSubtypes = async (ticketTypeId) => {
 
+    ticketSubtypeSelect.innerHTML =
+        '<option value="">Seleccione un servicio afectado</option>';
+
+    if (!ticketTypeId) {
+        return;
+    }
+
+    const response = await fetch(
+        `${API_URL}/ticket-subtypes/active/${ticketTypeId}`,
+        {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        }
+    );
+
+    const result = await response.json();
+    const subtypes = result.data || result;
+
+    subtypes.forEach(subtype => {
+
+        ticketSubtypeSelect.innerHTML += `
+            <option value="${subtype.id}">
+                ${subtype.name}
+            </option>
+        `;
+
+    });
+
+};
+
+typeSelect.addEventListener('change', () => {
+
+    loadTicketSubtypes(typeSelect.value);
+
+});
 const loadSupportUsers = async () => {
 
     const response = await fetch(
@@ -280,13 +318,13 @@ if (!countryId) {
 
 const payload = {
     typeId: Number(typeSelect.value),
+    ticketSubtypeId: Number(ticketSubtypeSelect.value),
     subject: document.getElementById('subject').value,
     assignedTo: assignedSelect.value || null,
-    priority: document.getElementById('priority').value,
     description: document.getElementById('description').value,
     countryId: countryId
 };
-console.log('Payload Ticket:', payload);
+
     const response = await fetch(
         `${API_URL}/tickets`,
         {
@@ -431,44 +469,10 @@ const loadCountries = async () => {
         console.error('Error cargando países:', error);
     }
 };
-const loadPrioritySetting = async () => {
-    try {
 
-        const response = await fetch(
-            `${API_URL}/system-settings/showPriorityField`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            }
-        );
-
-        const result = await response.json();
-
-        const setting = result.data || result;
-
-        if (setting.value === 'true') {
-
-            priorityContainer.classList.remove('hidden');
-
-        } else {
-
-            priorityContainer.classList.add('hidden');
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            'Error cargando configuración de prioridad:',
-            error
-        );
-
-    }
-};
 renderMenu();
 loadTicketTypes();
 loadSupportUsers();
 loadCountries();
-loadPrioritySetting();
+
 

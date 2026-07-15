@@ -10,8 +10,7 @@ const uploadProfileImage = async (req, res) => {
 
         const imagePath = `/uploads/profiles/${req.file.filename}`;
 
-        console.log('PROFILE FILE:', req.file);
-        console.log('PROFILE IMAGE PATH:', imagePath);
+
 
         const user = await prisma.user.update({
             where: {

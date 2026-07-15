@@ -1,4 +1,7 @@
 const prisma = require('../config/prisma');
+const ticketInclude = require('../utils/ticketInclude.util');
+
+
 
 const getMyTickets = async (req, res) => {
     try {
@@ -6,29 +9,7 @@ const getMyTickets = async (req, res) => {
             where: {
                 requestedBy: req.user.id
             },
-            include: {
-                type: {
-                    select: {
-                        id: true,
-                        name: true
-                    }
-                },
-                assignee: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true
-                    }
-                },
-                country: {
-                    select: {
-                        id: true,
-                        name: true,
-                        code: true,
-                        flagEmoji: true
-                    }
-                }
-            },
+            include: ticketInclude,
             orderBy: {
                 createdAt: 'desc'
             }
@@ -47,36 +28,7 @@ const getMyTickets = async (req, res) => {
 const getAllTickets = async (req, res) => {
     try {
         const tickets = await prisma.ticket.findMany({
-            include: {
-                requester: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true
-                    }
-                },
-                assignee: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true
-                    }
-                },
-                type: {
-                    select: {
-                        id: true,
-                        name: true
-                    }
-                },
-                country: {
-                    select: {
-                        id: true,
-                        name: true,
-                        code: true,
-                        flagEmoji: true
-                    }
-                }
-            },
+            include: ticketInclude,
             orderBy: {
                 createdAt: 'desc'
             }

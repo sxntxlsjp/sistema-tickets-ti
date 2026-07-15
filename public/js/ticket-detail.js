@@ -9,10 +9,29 @@ const params = new URLSearchParams(window.location.search);
 const ticketId = params.get('id');
 let selectedRating = null;
 let selectedFiles = [];
+let selectedPriorityId = null;
+let availablePriorities = [];
 const statusLabels = {
+
     EN_REVISION: 'En revisión',
     PENDIENTE: 'Pendiente',
     FINALIZADO: 'Finalizado'
+};
+
+const formatSla = (minutes) => {
+
+    if (minutes % 1440 === 0) {
+        const days = minutes / 1440;
+        return `${days} ${days === 1 ? 'día' : 'días'}`;
+    }
+
+    if (minutes % 60 === 0) {
+        const hours = minutes / 60;
+        return `${hours} ${hours === 1 ? 'hora' : 'horas'}`;
+    }
+
+    return `${minutes} min`;
+
 };
 
 const loadTicketDetail = async () => {
@@ -52,12 +71,43 @@ document.getElementById('ticketHeader').innerHTML = `
                     </p>
                 </div>
 
-                <div>
-                    <p class="text-slate-400 font-semibold">Prioridad</p>
-                    <p class="text-slate-700 font-semibold">
-                        ${ticket.priority || '—'}
-                    </p>
-                </div>
+                    <div>
+                        <p class="text-slate-400 font-semibold">Prioridad</p>
+
+                        ${
+                            ticket.priority
+                                ? `
+                                    <span
+                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold text-white"
+                                        style="background:${ticket.priority.color}">
+                                        ${ticket.priority.name}
+                                    </span>
+
+                                    <p class="text-xs text-slate-500 mt-2">
+                                        SLA:
+                                        ${formatSla(ticket.priority.slaDurationMinutes)}
+                                    </p>
+                                `
+                                : `
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-slate-200 text-slate-700">
+                                        Sin asignar
+                                    </span>
+
+                                    ${
+                                        user.role === 'ADMIN'
+                                            ? `
+                                                <button
+                                                    onclick="openPriorityModal()"
+                                                    class="block mt-3 text-sm bg-slate-900 text-white px-3 py-2 rounded-xl hover:bg-slate-800">
+                                                    Asignar prioridad
+                                                </button>
+                                            `
+                                            : ''
+                                    }
+                                `
+                        }
+
+                    </div>
 
                 <div>
                     <p class="text-slate-400 font-semibold">País de soporte</p>
@@ -746,5 +796,183 @@ document.getElementById('attachmentForm').addEventListener('submit', async (even
 });
 
 
+const openPriorityModal = async () => {
 
+    const response = await fetch(
+        `${API_URL}/ticket-priorities/active`,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    );
+
+    const result = await response.json();
+
+    availablePriorities = result.data || result;
+
+    const container =
+        document.getElementById('priorityOptions');
+
+    container.innerHTML = '';
+
+    availablePriorities.forEach(priority => {
+
+        container.innerHTML += `
+            <button
+                onclick="selectPriority(${priority.id})"
+                id="priority-${priority.id}"
+                class="border-2 border-slate-200 rounded-2xl p-5 text-left hover:border-slate-900 transition">
+
+                <div class="flex items-center justify-between mb-3">
+
+                    <span
+                        class="px-3 py-1 rounded-full text-white font-semibold"
+                        style="background:${priority.color}">
+                        ${priority.name}
+                    </span>
+
+                    <span class="text-sm text-slate-500">
+                        ${formatSla(priority.slaDurationMinutes)}
+                    </span>
+
+                </div>
+
+                <p class="text-slate-600">
+                    ${priority.description || ''}
+                </p>
+
+            </button>
+        `;
+
+    });
+
+    const modal =
+        document.getElementById('priorityModal');
+
+    const content =
+        document.getElementById('priorityModalContent');
+
+    modal.classList.remove('hidden');
+
+    setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+    }, 10);
+
+};
+const closePriorityModal = () => {
+
+    const modal =
+        document.getElementById('priorityModal');
+
+    const content =
+        document.getElementById('priorityModalContent');
+
+    content.classList.remove('scale-100', 'opacity-100');
+    content.classList.add('scale-95', 'opacity-0');
+
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+
+};
+
+const selectPriority = (priorityId) => {
+
+    selectedPriorityId = priorityId;
+
+    availablePriorities.forEach(priority => {
+
+        const card =
+            document.getElementById(`priority-${priority.id}`);
+
+        card.classList.remove(
+            'border-slate-900',
+            'bg-slate-50'
+        );
+
+        card.classList.add(
+            'border-slate-200'
+        );
+
+    });
+
+    const selected =
+        document.getElementById(`priority-${priorityId}`);
+
+    selected.classList.remove('border-slate-200');
+
+    selected.classList.add(
+        'border-slate-900',
+        'bg-slate-50'
+    );
+
+    const button =
+        document.getElementById('assignPriorityBtn');
+
+    button.disabled = false;
+
+    button.classList.remove(
+        'opacity-50',
+        'cursor-not-allowed'
+    );
+
+};
+
+const assignPriority = async () => {
+    if (!selectedPriorityId) return;
+
+    const response = await fetch(
+        `${API_URL}/tickets/${ticketId}/priority`,
+        {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                priorityId: selectedPriorityId
+            })
+        }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || result.success === false) {
+        alert(result.message || 'No se pudo asignar la prioridad.');
+        return;
+    }
+
+    closePriorityModal();
+
+    selectedPriorityId = null;
+
+    await loadTicketDetail();
+    openPrioritySuccessModal();
+};
+
+const openPrioritySuccessModal = () => {
+    const modal = document.getElementById('prioritySuccessModal');
+    const content = document.getElementById('prioritySuccessModalContent');
+
+    modal.classList.remove('hidden');
+
+    setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+    }, 10);
+};
+
+const closePrioritySuccessModal = () => {
+    const modal = document.getElementById('prioritySuccessModal');
+    const content = document.getElementById('prioritySuccessModalContent');
+
+    content.classList.remove('scale-100', 'opacity-100');
+    content.classList.add('scale-95', 'opacity-0');
+
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+};
 loadTicketDetail();

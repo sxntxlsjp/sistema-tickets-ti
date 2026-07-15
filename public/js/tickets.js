@@ -82,9 +82,55 @@ const renderTickets = (data) => {
     data.forEach(ticket => {
         table.innerHTML += `
             <tr class="hover:bg-slate-50">
-                <td class="p-4 whitespace-nowrap font-semibold">${ticket.ticketNumber}</td>
-                <td class="p-4">${ticket.subject}</td>
-                <td class="p-4 whitespace-nowrap">${ticket.type?.name || '-'}</td>
+<td class="p-4 min-w-[320px]">
+    <div class="space-y-2">
+
+        <div>
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">
+                ${ticket.ticketNumber}
+            </span>
+        </div>
+
+        <div class="font-semibold text-slate-800">
+            ${ticket.subject}
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-xs font-semibold">
+                🏷️ ${ticket.type?.name || '—'}
+            </span>
+
+            ${
+                ticket.ticketSubtype
+                    ? `
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium">
+                            ${ticket.ticketSubtype.name}
+                        </span>
+                    `
+                    : ''
+            }
+        </div>
+
+    </div>
+</td>
+
+                <td class="p-4 whitespace-nowrap">
+                    ${
+                        ticket.priority
+                            ? `
+                                <span
+                                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold text-white"
+                                    style="background:${ticket.priority.color}">
+                                    ${ticket.priority.name}
+                                </span>
+                            `
+                            : `
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-slate-200 text-slate-700">
+                                    Sin asignar
+                                </span>
+                            `
+                    }
+                </td>
                 <td class="p-4 whitespace-nowrap">
                     ${
                         ticket.country

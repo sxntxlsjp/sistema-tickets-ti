@@ -34,6 +34,7 @@ const menuItems = user.role === 'ADMIN'
                 { key: 'users', label: 'Usuarios', icon: '👥', href: 'users.html' },
                 { key: 'countries', label: 'Países', icon: '🌎', href: 'countries.html' },
                 { key: 'ticket-types', label: 'Tipos de Ticket', icon: '🏷️', href: 'ticket-types.html' },
+                { key: 'priorities', label: 'Prioridades', icon: '🚦', href: 'priorities.html' },
                 { key: 'settings', label: 'Configuración', icon: '⚙️', href: 'settings.html' }
             ]
         },

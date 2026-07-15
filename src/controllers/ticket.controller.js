@@ -1,7 +1,6 @@
 const prisma = require('../config/prisma');
-const {
-    calculateSla
-} = require('../utils/sla.util');
+const ticketInclude = require('../utils/ticketInclude.util');
+
 const {
     notifyAdminNewTicket
 } = require('../services/mail.service');
@@ -20,14 +19,14 @@ const generateTicketNumber = async () => {
 
 const createTicket = async (req, res) => {
     try {
-        const {
-            typeId,
-            subject,
-            assignedTo,
-            priority,
-            description,
-            countryId
-        } = req.body;
+const {
+    typeId,
+    subject,
+    assignedTo,
+    description,
+    countryId,
+    ticketSubtypeId
+} = req.body;
 
         if (!typeId || !subject || !description || !assignedTo) {
             return res.status(400).json({
@@ -37,22 +36,7 @@ const createTicket = async (req, res) => {
 
         const ticketNumber = await generateTicketNumber();
 
-        const prioritySetting = await prisma.systemSetting.findUnique({
-    where: {
-        key: 'showPriorityField'
-    }
-});
 
-        const showPriorityField =
-            prioritySetting &&
-            prioritySetting.isActive &&
-            prioritySetting.value === 'true';
-
-        const finalPriority = showPriorityField
-            ? (priority || 'MEDIA')
-            : 'BAJA';
-
-        const sla = calculateSla(finalPriority);
         let validCountryId = null;
 
         if (countryId) {
@@ -72,58 +56,47 @@ const createTicket = async (req, res) => {
                 });
             }
         }
+        let validTicketSubtypeId = null;
+
+            if (ticketSubtypeId) {
+                validTicketSubtypeId = Number(ticketSubtypeId);
+
+                const subtype = await prisma.ticketSubtype.findFirst({
+                    where: {
+                        id: validTicketSubtypeId,
+                        ticketTypeId: Number(typeId),
+                        isActive: true
+                    }
+                });
+
+                if (!subtype) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'El servicio afectado seleccionado no existe, no está activo o no pertenece al tipo de ticket seleccionado'
+                    });
+                }
+            }
         const ticket = await prisma.ticket.create({
             data: {
                 ticketNumber,
                 requestedBy: req.user.id,
                 typeId: Number(typeId),
+                ticketSubtypeId: validTicketSubtypeId,
                 subject,
                 assignedTo: Number(assignedTo),
                 description,
-                priority: finalPriority,
                 status: 'PENDIENTE',
-                slaDueAt: sla.slaDueAt,
-                slaStatus: sla.slaStatus,
-                countryId: validCountryId
+
+                countryId: validCountryId,
+
+                // Nueva arquitectura de prioridad/SLA
+                priorityId: null,
+                slaStartedAt: null,
+                slaDueAt: null,
+                slaResolvedAt: null,
+                slaStatus: 'ON_TIME'
             },
-            include: {
-                requester: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        role: true,
-                        jobTitle: true,
-                        department: true,
-                        profileImage: true
-                    }
-                },
-                assignee: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        role: true,
-                        jobTitle: true,
-                        department: true,
-                        profileImage: true
-                    }
-                },
-                type: {
-                    select: {
-                        id: true,
-                        name: true
-                    }
-                },
-                country: {
-                    select: {
-                        id: true,
-                        name: true,
-                        code: true,
-                        flagEmoji: true
-                    }
-                }
-            }
+            include: ticketInclude
         });
         await notifyAdminNewTicket(ticket);
         return res.status(201).json({
@@ -195,7 +168,146 @@ const takeTicket = async (req, res) => {
         });
     }
 };
+
+const assignTicketPriority = async (req, res) => {
+    try {
+        const ticketId = Number(req.params.id);
+        const { priorityId } = req.body;
+
+        if (!priorityId) {
+            return res.status(400).json({
+                success: false,
+                message: 'La prioridad es obligatoria'
+            });
+        }
+
+        const ticket = await prisma.ticket.findUnique({
+            where: {
+                id: ticketId
+            }
+        });
+
+        if (!ticket) {
+            return res.status(404).json({
+                success: false,
+                message: 'Ticket no encontrado'
+            });
+        }
+        if (ticket.priorityId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Este ticket ya tiene una prioridad asignada'
+            });
+        }
+        if (ticket.status === 'FINALIZADO') {
+            return res.status(400).json({
+                success: false,
+                message: 'No se puede asignar prioridad a un ticket finalizado'
+            });
+        }
+
+        const priority = await prisma.ticketPriority.findFirst({
+            where: {
+                id: Number(priorityId),
+                isActive: true
+            }
+        });
+
+        if (!priority) {
+            return res.status(400).json({
+                success: false,
+                message: 'La prioridad seleccionada no existe o no está activa'
+            });
+        }
+
+        const slaStartedAt = new Date();
+        const slaDueAt = new Date(
+            slaStartedAt.getTime() + priority.slaDurationMinutes * 60 * 1000
+        );
+
+        const updatedTicket = await prisma.ticket.update({
+            where: {
+                id: ticketId
+            },
+            data: {
+                priorityId: priority.id,
+                slaStartedAt,
+                slaDueAt,
+                slaStatus: 'ON_TIME'
+            },
+            include: {
+                requester: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        role: true,
+                        jobTitle: true,
+                        department: true,
+                        profileImage: true
+                    }
+                },
+                assignee: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        role: true,
+                        jobTitle: true,
+                        department: true,
+                        profileImage: true
+                    }
+                },
+                type: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                },
+                ticketSubtype: {
+                    select: {
+                        id: true,
+                        name: true,
+                        description: true
+                    }
+                },
+                priority: {
+                    select: {
+                        id: true,
+                        name: true,
+                        description: true,
+                        slaDurationMinutes: true,
+                        color: true
+                    }
+                },
+                country: {
+                    select: {
+                        id: true,
+                        name: true,
+                        code: true,
+                        flagEmoji: true
+                    }
+                }
+            }
+        });
+
+        return res.json({
+            success: true,
+            message: 'Prioridad asignada correctamente y SLA iniciado',
+            data: updatedTicket
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: 'Error al asignar prioridad al ticket'
+        });
+    }
+};
+
 module.exports = {
     createTicket,
-    takeTicket
+    takeTicket,
+    assignTicketPriority
 };

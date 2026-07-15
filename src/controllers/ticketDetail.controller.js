@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const ticketInclude = require('../utils/ticketInclude.util');
 
 const getTicketById = async (req, res) => {
     try {
@@ -9,36 +10,7 @@ const getTicketById = async (req, res) => {
                 id: Number(id)
             },
             include: {
-                requester: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        role: true
-                    }
-                },
-                assignee: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        role: true
-                    }
-                },
-                type: {
-                    select: {
-                        id: true,
-                        name: true
-                    }
-                },
-                country: {
-                    select: {
-                        id: true,
-                        name: true,
-                        code: true,
-                        flagEmoji: true
-                    }
-                },
+                ...ticketInclude,
                 comments: {
                     include: {
                         user: {
@@ -75,24 +47,24 @@ const getTicketById = async (req, res) => {
                     }
                 },
                 satisfaction: true,
-                    histories: {
-                        include: {
-                            changer: {
-                                select: {
-                                    id: true,
-                                    name: true,
-                                    email: true,
-                                    role: true,
-                                    jobTitle: true,
-                                    department: true,
-                                    profileImage: true
-                                }
+                histories: {
+                    include: {
+                        changer: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                role: true,
+                                jobTitle: true,
+                                department: true,
+                                profileImage: true
                             }
-                        },
-                        orderBy: {
-                            createdAt: 'desc'
                         }
+                    },
+                    orderBy: {
+                        createdAt: 'desc'
                     }
+                }
             }
         });
 

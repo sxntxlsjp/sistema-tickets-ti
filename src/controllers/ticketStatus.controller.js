@@ -24,6 +24,13 @@ const updateTicketStatus = async (req, res) => {
                 message: 'Ticket no encontrado'
             });
         }
+        if (status === 'FINALIZADO' && !existingTicket.priorityId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Debe asignarse una prioridad antes de finalizar el ticket'
+            });
+        }
+        const resolvedAt = status === 'FINALIZADO' ? new Date() : null;
 
         const updatedTicket = await prisma.ticket.update({
             where: {
@@ -31,7 +38,8 @@ const updateTicketStatus = async (req, res) => {
             },
             data: {
                 status,
-                closedAt: status === 'FINALIZADO' ? new Date() : null
+                closedAt: resolvedAt,
+                slaResolvedAt: resolvedAt
             }
         });
 

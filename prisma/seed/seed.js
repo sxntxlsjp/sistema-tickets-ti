@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function main() {
 
-    console.log('Iniciando carga de datos...');
+
 
     // Crear usuario administrador
     const hashedPassword = await bcrypt.hash('Admin123*', 10);
@@ -46,7 +46,7 @@ async function main() {
         });
     }
 
-    console.log('Datos iniciales cargados correctamente.');
+
 }
 
 main()

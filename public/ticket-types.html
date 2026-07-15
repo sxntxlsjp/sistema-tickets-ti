@@ -66,20 +66,7 @@
                     </div>
                 </div>
 
-                <div class="w-full overflow-x-auto">
-                    <table class="min-w-[900px] w-full text-left text-sm">
-                        <thead class="bg-slate-900 text-white">
-                            <tr>
-                                <th class="p-4 whitespace-nowrap">Nombre</th>
-                                <th class="p-4 whitespace-nowrap">Descripción</th>
-                                <th class="p-4 whitespace-nowrap">Estado</th>
-                                <th class="p-4 whitespace-nowrap">Acciones</th>
-                            </tr>
-                        </thead>
-
-                        <tbody id="ticketTypesList" class="divide-y"></tbody>
-                    </table>
-                </div>
+                    <div id="ticketTypesList" class="space-y-4"></div>
             </div>
 
         </div>
@@ -194,6 +181,42 @@
             class="w-full bg-slate-900 text-white py-3 rounded-2xl hover:bg-slate-800">
             Entendido
         </button>
+
+    </div>
+</div>
+
+<div id="subtypeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
+    <div id="subtypeModalContent" class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md transform scale-95 opacity-0 transition-all duration-300">
+
+        <h3 class="text-2xl font-bold text-slate-800 mb-2">
+            Agregar servicio afectado
+        </h3>
+
+        <p id="subtypeModalText" class="text-slate-500 mb-6"></p>
+
+        <input type="hidden" id="subtypeTicketTypeId">
+
+        <input
+            id="subtypeName"
+            type="text"
+            placeholder="Nombre del servicio afectado"
+            class="w-full border rounded-xl p-3 mb-5"
+            required
+        >
+
+        <div class="flex justify-end gap-3">
+            <button
+                onclick="closeSubtypeModal()"
+                class="px-5 py-3 border rounded-xl hover:bg-slate-50">
+                Cancelar
+            </button>
+
+            <button
+                onclick="saveSubtype()"
+                class="px-5 py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800">
+                Guardar
+            </button>
+        </div>
 
     </div>
 </div>

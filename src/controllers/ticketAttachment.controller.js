@@ -21,10 +21,7 @@ const uploadAttachment = async (req, res) => {
                 message: 'No se adjuntó ningún archivo'
             });
         }
-        console.log('PROFILE FILE:', JSON.stringify(req.file, null, 2));
-        console.log('ATTACHMENT FILE:', req.file);
-        console.log('ATTACHMENT URL:', `/uploads/${req.file.filename}`);
-        console.log('ATTACHMENT FILE:', JSON.stringify(req.file, null, 2));
+
         const attachment = await prisma.ticketAttachment.create({
             data: {
                 ticketId: Number(id),

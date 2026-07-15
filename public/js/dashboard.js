@@ -5,8 +5,7 @@ if (!token) {
 }
 
 const user = JSON.parse(localStorage.getItem('user'));
-let statusChartInstance = null;
-let priorityChartInstance = null;
+const chartInstances = {};
 
 if (!user || user.role !== 'ADMIN') {
     window.location.href = 'user-home.html';
@@ -18,74 +17,138 @@ const statusLabels = {
     FINALIZADO: 'Finalizado'
 };
 
-const priorityLabels = {
-    BAJA: 'Baja',
-    MEDIA: 'Media',
-    ALTA: 'Alta'
+const escapeHtml = (value) => {
+    if (value === null || value === undefined) return '';
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+};
+
+const setText = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
 };
 
 const loadDashboard = async (range = 'all') => {
     setActiveRangeButton(range);
-    const response = await fetch(`${API_URL}/dashboard/summary?range=${range}`, {
-        headers: {
-            'Authorization': `Bearer ${token}`
+
+    let data;
+
+    try {
+        const response = await fetch(`${API_URL}/dashboard/summary?range=${range}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('No se pudo cargar el dashboard');
         }
-    });
 
-    const data = await response.json();
+        data = await response.json();
+    } catch (error) {
+        console.error(error);
+        return;
+    }
+
     loadAdminAlerts();
-    document.getElementById('totalTickets').textContent = data.totalTickets;
-    document.getElementById('openTickets').textContent = data.openTickets;
-    document.getElementById('pendingTickets').textContent = data.pendingTickets;
-    document.getElementById('closedTickets').textContent = data.closedTickets;
-    document.getElementById('overdueTickets').textContent = data.overdueTickets;
 
-    document.getElementById('satisfactionAverage').textContent =
-        `${Number(data.satisfactionAverage).toFixed(1)} ⭐`;
+    setText('totalTickets', data.totalTickets ?? 0);
+    setText('withoutPriorityTickets', data.withoutPriorityTickets ?? 0);
+    setText('openTickets', data.openTickets ?? 0);
+    setText('pendingTickets', data.pendingTickets ?? 0);
+    setText('closedTickets', data.closedTickets ?? 0);
 
-const statusData = data.ticketsByStatus.map(item => ({
-    label: statusLabels[item.status] || item.status,
-    total: item._count
-}));
+    setText('slaNotStarted', data.slaNotStarted ?? 0);
+    setText('slaOnTime', data.slaOnTime ?? 0);
+    setText('slaDueSoon', data.slaDueSoon ?? 0);
+    setText('slaOverdue', data.slaOverdue ?? 0);
 
-const priorityData = data.ticketsByPriority.map(item => ({
-    label: priorityLabels[item.priority] || item.priority,
-    total: item._count
-}));
+    setText('createdToday', data.createdToday ?? 0);
+    setText('createdThisWeek', data.createdThisWeek ?? 0);
+    setText('closedThisWeek', data.closedThisWeek ?? 0);
+    setText('resolutionRate', `${data.resolutionRate ?? 0}%`);
+    setText(
+        'avgResolutionMinutes',
+        data.avgResolutionMinutes !== null && data.avgResolutionMinutes !== undefined
+            ? formatMinutes(data.avgResolutionMinutes)
+            : '-'
+    );
 
-renderChart(
-    'statusChart',
-    statusData.map(item => item.label),
-    statusData.map(item => item.total),
-    'doughnut'
-);
+    setText(
+        'satisfactionAverage',
+        `${Number(data.satisfactionAverage || 0).toFixed(1)} ⭐`
+    );
 
-renderChart(
-    'priorityChart',
-    priorityData.map(item => item.label),
-    priorityData.map(item => item.total),
-    'bar'
-);
+    const statusData = (data.ticketsByStatus || []).map(item => ({
+        label: statusLabels[item.status] || item.status,
+        total: item._count
+    }));
+
+    renderChart(
+        'statusChart',
+        statusData.map(item => item.label),
+        statusData.map(item => item.total),
+        'doughnut'
+    );
+
+    const priorityData = data.ticketsByPriority || [];
+
+    renderChart(
+        'priorityChart',
+        priorityData.map(item => item.priorityName),
+        priorityData.map(item => item.total),
+        'bar',
+        priorityData.map(item => item.color)
+    );
+
+    renderChart(
+        'slaChart',
+        ['No iniciado', 'En tiempo', 'Por vencer', 'Vencido'],
+        [data.slaNotStarted || 0, data.slaOnTime || 0, data.slaDueSoon || 0, data.slaOverdue || 0],
+        'doughnut',
+        ['#94A3B8', '#22C55E', '#F59E0B', '#EF4444']
+    );
 
     renderBars(
         'ticketsByType',
-        data.ticketsByType.map(item => ({
-            label: item.typeName,
+        (data.ticketsByType || []).map(item => ({ label: item.typeName, total: item.total }))
+    );
+
+    renderBars(
+        'ticketsBySubtype',
+        (data.ticketsBySubtype || []).map(item => ({ label: item.subtypeName, total: item.total }))
+    );
+
+    renderBars(
+        'ticketsByCountry',
+        (data.ticketsByCountry || []).map(item => ({
+            label: `${item.flagEmoji ? item.flagEmoji + ' ' : ''}${item.countryName}`,
             total: item.total
         }))
     );
 
     renderBars(
-        'ticketsByDepartment',
-        data.ticketsByDepartment.map(item => ({
-            label: item.department,
-            total: item.total
-        }))
+        'ticketsByAssignee',
+        (data.ticketsByAssignee || []).map(item => ({ label: item.assigneeName, total: item.total }))
     );
 
-    renderLatestTickets(data.latestTickets);
-    renderLatestSatisfactions(data.latestSatisfactions);
+    renderLatestTickets(data.latestTickets || []);
+    renderLatestSatisfactions(data.latestSatisfactions || []);
+    renderOverdueTickets(data.overdueTicketsList || []);
 };
+
+const formatMinutes = (minutes) => {
+    if (minutes < 60) return `${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} h`;
+    const days = Math.floor(hours / 24);
+    return `${days} d`;
+};
+
 const setActiveRangeButton = (range) => {
     document.querySelectorAll('.range-btn').forEach(button => {
         button.classList.remove('bg-slate-900', 'text-white');
@@ -99,20 +162,29 @@ const setActiveRangeButton = (range) => {
         activeButton.classList.add('bg-slate-900', 'text-white');
     }
 };
+
 const loadAdminAlerts = async () => {
     const container = document.getElementById('adminAlertsContainer');
 
     if (!container) return;
 
-    const response = await fetch(`${API_URL}/dashboard/my-alerts`, {
-        headers: {
-            'Authorization': `Bearer ${token}`
+    let data;
+
+    try {
+        const response = await fetch(`${API_URL}/dashboard/my-alerts`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        data = await response.json();
+
+        if (!response.ok || data.totalPendingAssigned === 0) {
+            container.innerHTML = '';
+            return;
         }
-    });
-
-    const data = await response.json();
-
-    if (!response.ok || data.totalPendingAssigned === 0) {
+    } catch (error) {
+        console.error(error);
         container.innerHTML = '';
         return;
     }
@@ -147,15 +219,15 @@ const loadAdminAlerts = async () => {
 
                             <div>
                                 <p class="font-bold text-slate-800">
-                                    ${ticket.ticketNumber}
+                                    ${escapeHtml(ticket.ticketNumber)}
                                 </p>
 
                                 <p class="text-slate-600">
-                                    ${ticket.subject}
+                                    ${escapeHtml(ticket.subject)}
                                 </p>
 
                                 <p class="text-sm text-slate-500 mt-1">
-                                    ${ticket.type?.name || '-'} · ${ticket.requester?.name || '-'}
+                                    ${escapeHtml(ticket.type?.name || '-')} · ${escapeHtml(ticket.requester?.name || '-')}
                                 </p>
                             </div>
 
@@ -178,25 +250,27 @@ const loadAdminAlerts = async () => {
         </div>
     `;
 };
-const renderChart = (canvasId, labels, values, chartType = 'doughnut') => {
+
+const renderChart = (canvasId, labels, values, chartType = 'doughnut', colors = null) => {
     const ctx = document.getElementById(canvasId);
 
     if (!ctx) return;
 
-    if (canvasId === 'statusChart' && statusChartInstance) {
-        statusChartInstance.destroy();
+    if (chartInstances[canvasId]) {
+        chartInstances[canvasId].destroy();
     }
 
-    if (canvasId === 'priorityChart' && priorityChartInstance) {
-        priorityChartInstance.destroy();
-    }
+    const hasData = values.some(value => value > 0);
 
-    const chart = new Chart(ctx, {
+    chartInstances[canvasId] = new Chart(ctx, {
         type: chartType,
         data: {
-            labels,
+            labels: hasData ? labels : ['Sin datos'],
             datasets: [{
-                data: values,
+                data: hasData ? values : [1],
+                backgroundColor: hasData
+                    ? (colors || undefined)
+                    : ['#E2E8F0'],
                 borderWidth: 1
             }]
         },
@@ -204,22 +278,20 @@ const renderChart = (canvasId, labels, values, chartType = 'doughnut') => {
             responsive: true,
             plugins: {
                 legend: {
-                    position: 'bottom'
+                    position: 'bottom',
+                    display: hasData
+                },
+                tooltip: {
+                    enabled: hasData
                 }
             }
         }
     });
-
-    if (canvasId === 'statusChart') {
-        statusChartInstance = chart;
-    }
-
-    if (canvasId === 'priorityChart') {
-        priorityChartInstance = chart;
-    }
 };
+
 const renderBars = (containerId, items) => {
     const container = document.getElementById(containerId);
+    if (!container) return;
     container.innerHTML = '';
 
     if (!items || items.length === 0) {
@@ -235,7 +307,7 @@ const renderBars = (containerId, items) => {
         container.innerHTML += `
             <div>
                 <div class="flex justify-between text-sm mb-1">
-                    <span class="font-medium text-slate-700">${item.label}</span>
+                    <span class="font-medium text-slate-700">${escapeHtml(item.label)}</span>
                     <span class="font-bold">${item.total}</span>
                 </div>
 
@@ -249,7 +321,13 @@ const renderBars = (containerId, items) => {
 
 const renderLatestTickets = (tickets) => {
     const container = document.getElementById('latestTickets');
+    if (!container) return;
     container.innerHTML = '';
+
+    if (!tickets || tickets.length === 0) {
+        container.innerHTML = '<p class="text-slate-500">Sin tickets registrados</p>';
+        return;
+    }
 
     tickets.forEach(ticket => {
         container.innerHTML += `
@@ -258,10 +336,10 @@ const renderLatestTickets = (tickets) => {
 
                 <div class="flex justify-between">
                     <div>
-                        <p class="font-bold">${ticket.ticketNumber}</p>
-                        <p class="text-slate-600">${ticket.subject}</p>
+                        <p class="font-bold">${escapeHtml(ticket.ticketNumber)}</p>
+                        <p class="text-slate-600">${escapeHtml(ticket.subject)}</p>
                         <p class="text-sm text-slate-500">
-                            ${ticket.requester?.name || '-'} · ${ticket.requester?.department || 'Sin departamento'}
+                            ${escapeHtml(ticket.requester?.name || '-')} · ${escapeHtml(ticket.type?.name || '-')}
                         </p>
                     </div>
 
@@ -282,6 +360,7 @@ const renderLatestTickets = (tickets) => {
 
 const renderLatestSatisfactions = (items) => {
     const container = document.getElementById('latestSatisfactions');
+    if (!container) return;
     container.innerHTML = '';
 
     if (!items || items.length === 0) {
@@ -293,22 +372,63 @@ const renderLatestSatisfactions = (items) => {
         container.innerHTML += `
             <div class="border rounded-xl p-4">
                 <div class="flex justify-between mb-2">
-                    <p class="font-bold">${item.ticket.ticketNumber}</p>
+                    <p class="font-bold">${escapeHtml(item.ticket.ticketNumber)}</p>
                     <p class="font-bold">${'⭐'.repeat(item.rating)}</p>
                 </div>
 
-                <p class="text-slate-600">${item.ticket.subject}</p>
+                <p class="text-slate-600">${escapeHtml(item.ticket.subject)}</p>
 
                 <p class="text-sm text-slate-500 mt-1">
-                    ${item.user.name}
+                    ${escapeHtml(item.user.name)}
                 </p>
 
                 ${
                     item.comment
-                        ? `<p class="mt-2 text-sm italic text-slate-700">"${item.comment}"</p>`
+                        ? `<p class="mt-2 text-sm italic text-slate-700">"${escapeHtml(item.comment)}"</p>`
                         : ''
                 }
             </div>
+        `;
+    });
+};
+
+const renderOverdueTickets = (tickets) => {
+    const container = document.getElementById('overdueTicketsList');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (!tickets || tickets.length === 0) {
+        container.innerHTML = '<p class="text-slate-500">No hay tickets vencidos</p>';
+        return;
+    }
+
+    tickets.forEach(ticket => {
+        const color = ticket.priority?.color || '#EF4444';
+
+        container.innerHTML += `
+            <a href="ticket-detail.html?id=${ticket.id}"
+               class="block border rounded-xl p-4 hover:bg-slate-50">
+
+                <div class="flex justify-between">
+                    <div>
+                        <p class="font-bold">${escapeHtml(ticket.ticketNumber)}</p>
+                        <p class="text-slate-600">${escapeHtml(ticket.subject)}</p>
+                        <p class="text-sm text-slate-500">
+                            ${escapeHtml(ticket.assignee?.name || 'Sin asignar')}
+                        </p>
+                    </div>
+
+                    <div class="text-right">
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold text-white" style="background-color: ${escapeHtml(color)}">
+                            ${escapeHtml(ticket.priority?.name || 'Sin prioridad')}
+                        </span>
+                        <p class="text-xs text-slate-500 mt-1">
+                            Venció: ${new Date(ticket.slaDueAt).toLocaleString('es-EC')}
+                        </p>
+                    </div>
+                </div>
+
+            </a>
         `;
     });
 };
@@ -368,5 +488,5 @@ document
         exportManagementReport
     );
 
-    
+
 loadDashboard('all');

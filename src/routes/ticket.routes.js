@@ -3,7 +3,8 @@ const router = express.Router();
 
 const {
     createTicket,
-    takeTicket
+    takeTicket,
+    assignTicketPriority
 } = require('../controllers/ticket.controller');
 const {
     authenticateToken,
@@ -16,5 +17,11 @@ router.put(
     authenticateToken,
     authorizeRoles('ADMIN'),
     takeTicket
+);
+router.patch(
+    '/:id/priority',
+    authenticateToken,
+    authorizeRoles('ADMIN'),
+    assignTicketPriority
 );
 module.exports = router;

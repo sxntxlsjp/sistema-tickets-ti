@@ -4,6 +4,26 @@ const prisma = require('../config/prisma');
 const getTicketTypes = async (req, res) => {
     try {
         const ticketTypes = await prisma.ticketType.findMany({
+            include: {
+                subtypes: {
+                    select: {
+                        id: true,
+                        ticketTypeId: true,
+                        name: true,
+                        description: true,
+                        displayOrder: true,
+                        isActive: true
+                    },
+                    orderBy: [
+                        {
+                            displayOrder: 'asc'
+                        },
+                        {
+                            name: 'asc'
+                        }
+                    ]
+                }
+            },
             orderBy: {
                 name: 'asc'
             }
