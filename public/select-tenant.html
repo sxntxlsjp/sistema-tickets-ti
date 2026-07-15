@@ -4,29 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Selecciona tu empresa | MasterDiv Desk</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        'primary-navy': '#0D1B2A',
+                        'secondary-navy': '#1E293B',
+                        'primary-blue': '#2563EB',
+                        'accent-cyan': '#06B6D4',
+                        'success-green': '#10B981',
+                        surface: '#F1F5F9'
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/modal-behavior.js"></script>
+
+    <style>
+        @keyframes tenant-fade-up {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tenant-card { animation: tenant-fade-up 0.4s var(--ease-standard) both; }
+    </style>
 </head>
 
-<body class="bg-slate-100 min-h-screen">
+<body style="background-color: var(--surface-page);" class="min-h-screen">
+
+<button
+    onclick="toggleTheme()"
+    aria-label="Cambiar entre modo claro y oscuro"
+    class="btn btn-icon fixed top-5 right-5 z-10"
+    style="background-color: var(--surface-card); box-shadow: var(--shadow-sm);">
+    <i data-lucide="moon" id="selectThemeIcon"></i>
+</button>
 
 <div class="max-w-4xl mx-auto px-6 py-16">
 
     <div class="mb-10 text-center">
-        <h1 class="text-3xl font-bold text-slate-800">Selecciona tu empresa</h1>
-        <p class="text-slate-500 mt-2">
+        <span class="logo-chip mb-8" style="display: inline-flex;"><img src="assets/logo.png" alt="MasterDiv Desk" class="h-10 object-contain"></span>
+        <h1 class="text-3xl font-bold" style="color: var(--text-primary);">Selecciona tu empresa</h1>
+        <p class="field-help mt-2" style="font-size: var(--font-size-base);">
             Elige la empresa con la que quieres trabajar en MasterDiv Desk.
         </p>
     </div>
 
     <div id="tenantCards" class="grid grid-cols-1 sm:grid-cols-2 gap-5"></div>
 
-    <div id="emptyState" class="hidden text-center text-slate-500 mt-10">
-        No tienes empresas asignadas. Contacta al administrador de MasterDiv.
+    <div id="emptyState" class="hidden empty-state">
+        <i data-lucide="building-2" class="icon"></i>
+        <p class="empty-state-title">Sin empresas asignadas</p>
+        <p>Contacta al administrador de MasterDiv para obtener acceso.</p>
     </div>
 
     <div class="text-center mt-10">
-        <button onclick="logout()" class="text-sm text-slate-500 hover:text-slate-800 font-semibold">
-            Cerrar sesión
+        <button onclick="logout()" class="btn btn-ghost">
+            <i data-lucide="log-out" class="icon-sm"></i>
+            <span>Cerrar sesión</span>
         </button>
     </div>
 
@@ -35,5 +85,18 @@
 <script src="js/api.js"></script>
 <script src="js/layout.js"></script>
 <script src="js/select-tenant.js"></script>
+<script>
+    lucide.createIcons();
+
+    const syncSelectThemeIcon = () => {
+        const icon = document.getElementById('selectThemeIcon');
+        if (!icon) return;
+        icon.setAttribute('data-lucide', resolveTheme(getThemePreference()) === 'dark' ? 'sun' : 'moon');
+        lucide.createIcons();
+    };
+
+    syncSelectThemeIcon();
+    document.addEventListener('themechange', syncSelectThemeIcon);
+</script>
 </body>
 </html>

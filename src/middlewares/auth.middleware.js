@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const prisma = require('../config/prisma');
 
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -10,15 +11,39 @@ const authenticateToken = (req, res, next) => {
         });
     }
 
-    jwt.verify(token, process.env.JWT_SECRET, (error, user) => {
+    jwt.verify(token, process.env.JWT_SECRET, async (error, decoded) => {
         if (error) {
             return res.status(403).json({
                 message: 'Token inválido o expirado'
             });
         }
 
-        req.user = user;
-        next();
+        try {
+            const user = await prisma.user.findUnique({
+                where: { id: decoded.id }
+            });
+
+            if (!user || !user.isActive) {
+                return res.status(401).json({
+                    message: 'Sesión inválida'
+                });
+            }
+
+            req.user = {
+                id: user.id,
+                email: user.email,
+                role: user.role,
+                isSuperAdmin: user.isSuperAdmin
+            };
+
+            next();
+
+        } catch (dbError) {
+            console.error(dbError);
+            return res.status(500).json({
+                message: 'Error al validar la sesión'
+            });
+        }
     });
 };
 

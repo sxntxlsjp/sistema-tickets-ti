@@ -77,21 +77,24 @@ const loadCountries = async () => {
                 <td class="p-4 whitespace-nowrap">
                     ${
                         country.isActive
-                            ? '<span class="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700">Activo</span>'
-                            : '<span class="px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-700">Inactivo</span>'
+                            ? '<span class="badge badge-success">Activo</span>'
+                            : '<span class="badge badge-danger">Inactivo</span>'
                     }
                 </td>
 
                 <td class="p-4 whitespace-nowrap">
                     <button
                         onclick="openDeleteCountryModal(${country.id}, '${country.name}')"
-                        class="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700">
+                        class="btn btn-danger btn-sm">
+                        <i data-lucide="trash-2" class="icon-sm"></i>
                         Eliminar
                     </button>
                 </td>
             </tr>
         `;
     });
+
+    refreshIcons();
 };
 
 countryForm.addEventListener('submit', async (event) => {

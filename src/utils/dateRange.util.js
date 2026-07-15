@@ -1,3 +1,5 @@
+const VALID_RANGES = ['today', 'week', '7d', '30d', 'month', 'all'];
+
 const getDateRange = (range = 'all') => {
 
     const now = new Date();
@@ -12,6 +14,19 @@ const getDateRange = (range = 'all') => {
                 now.getFullYear(),
                 now.getMonth(),
                 now.getDate()
+            );
+
+            break;
+
+        case 'week':
+
+            startDate = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate()
+            );
+            startDate.setDate(
+                startDate.getDate() - startDate.getDay()
             );
 
             break;
@@ -53,5 +68,6 @@ const getDateRange = (range = 'all') => {
 };
 
 module.exports = {
-    getDateRange
+    getDateRange,
+    VALID_RANGES
 };

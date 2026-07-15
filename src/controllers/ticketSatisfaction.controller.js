@@ -1,5 +1,6 @@
 const prisma = require('../config/prisma');
 const { findTenantTicket } = require('../utils/ticketTenant.util');
+const { canAccessTicket } = require('../utils/ticketAccess.util');
 
 const createSatisfaction = async (req, res) => {
     try {
@@ -19,7 +20,7 @@ const createSatisfaction = async (req, res) => {
 
         const ticket = await findTenantTicket(ticketId, req.tenantId);
 
-        if (!ticket) {
+        if (!ticket || !canAccessTicket(req, ticket)) {
             return res.status(404).json({
                 message: 'Ticket no encontrado'
             });

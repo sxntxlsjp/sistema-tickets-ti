@@ -25,29 +25,29 @@ const loadTicketTypes = async () => {
     ticketTypesList.innerHTML = '';
 ticketTypes.forEach(type => {
     ticketTypesList.innerHTML += `
-        <div class="max-w-5xl mx-auto bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg transition">
+        <div class="max-w-5xl mx-auto card hover:shadow-lg transition">
 
             <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
 
                 <div>
                     <div class="flex flex-wrap items-center gap-3">
-                        <h4 class="text-xl font-bold text-slate-800">
+                        <h4 class="text-xl font-bold" style="color: var(--text-primary);">
                             ${type.name}
                         </h4>
 
                         ${
                             type.isActive
-                                ? '<span class="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700">Activo</span>'
-                                : '<span class="px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-700">Inactivo</span>'
+                                ? '<span class="badge badge-success">Activo</span>'
+                                : '<span class="badge badge-danger">Inactivo</span>'
                         }
                     </div>
 
-                    <p class="text-slate-500 mt-2">
+                    <p class="field-help mt-2">
                         ${type.description || 'Sin descripción'}
                     </p>
                 </div>
 
-                <div class="flex items-center gap-2 shrink-0">
+                <div class="table-actions shrink-0">
 
                     <button
                         onclick="openEditTicketTypeModal(
@@ -56,33 +56,37 @@ ticketTypes.forEach(type => {
                             '${(type.description || '').replace(/'/g, "\\'")}'
                         )"
                         title="Editar tipo"
-                        class="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
-                        ✏️
+                        aria-label="Editar tipo"
+                        class="btn btn-icon" style="background-color: rgba(37,99,235,0.12); color: var(--color-primary-blue);">
+                        <i data-lucide="pencil" class="icon-sm"></i>
                     </button>
 
                     <button
                         onclick="toggleTicketTypeStatus(${type.id}, ${type.isActive})"
                         title="${type.isActive ? 'Desactivar tipo' : 'Activar tipo'}"
-                        class="w-10 h-10 flex items-center justify-center rounded-xl bg-amber-100 text-amber-700 hover:bg-amber-200 transition">
-                        ${type.isActive ? '⏸️' : '▶️'}
+                        aria-label="${type.isActive ? 'Desactivar tipo' : 'Activar tipo'}"
+                        class="btn btn-icon" style="background-color: rgba(245,158,11,0.14); color: #B45309;">
+                        <i data-lucide="${type.isActive ? 'pause' : 'play'}" class="icon-sm"></i>
                     </button>
 
                     <button
                         onclick="openDeleteTicketTypeModal(${type.id}, '${type.name.replace(/'/g, "\\'")}')"
                         title="Eliminar tipo"
-                        class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition">
-                        🗑️
+                        aria-label="Eliminar tipo"
+                        class="btn btn-icon" style="background-color: rgba(239,68,68,0.12); color: var(--color-danger);">
+                        <i data-lucide="trash-2" class="icon-sm"></i>
                     </button>
 
                 </div>
 
             </div>
 
-            <div class="border-t pt-4">
+            <div style="border-top: 1px solid var(--border-default); padding-top: var(--space-4);">
 
                 <div class="flex items-center justify-between mb-3">
-                    <p class="text-sm font-bold text-slate-700">
-                        🛠️ Servicios afectados
+                    <p class="text-sm font-bold flex items-center gap-2" style="color: var(--text-secondary);">
+                        <i data-lucide="wrench" class="icon-sm"></i>
+                        Servicios afectados
                     </p>
                 </div>
 
@@ -91,19 +95,17 @@ ticketTypes.forEach(type => {
                         ? `
                             <div class="flex flex-wrap gap-2">
                                 ${type.subtypes.map(subtype => `
-                                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${
-                                    subtype.isActive
-                                        ? 'bg-slate-100 text-slate-700'
-                                        : 'bg-red-100 text-red-700'
-                                }">
+                                <span class="badge ${subtype.isActive ? 'badge-neutral' : 'badge-danger'}">
                                     ${subtype.name}
 
                                     <button
                                         type="button"
                                         onclick="deleteSubtype(${subtype.id}, '${subtype.name.replace(/'/g, "\\'")}')"
                                         title="Eliminar servicio afectado"
-                                        class="ml-1 text-red-600 hover:text-red-800 font-bold">
-                                        ×
+                                        aria-label="Eliminar servicio afectado"
+                                        style="color: var(--color-danger);"
+                                        class="font-bold">
+                                        <i data-lucide="x" class="icon-sm"></i>
                                     </button>
                                 </span>
                                 `).join('')}
@@ -111,22 +113,24 @@ ticketTypes.forEach(type => {
                             <button
                                 type="button"
                                 onclick="openSubtypeModal(${type.id}, '${type.name.replace(/'/g, "\\'")}')"
-                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-sky-100 text-sky-700 hover:bg-sky-200 transition">
-                                + Agregar
+                                class="badge badge-blue" style="cursor: pointer; border: none;">
+                                <i data-lucide="plus" class="icon-sm"></i>
+                                Agregar
                             </button>
                             </div>
                         `
                         : `
                             <div class="flex items-center gap-3">
-                                <p class="text-sm text-slate-400">
+                                <p class="text-sm" style="color: var(--text-muted);">
                                     Sin servicios afectados registrados
                                 </p>
 
                             <button
                                 type="button"
                                 onclick="openSubtypeModal(${type.id}, '${type.name.replace(/'/g, "\\'")}')"
-                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-sky-100 text-sky-700 hover:bg-sky-200 transition">
-                                + Agregar
+                                class="badge badge-blue" style="cursor: pointer; border: none;">
+                                <i data-lucide="plus" class="icon-sm"></i>
+                                Agregar
                             </button>
                             </div>
                         `
@@ -137,6 +141,8 @@ ticketTypes.forEach(type => {
         </div>
     `;
 });
+
+refreshIcons();
 };
 ticketTypeForm.addEventListener('submit', async (event) => {
     event.preventDefault();

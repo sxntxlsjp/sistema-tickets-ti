@@ -3,26 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Perfil | Sistema de Tickets</title>
+    <title>Mi Perfil | MasterDiv Desk</title>
 
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        'primary-navy': '#0D1B2A',
+                        'secondary-navy': '#1E293B',
+                        'primary-blue': '#2563EB',
+                        'accent-cyan': '#06B6D4',
+                        'success-green': '#10B981',
+                        surface: '#F1F5F9'
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/modal-behavior.js"></script>
 </head>
 
-<body class="bg-slate-100" data-page="profile">
+<body data-page="profile">
 
 <div class="min-h-screen">
 
     <aside id="sidebar"></aside>
 
-    <main class="flex-1 p-8 min-w-0">
+    <main class="flex-1 p-5 md:p-8 min-w-0">
 
         <div class="mb-8">
 
-            <h2 class="text-3xl font-bold text-slate-800">
+            <h2 class="text-3xl font-bold" style="color: var(--text-primary);">
                 Mi Perfil
             </h2>
 
-            <p class="text-slate-500">
+            <p class="field-help">
                 Administra tu información personal y seguridad.
             </p>
 
@@ -31,7 +61,7 @@
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
             <!-- TARJETA PERFIL -->
-            <div class="bg-white rounded-3xl shadow p-8">
+            <div class="card card-lg">
 
                 <div class="flex flex-col items-center">
 
@@ -39,12 +69,14 @@
 
                     <img
                         id="profileImage"
-                        class="hidden w-32 h-32 rounded-full object-cover border-4 border-slate-200 shadow-lg"
+                        class="hidden w-32 h-32 rounded-full object-cover border-4 shadow-lg"
+                        style="border-color: var(--surface-sunken);"
                     >
 
                     <div
                         id="profileAvatar"
-                        class="w-32 h-32 rounded-full bg-slate-800 text-white text-4xl font-bold flex items-center justify-center">
+                        class="w-32 h-32 rounded-full text-white text-4xl font-bold flex items-center justify-center"
+                        style="background-color: var(--color-primary-navy);">
                     </div>
 
                 </div>
@@ -52,8 +84,8 @@
                     <div class="flex flex-col items-center gap-3">
 
                         <label
-                            class="cursor-pointer bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition">
-
+                            class="btn btn-secondary btn-sm cursor-pointer">
+                            <i data-lucide="camera" class="icon-sm"></i>
                             Seleccionar foto
 
                             <input
@@ -65,27 +97,27 @@
 
                         <button
                             id="savePhotoBtn"
-                            class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl transition">
+                            class="hidden btn btn-success btn-sm">
                             Guardar foto
                         </button>
 
                         <p
                             id="photoUploadMessage"
-                            class="text-sm text-slate-500">
+                            class="text-sm" style="color: var(--text-muted);">
                         </p>
 
                     </div>
 
                     <h3 id="profileName"
-                        class="text-2xl font-bold text-center">
+                        class="text-2xl font-bold text-center mt-4" style="color: var(--text-primary);">
                     </h3>
 
                     <p id="profileJobTitle"
-                       class="text-slate-500 mt-2 text-center">
+                       class="field-help text-center">
                     </p>
 
                     <p id="profileDepartment"
-                       class="text-slate-400 text-sm text-center mt-1">
+                       class="text-sm text-center mt-1" style="color: var(--text-muted);">
                     </p>
 
                 </div>
@@ -93,50 +125,50 @@
             </div>
 
             <!-- DATOS -->
-            <div class="xl:col-span-2 bg-white rounded-3xl shadow p-8">
+            <div class="xl:col-span-2 card card-lg">
 
-                <h3 class="text-xl font-bold mb-6">
+                <h3 class="card-title mb-6" style="font-size: var(--font-size-base);">
                     Información Personal
                 </h3>
 
                 <form id="profileForm" class="space-y-5">
 
                     <div>
-                        <label class="block text-sm text-slate-500 mb-2">
+                        <label class="field-label">
                             Nombre completo
                         </label>
 
                         <input
                             id="name"
                             type="text"
-                            class="w-full border rounded-2xl p-4"
+                            class="input"
                         >
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
                         <div>
-                            <label class="block text-sm text-slate-500 mb-2">
+                            <label class="field-label">
                                 Departamento
                             </label>
 
                             <input
                                 id="department"
                                 type="text"
-                                class="w-full border rounded-2xl p-4"
+                                class="input"
                                 readonly
                             >
                         </div>
 
                         <div>
-                            <label class="block text-sm text-slate-500 mb-2">
+                            <label class="field-label">
                                 Cargo
                             </label>
 
                             <input
                                 id="jobTitle"
                                 type="text"
-                                class="w-full border rounded-2xl p-4"
+                                class="input"
                                 readonly
                             >
                         </div>
@@ -144,78 +176,78 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm text-slate-500 mb-2">
+                        <label class="field-label">
                             Correo electrónico
                         </label>
 
                         <input
                             id="email"
                             type="email"
-                            class="w-full border rounded-2xl p-4"
+                            class="input"
                             readonly
                         >
                     </div>
 
                     <div>
-                        <label class="block text-sm text-slate-500 mb-2">
+                        <label class="field-label">
                             Teléfono
                         </label>
 
                         <input
                             id="phone"
                             type="text"
-                            class="w-full border rounded-2xl p-4"
+                            class="input"
                         >
                     </div>
 
                     <button
                         type="submit"
-                        class="bg-slate-900 text-white px-6 py-4 rounded-2xl hover:bg-slate-800">
+                        class="btn btn-primary">
                         Guardar cambios
                     </button>
 
                 </form>
-                <hr class="my-8">
+                <hr class="my-8" style="border-color: var(--border-default);">
 
-                <h3 class="text-xl font-bold mb-6">
+                <h3 class="card-title mb-6" style="font-size: var(--font-size-base);">
                     Seguridad
                 </h3>
 
                 <form id="passwordForm" class="space-y-5">
 
                     <div>
-                        <label class="block text-sm text-slate-500 mb-2">
+                        <label class="field-label">
                             Contraseña actual
                         </label>
 
                         <input
                             id="currentPassword"
                             type="password"
-                            class="w-full border rounded-2xl p-4"
+                            class="input"
                         >
                     </div>
 
                     <div>
-                        <label class="block text-sm text-slate-500 mb-2">
+                        <label class="field-label">
                             Nueva contraseña
                         </label>
 
                         <input
                             id="newPassword"
                             type="password"
-                            class="w-full border rounded-2xl p-4"
+                            class="input"
                         >
                     </div>
 
                     <div>
-                        <label class="block text-sm text-slate-500 mb-2">
+                        <label class="field-label">
                             Confirmar nueva contraseña
                         </label>
 
                         <input
                             id="confirmPassword"
                             type="password"
-                            class="w-full border rounded-2xl p-4"
+                            class="input"
                         >
                     </div>
 
@@ -226,7 +258,7 @@
 
                     <button
                         type="submit"
-                        class="bg-indigo-600 text-white px-6 py-4 rounded-2xl hover:bg-indigo-700">
+                        class="btn" style="background-color: var(--color-secondary-navy); color: #fff;">
                         Actualizar contraseña
                     </button>
 
@@ -245,6 +277,7 @@
 
 <script>
     renderLayout('profile');
+    lucide.createIcons();
 </script>
 
 </body>

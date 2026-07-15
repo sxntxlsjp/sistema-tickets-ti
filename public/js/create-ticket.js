@@ -397,48 +397,6 @@ showSuccessTicketModal(data.ticket);
 
 
 
-const renderMenu = () => {
-    const menu = document.getElementById('sidebarMenu');
-
-    if (!menu) return;
-
-    if (user.role === 'ADMIN') {
-        menu.innerHTML = `
-            <a href="dashboard.html" class="block hover:bg-slate-800 px-4 py-3 rounded-xl">
-                Dashboard
-            </a>
-
-            <a href="tickets.html" class="block hover:bg-slate-800 px-4 py-3 rounded-xl">
-                Tickets
-            </a>
-
-            <a href="create-ticket.html" class="block bg-slate-800 px-4 py-3 rounded-xl">
-                Nuevo Ticket
-            </a>
-            <a href="users.html" class="block hover:bg-slate-800 px-4 py-3 rounded-xl">
-                Usuarios
-            </a>
-            <button onclick="logout()" class="w-full text-left hover:bg-red-600 px-4 py-3 rounded-xl">
-                Cerrar sesión
-            </button>
-        `;
-    } else {
-        menu.innerHTML = `
-            <a href="tickets.html" class="block hover:bg-slate-800 px-4 py-3 rounded-xl">
-                Mis Tickets
-            </a>
-
-            <a href="create-ticket.html" class="block bg-slate-800 px-4 py-3 rounded-xl">
-                Crear Ticket
-            </a>
-
-            <button onclick="logout()" class="w-full text-left hover:bg-red-600 px-4 py-3 rounded-xl">
-                Cerrar sesión
-            </button>
-        `;
-    }
-};
-
 const loadCountries = async () => {
     try {
         const response = await fetch(
@@ -470,7 +428,6 @@ const loadCountries = async () => {
     }
 };
 
-renderMenu();
 loadTicketTypes();
 loadSupportUsers();
 loadCountries();

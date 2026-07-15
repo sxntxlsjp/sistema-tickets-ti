@@ -1,5 +1,6 @@
 const loginForm = document.getElementById('loginForm');
 const errorMessage = document.getElementById('errorMessage');
+const loginSubmitBtn = document.getElementById('loginSubmitBtn');
 
 if (loginForm) {
     loginForm.addEventListener('submit', async (event) => {
@@ -7,6 +8,8 @@ if (loginForm) {
 
         errorMessage.classList.add('hidden');
         errorMessage.textContent = '';
+        loginSubmitBtn?.classList.add('btn-loading');
+        loginSubmitBtn?.setAttribute('disabled', 'true');
 
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
@@ -53,6 +56,9 @@ if (loginForm) {
         } catch (error) {
             errorMessage.textContent = 'No se pudo conectar con el servidor';
             errorMessage.classList.remove('hidden');
+        } finally {
+            loginSubmitBtn?.classList.remove('btn-loading');
+            loginSubmitBtn?.removeAttribute('disabled');
         }
     });
 }

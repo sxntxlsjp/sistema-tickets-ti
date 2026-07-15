@@ -3,60 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuración | Sistema de Tickets</title>
+    <title>Configuración | MasterDiv Desk</title>
 
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        'primary-navy': '#0D1B2A',
+                        'secondary-navy': '#1E293B',
+                        'primary-blue': '#2563EB',
+                        'accent-cyan': '#06B6D4',
+                        'success-green': '#10B981',
+                        surface: '#F1F5F9'
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/modal-behavior.js"></script>
 </head>
 
-<body class="bg-slate-100" data-page="settings">
+<body data-page="settings">
 
 <div class="min-h-screen">
 
     <aside id="sidebar"></aside>
 
-    <main class="p-8 min-w-0">
+    <main class="p-5 md:p-8 min-w-0">
 
         <div class="mb-8">
-            <h2 class="text-3xl font-bold text-slate-800">
+            <h2 class="text-3xl font-bold" style="color: var(--text-primary);">
                 Configuración del Sistema
             </h2>
 
-            <p class="text-slate-500">
+            <p class="field-help">
                 Administra el comportamiento general de la plataforma.
             </p>
         </div>
 
-        <div class="bg-white rounded-2xl shadow p-8">
+        <div class="card card-lg">
 
-            <h3 class="text-xl font-bold mb-6">
+            <h3 class="card-title mb-6" style="font-size: var(--font-size-base);">
                 Configuración General
             </h3>
 
-            <div class="flex items-center justify-between border rounded-2xl p-6">
+            <div class="flex items-center justify-between rounded-2xl p-6" style="border: 1px solid var(--border-default);">
 
                 <div>
 
-                    <h4 class="font-semibold text-lg">
+                    <h4 class="font-semibold text-lg" style="color: var(--text-primary);">
                         Mostrar campo Prioridad
                     </h4>
 
-                    <p class="text-slate-500 mt-1">
+                    <p class="field-help mt-1">
                         Permite que el usuario seleccione la prioridad al crear un ticket.
                     </p>
 
                 </div>
 
-                <label class="relative inline-flex items-center cursor-pointer">
-
+                <label class="switch">
                     <input
                         type="checkbox"
-                        id="showPriorityField"
-                        class="sr-only peer">
-
-                    <div class="w-14 h-8 bg-slate-300 rounded-full peer peer-checked:bg-green-500 transition-all"></div>
-
-                    <div class="absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-all peer-checked:translate-x-6"></div>
-
+                        id="showPriorityField">
+                    <span class="switch-track"></span>
+                    <span class="switch-thumb"></span>
                 </label>
 
             </div>
@@ -73,6 +98,7 @@
 
 <script>
     renderLayout('settings');
+    lucide.createIcons();
 </script>
 
 </body>

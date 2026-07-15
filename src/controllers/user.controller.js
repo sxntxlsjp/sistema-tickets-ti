@@ -212,15 +212,20 @@ const updateUser = async (req, res) => {
             });
         }
 
+        // Identidad global (nombre, correo) solo la puede modificar un Super Administrador.
+        // Un TENANT_ADMIN solo administra datos de contexto laboral dentro de su empresa.
+        const globalIdentityData = req.user.isSuperAdmin
+            ? { name, email }
+            : {};
+
         const updatedUser = await prisma.user.update({
             where: {
                 id: userId
             },
             data: {
-                name,
+                ...globalIdentityData,
                 department,
                 jobTitle,
-                email,
                 phone
             },
             select: {
@@ -286,6 +291,21 @@ const resetUserPassword = async (req, res) => {
             return res.status(404).json({
                 message: 'Usuario no encontrado en esta empresa'
             });
+        }
+
+        // La contraseña es identidad global (compartida entre empresas si el usuario
+        // pertenece a varias). Un TENANT_ADMIN solo puede resetearla si el usuario
+        // es exclusivo de su empresa; si pertenece a otras, solo el Super Administrador puede.
+        if (!req.user.isSuperAdmin) {
+            const membershipCount = await prisma.tenantUser.count({
+                where: { userId, isActive: true }
+            });
+
+            if (membershipCount > 1) {
+                return res.status(403).json({
+                    message: 'Este usuario pertenece a varias empresas; solo un Super Administrador puede restablecer su contraseña'
+                });
+            }
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);

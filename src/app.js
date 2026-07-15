@@ -13,6 +13,7 @@ const ticketDetailRoutes = require('./routes/ticketDetail.routes');
 const path = require('path');
 const fs = require('fs');
 const ticketAttachmentRoutes = require('./routes/ticketAttachment.routes');
+const ticketAttachmentDownloadRoutes = require('./routes/ticketAttachmentDownload.routes');
 const ticketSatisfactionRoutes = require('./routes/ticketSatisfaction.routes');
 const ticketAssignRoutes = require('./routes/ticketAssign.routes');
 const profileRoutes = require('./routes/profile.routes');
@@ -33,29 +34,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
-app.use(express.static(path.join(__dirname, '../public')));
 app.use(
     '/uploads/profiles',
     express.static(profileUploadsPath)
 );
-
-app.use(
-    '/uploads',
-    express.static(ticketUploadsPath)
-);
-
-app.get('/debug/uploads', (req, res) => {
-    res.json({
-        ticketUploadsPath,
-        profileUploadsPath,
-        ticketFiles: fs.existsSync(ticketUploadsPath)
-            ? fs.readdirSync(ticketUploadsPath)
-            : [],
-        profileFiles: fs.existsSync(profileUploadsPath)
-            ? fs.readdirSync(profileUploadsPath)
-            : []
-    });
-});
 
 app.get('/', (req, res) => {
     res.json({
@@ -67,13 +49,13 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/ticket-types', ticketTypeRoutes);
 app.use('/api/tickets', ticketRoutes);
-app.use('/api/tickets', ticketRoutes);
 app.use('/api/tickets', ticketListRoutes);
 app.use('/api/tickets', ticketStatusRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/tickets', ticketCommentRoutes);
 app.use('/api/tickets', ticketDetailRoutes);
 app.use('/api/tickets', ticketAttachmentRoutes);
+app.use('/api/ticket-attachments', ticketAttachmentDownloadRoutes);
 app.use('/api/tickets', ticketSatisfactionRoutes);
 app.use('/api/tickets', ticketAssignRoutes);
 app.use('/api/profile', profileRoutes);

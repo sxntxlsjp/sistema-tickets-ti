@@ -3,31 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tipos de Ticket | Sistema de Tickets</title>
+    <title>Tipos de Ticket | MasterDiv Desk</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        'primary-navy': '#0D1B2A',
+                        'secondary-navy': '#1E293B',
+                        'primary-blue': '#2563EB',
+                        'accent-cyan': '#06B6D4',
+                        'success-green': '#10B981',
+                        surface: '#F1F5F9'
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/modal-behavior.js"></script>
 </head>
 
-<body class="bg-slate-100" data-page="ticket-types">
+<body data-page="ticket-types">
 
 <div class="min-h-screen">
 
     <aside id="sidebar"></aside>
 
-    <main class="p-8 min-w-0">
+    <main class="p-5 md:p-8 min-w-0">
 
         <div class="mb-8">
-            <h2 class="text-3xl font-bold text-slate-800">
+            <h2 class="text-3xl font-bold" style="color: var(--text-primary);">
                 Tipos de Ticket
             </h2>
-            <p class="text-slate-500">
+            <p class="field-help">
                 Administra los tipos disponibles para la creación de tickets
             </p>
         </div>
 
         <div class="space-y-6">
 
-            <div class="bg-white rounded-2xl shadow p-6">
-                <h3 class="text-xl font-bold mb-4">
+            <div class="card">
+                <h3 class="card-title mb-4" style="font-size: var(--font-size-base);">
                     Nuevo Tipo de Ticket
                 </h3>
 
@@ -36,7 +66,7 @@
                         id="name"
                         type="text"
                         placeholder="Nombre del tipo"
-                        class="w-full border rounded-xl p-3"
+                        class="input"
                         required
                     >
 
@@ -44,23 +74,24 @@
                         id="description"
                         type="text"
                         placeholder="Descripción"
-                        class="w-full border rounded-xl p-3 md:col-span-1"
+                        class="input md:col-span-1"
                     >
 
                     <button
-                        class="w-full bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800">
+                        class="btn btn-primary btn-block">
+                        <i data-lucide="plus" class="icon-sm"></i>
                         Crear Tipo
                     </button>
                 </form>
             </div>
 
-            <div class="bg-white rounded-2xl shadow p-6">
+            <div class="card">
                 <div class="flex justify-between items-center mb-5">
                     <div>
-                        <h3 class="text-xl font-bold">
+                        <h3 class="card-title" style="font-size: var(--font-size-base);">
                             Tipos Registrados
                         </h3>
-                        <p class="text-slate-500 text-sm">
+                        <p class="field-help">
                             Gestión de tipos activos e inactivos para tickets
                         </p>
                     </div>
@@ -74,150 +105,160 @@
     </main>
 
 </div>
-<div id="editTicketTypeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg">
+<div id="editTicketTypeModal" class="hidden modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50">
+    <div class="modal-panel">
+        <div class="modal-body">
 
-        <h3 class="text-2xl font-bold mb-5">Editar Tipo de Ticket</h3>
+            <h3 class="text-2xl font-bold mb-5" style="color: var(--text-primary);">Editar Tipo de Ticket</h3>
 
-        <input type="hidden" id="editTicketTypeId">
+            <input type="hidden" id="editTicketTypeId">
 
-        <div class="space-y-4">
-            <input
-                id="editTicketTypeName"
-                type="text"
-                placeholder="Nombre del tipo"
-                class="w-full border rounded-xl p-3"
-            >
+            <div class="space-y-4">
+                <input
+                    id="editTicketTypeName"
+                    type="text"
+                    placeholder="Nombre del tipo"
+                    class="input"
+                >
 
-            <textarea
-                id="editTicketTypeDescription"
-                rows="4"
-                placeholder="Descripción"
-                class="w-full border rounded-xl p-3"
-            ></textarea>
+                <textarea
+                    id="editTicketTypeDescription"
+                    rows="4"
+                    placeholder="Descripción"
+                    class="textarea"
+                ></textarea>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="closeEditTicketTypeModal()" class="btn btn-outline">
+                    Cancelar
+                </button>
+
+                <button onclick="saveTicketTypeChanges()" class="btn btn-primary">
+                    Guardar cambios
+                </button>
+            </div>
+
         </div>
-
-        <div class="flex justify-end gap-3 mt-6">
-            <button onclick="closeEditTicketTypeModal()" class="px-4 py-2 border rounded-xl">
-                Cancelar
-            </button>
-
-            <button onclick="saveTicketTypeChanges()" class="px-4 py-2 bg-slate-900 text-white rounded-xl">
-                Guardar cambios
-            </button>
-        </div>
-
     </div>
 </div>
 
-<div id="successTicketTypeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
-    <div id="successTicketTypeModalContent" class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md text-center transform scale-95 opacity-0 transition-all duration-300">
+<div id="successTicketTypeModal" class="hidden modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50">
+    <div id="successTicketTypeModalContent" class="modal-panel text-center" style="max-width: 28rem;">
+        <div class="modal-body">
 
-        <div class="w-20 h-20 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-4xl mx-auto mb-5">
-            ✓
-        </div>
+            <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style="background-color: rgba(16,185,129,0.14); color: var(--color-success-green);">
+                <i data-lucide="check" class="icon-lg"></i>
+            </div>
 
             <h3
                 id="successTicketTypeTitle"
-                class="text-2xl font-bold text-slate-800 mb-2">
+                class="text-2xl font-bold mb-2" style="color: var(--text-primary);">
                 Operación realizada correctamente
             </h3>
 
-        <p id="successTicketTypeText" class="text-slate-500 mb-6">
-            El tipo de ticket fue creado correctamente.
-        </p>
-
-        <button
-            onclick="closeSuccessTicketTypeModal()"
-            class="w-full bg-slate-900 text-white py-3 rounded-2xl hover:bg-slate-800">
-            Entendido
-        </button>
-
-    </div>
-</div>
-<div id="deleteTicketTypeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
-    <div id="deleteTicketTypeModalContent" class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md transform scale-95 opacity-0 transition-all duration-300">
-
-        <h3 class="text-2xl font-bold text-slate-800 mb-2">
-            Eliminar tipo de ticket
-        </h3>
-
-        <p id="deleteTicketTypeText" class="text-slate-500 mb-6"></p>
-
-        <input type="hidden" id="deleteTicketTypeId">
-
-        <div class="flex justify-end gap-3">
-            <button
-                onclick="closeDeleteTicketTypeModal()"
-                class="px-5 py-3 border rounded-xl hover:bg-slate-50">
-                Cancelar
-            </button>
+            <p id="successTicketTypeText" class="field-help mb-6">
+                El tipo de ticket fue creado correctamente.
+            </p>
 
             <button
-                onclick="confirmDeleteTicketType()"
-                class="px-5 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700">
-                Eliminar
+                onclick="closeSuccessTicketTypeModal()"
+                class="btn btn-primary btn-block">
+                Entendido
             </button>
-        </div>
 
+        </div>
     </div>
 </div>
+<div id="deleteTicketTypeModal" class="hidden modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50">
+    <div id="deleteTicketTypeModalContent" class="modal-panel" style="max-width: 28rem;">
+        <div class="modal-body">
 
-<div id="errorTicketTypeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
-    <div id="errorTicketTypeModalContent" class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md text-center transform scale-95 opacity-0 transition-all duration-300">
+            <h3 class="text-2xl font-bold mb-2" style="color: var(--text-primary);">
+                Eliminar tipo de ticket
+            </h3>
 
-        <div class="w-20 h-20 bg-red-100 text-red-700 rounded-full flex items-center justify-center text-4xl mx-auto mb-5">
-            !
+            <p id="deleteTicketTypeText" class="field-help mb-6"></p>
+
+            <input type="hidden" id="deleteTicketTypeId">
+
+            <div class="flex justify-end gap-3">
+                <button
+                    onclick="closeDeleteTicketTypeModal()"
+                    class="btn btn-outline">
+                    Cancelar
+                </button>
+
+                <button
+                    onclick="confirmDeleteTicketType()"
+                    class="btn btn-danger">
+                    Eliminar
+                </button>
+            </div>
+
         </div>
-
-        <h3 class="text-2xl font-bold text-slate-800 mb-2">
-            No se pudo completar la acción
-        </h3>
-
-        <p id="errorTicketTypeText" class="text-slate-500 mb-6"></p>
-
-        <button
-            onclick="closeErrorTicketTypeModal()"
-            class="w-full bg-slate-900 text-white py-3 rounded-2xl hover:bg-slate-800">
-            Entendido
-        </button>
-
     </div>
 </div>
 
-<div id="subtypeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
-    <div id="subtypeModalContent" class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md transform scale-95 opacity-0 transition-all duration-300">
+<div id="errorTicketTypeModal" class="hidden modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50">
+    <div id="errorTicketTypeModalContent" class="modal-panel text-center" style="max-width: 28rem;">
+        <div class="modal-body">
 
-        <h3 class="text-2xl font-bold text-slate-800 mb-2">
-            Agregar servicio afectado
-        </h3>
+            <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style="background-color: rgba(239,68,68,0.14); color: var(--color-danger);">
+                <i data-lucide="alert-triangle" class="icon-lg"></i>
+            </div>
 
-        <p id="subtypeModalText" class="text-slate-500 mb-6"></p>
+            <h3 class="text-2xl font-bold mb-2" style="color: var(--text-primary);">
+                No se pudo completar la acción
+            </h3>
 
-        <input type="hidden" id="subtypeTicketTypeId">
-
-        <input
-            id="subtypeName"
-            type="text"
-            placeholder="Nombre del servicio afectado"
-            class="w-full border rounded-xl p-3 mb-5"
-            required
-        >
-
-        <div class="flex justify-end gap-3">
-            <button
-                onclick="closeSubtypeModal()"
-                class="px-5 py-3 border rounded-xl hover:bg-slate-50">
-                Cancelar
-            </button>
+            <p id="errorTicketTypeText" class="field-help mb-6"></p>
 
             <button
-                onclick="saveSubtype()"
-                class="px-5 py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800">
-                Guardar
+                onclick="closeErrorTicketTypeModal()"
+                class="btn btn-primary btn-block">
+                Entendido
             </button>
+
         </div>
+    </div>
+</div>
 
+<div id="subtypeModal" class="hidden modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50">
+    <div id="subtypeModalContent" class="modal-panel" style="max-width: 28rem;">
+        <div class="modal-body">
+
+            <h3 class="text-2xl font-bold mb-2" style="color: var(--text-primary);">
+                Agregar servicio afectado
+            </h3>
+
+            <p id="subtypeModalText" class="field-help mb-6"></p>
+
+            <input type="hidden" id="subtypeTicketTypeId">
+
+            <input
+                id="subtypeName"
+                type="text"
+                placeholder="Nombre del servicio afectado"
+                class="input mb-5"
+                required
+            >
+
+            <div class="flex justify-end gap-3">
+                <button
+                    onclick="closeSubtypeModal()"
+                    class="btn btn-outline">
+                    Cancelar
+                </button>
+
+                <button
+                    onclick="saveSubtype()"
+                    class="btn btn-primary">
+                    Guardar
+                </button>
+            </div>
+
+        </div>
     </div>
 </div>
 
@@ -227,6 +268,7 @@
 
 <script>
     renderLayout('ticket-types');
+    lucide.createIcons();
 </script>
 
 </body>

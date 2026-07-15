@@ -18,6 +18,11 @@ src/uploads/*
 # Graphify
 graphify-out/
 
-# Branding temporal
-Branding.png
-logo.png
+# Branding original en raíz
+/Branding.png
+/logo.png
+/Favicon.png
+
+# Assets definitivos sí deben versionarse
+!public/assets/logo.png
+!public/assets/favicon.png

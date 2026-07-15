@@ -81,51 +81,47 @@ users.forEach(item => {
             </td>
 
             <td class="p-4 whitespace-nowrap">
-                <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                    item.role === 'ADMIN'
-                        ? 'bg-slate-900 text-white'
-                        : 'bg-blue-100 text-blue-700'
-                }">
+                <span class="badge ${item.role === 'ADMIN' ? 'badge-navy' : 'badge-blue'}">
                     ${item.role === 'ADMIN' ? 'Administrador' : 'Usuario'}
                 </span>
             </td>
 
             <td class="p-4 whitespace-nowrap">
-                <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                    item.isActive
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
-                }">
+                <span class="badge ${item.isActive ? 'badge-success' : 'badge-danger'}">
                     ${item.isActive ? 'Activo' : 'Inactivo'}
                 </span>
             </td>
 
             <td class="p-4 whitespace-nowrap">
-                <div class="flex gap-2">
+                <div class="table-actions">
 
                     <button
                         onclick="editUser(${item.id})"
                         title="Editar usuario"
-                        class="w-9 h-9 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">
-                        ✏️
+                        aria-label="Editar usuario"
+                        class="btn btn-icon btn-icon-sm" style="background-color: rgba(37,99,235,0.12); color: var(--color-primary-blue);">
+                        <i data-lucide="pencil" class="icon-sm"></i>
                     </button>
 
                     <button
                         onclick="resetPassword(${item.id})"
                         title="Resetear contraseña"
-                        class="w-9 h-9 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200">
-                        🔑
+                        aria-label="Resetear contraseña"
+                        class="btn btn-icon btn-icon-sm" style="background-color: rgba(245,158,11,0.14); color: #B45309;">
+                        <i data-lucide="key-round" class="icon-sm"></i>
                     </button>
 
                     <button
                         onclick="toggleUser(${item.id})"
                         title="${item.isActive ? 'Desactivar usuario' : 'Activar usuario'}"
-                        class="w-9 h-9 ${
+                        aria-label="${item.isActive ? 'Desactivar usuario' : 'Activar usuario'}"
+                        class="btn btn-icon btn-icon-sm"
+                        style="${
                             item.isActive
-                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                : 'bg-green-100 text-green-700 hover:bg-green-200'
-                        } rounded-lg">
-                        ${item.isActive ? '🚫' : '✅'}
+                                ? 'background-color: rgba(239,68,68,0.12); color: var(--color-danger);'
+                                : 'background-color: rgba(16,185,129,0.14); color: var(--color-success-green);'
+                        }">
+                        <i data-lucide="${item.isActive ? 'ban' : 'check'}" class="icon-sm"></i>
                     </button>
 
                 </div>
@@ -134,6 +130,8 @@ users.forEach(item => {
         </tr>
     `;
 });
+
+refreshIcons();
 };
 
 userForm.addEventListener('submit', async (event) => {
@@ -320,8 +318,8 @@ const toggleUser = (userId) => {
 
     button.className =
         user.isActive
-            ? 'px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl'
-            : 'px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl';
+            ? 'btn btn-danger'
+            : 'btn btn-success';
 
     document.getElementById('statusModal').classList.remove('hidden');
 };

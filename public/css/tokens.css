@@ -1,0 +1,141 @@
+/*
+  MasterDiv Desk — Design Tokens (Fase 1)
+  Fuente única de verdad para colores, tipografía, espaciados,
+  bordes, sombras, duraciones y capas (z-index).
+*/
+
+:root {
+    /* === Paleta oficial === */
+    --color-primary-navy: #0D1B2A;
+    --color-secondary-navy: #1E293B;
+    --color-primary-blue: #2563EB;
+    --color-accent-cyan: #06B6D4;
+    --color-success-green: #10B981;
+    --color-surface: #F1F5F9;
+
+    /* Derivados de estado (misma identidad, no colores arbitrarios) */
+    --color-warning: #F59E0B;
+    --color-danger: #EF4444;
+    --color-info: var(--color-accent-cyan);
+
+    /* Superficies y texto (modo claro) */
+    --surface-page: var(--color-surface);
+    --surface-card: #FFFFFF;
+    --surface-card-alt: #F8FAFC;
+    --surface-sunken: #EEF2F7;
+    --surface-overlay: rgba(13, 27, 42, 0.55);
+
+    --text-primary: var(--color-primary-navy);
+    --text-secondary: #475569;
+    --text-muted: #64748B;
+    --text-inverse: #FFFFFF;
+    --text-link: var(--color-primary-blue);
+
+    --border-default: #E2E8F0;
+    --border-strong: #CBD5E1;
+    --border-focus: var(--color-primary-blue);
+
+    /* === Tipografía === */
+    --font-family-base: 'Poppins', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+    --font-weight-light: 300;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+
+    /* === Espaciado (escala base 4px) === */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+
+    /* === Bordes / Radius === */
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.25rem;
+    --radius-2xl: 1.5rem;
+    --radius-full: 9999px;
+
+    /* === Sombras === */
+    --shadow-sm: 0 1px 2px 0 rgba(13, 27, 42, 0.06);
+    --shadow-md: 0 4px 12px -2px rgba(13, 27, 42, 0.10), 0 2px 4px -2px rgba(13, 27, 42, 0.06);
+    --shadow-lg: 0 12px 24px -6px rgba(13, 27, 42, 0.14), 0 4px 8px -4px rgba(13, 27, 42, 0.08);
+    --shadow-focus: 0 0 0 3px rgba(37, 99, 235, 0.35);
+
+    /* === Interacción === */
+    --opacity-disabled: 0.5;
+    --opacity-hover-overlay: 0.08;
+    --opacity-active-overlay: 0.14;
+
+    /* === Duraciones / easing === */
+    --duration-fast: 120ms;
+    --duration-base: 200ms;
+    --duration-slow: 320ms;
+    --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* === Capas === */
+    --z-dropdown: 30;
+    --z-sticky: 40;
+    --z-modal-overlay: 50;
+    --z-modal: 51;
+    --z-toast: 60;
+}
+
+/* === Modo oscuro === */
+:root[data-theme="dark"] {
+    --surface-page: #0B1420;
+    --surface-card: #101C2C;
+    --surface-card-alt: #162335;
+    --surface-sunken: #0C1826;
+    --surface-overlay: rgba(2, 6, 12, 0.7);
+
+    --text-primary: #F1F5F9;
+    --text-secondary: #CBD5E1;
+    --text-muted: #8CA0B3;
+    --text-inverse: #0D1B2A;
+    --text-link: #60A5FA;
+
+    --border-default: #22324A;
+    --border-strong: #2E4361;
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.45), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 12px 24px -6px rgba(0, 0, 0, 0.55), 0 4px 8px -4px rgba(0, 0, 0, 0.35);
+}
+
+/* Preferencia de sistema cuando el usuario no ha elegido explícitamente */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]):not([data-theme="dark"]) {
+        --surface-page: #0B1420;
+        --surface-card: #101C2C;
+        --surface-card-alt: #162335;
+        --surface-sunken: #0C1826;
+        --surface-overlay: rgba(2, 6, 12, 0.7);
+        --text-primary: #F1F5F9;
+        --text-secondary: #CBD5E1;
+        --text-muted: #8CA0B3;
+        --text-inverse: #0D1B2A;
+        --text-link: #60A5FA;
+        --border-default: #22324A;
+        --border-strong: #2E4361;
+    }
+}
+
+html, body {
+    font-family: var(--font-family-base);
+    background-color: var(--surface-page);
+    color: var(--text-primary);
+}

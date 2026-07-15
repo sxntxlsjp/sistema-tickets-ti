@@ -3,62 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inicio | Sistema de Tickets</title>
+    <title>Inicio | MasterDiv Desk</title>
 
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        'primary-navy': '#0D1B2A',
+                        'secondary-navy': '#1E293B',
+                        'primary-blue': '#2563EB',
+                        'accent-cyan': '#06B6D4',
+                        'success-green': '#10B981',
+                        surface: '#F1F5F9'
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/modal-behavior.js"></script>
 </head>
 
-<body class="bg-slate-100" data-page="user-home">
+<body data-page="user-home">
 
 <div class="min-h-screen">
 
 <aside id="sidebar"></aside>
 
-    <main class="flex-1 p-8 min-w-0">
+    <main class="flex-1 p-5 md:p-8 min-w-0">
 
         <div class="mb-8">
 
-            <h2 class="text-3xl font-bold text-slate-800">
+            <h2 class="text-3xl font-bold" style="color: var(--text-primary);">
                 Bienvenido
             </h2>
 
             <p id="userName"
-               class="text-slate-500 mt-2">
+               class="field-help mt-2">
             </p>
 
         </div>
 
         <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 
-            <div class="bg-white p-6 rounded-2xl shadow">
-                <p class="text-slate-500">Mis Tickets</p>
+            <div class="kpi-card">
+                <p class="kpi-label">Mis Tickets</p>
                 <h3 id="totalTickets"
-                    class="text-4xl font-bold mt-2">
+                    class="kpi-value">
                     0
                 </h3>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow">
-                <p class="text-slate-500">Pendientes</p>
+            <div class="kpi-card">
+                <p class="kpi-label">Pendientes</p>
                 <h3 id="pendingTickets"
-                    class="text-4xl font-bold mt-2">
+                    class="kpi-value" style="color: var(--color-warning);">
                     0
                 </h3>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow">
-                <p class="text-slate-500">Finalizados</p>
+            <div class="kpi-card">
+                <p class="kpi-label">Finalizados</p>
                 <h3 id="closedTickets"
-                    class="text-4xl font-bold mt-2">
+                    class="kpi-value" style="color: var(--color-success-green);">
                     0
                 </h3>
             </div>
 
         </section>
 
-        <section class="bg-white rounded-2xl shadow p-6">
+        <section class="card">
 
-            <h3 class="text-xl font-bold mb-4">
+            <h3 class="card-title mb-4" style="font-size: var(--font-size-base);">
                 Mis últimos tickets
             </h3>
 
@@ -76,6 +106,7 @@
 <script src="js/user-home.js"></script>
 <script>
     renderLayout('user-home');
+    lucide.createIcons();
 </script>
 </body>
 </html>

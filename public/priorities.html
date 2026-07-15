@@ -3,34 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prioridades | Sistema de Tickets</title>
-
+    <title>Prioridades | MasterDiv Desk</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        'primary-navy': '#0D1B2A',
+                        'secondary-navy': '#1E293B',
+                        'primary-blue': '#2563EB',
+                        'accent-cyan': '#06B6D4',
+                        'success-green': '#10B981',
+                        surface: '#F1F5F9'
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/modal-behavior.js"></script>
 </head>
 
-<body class="bg-slate-100" data-page="priorities">
+<body data-page="priorities">
 
 <div class="min-h-screen">
 
     <aside id="sidebar"></aside>
 
-    <main class="p-8 min-w-0">
+    <main class="p-5 md:p-8 min-w-0">
 
         <div class="mb-8">
-            <h2 class="text-3xl font-bold text-slate-800">
+            <h2 class="text-3xl font-bold" style="color: var(--text-primary);">
                 Registro de Prioridades
             </h2>
 
-            <p class="text-slate-500">
+            <p class="field-help">
                 Administra las prioridades utilizadas para el cálculo dinámico del SLA.
             </p>
         </div>
 
         <div class="space-y-6">
 
-            <div class="bg-white rounded-2xl shadow p-6">
+            <div class="card">
 
-                <h3 class="text-xl font-bold mb-4">
+                <h3 class="card-title mb-4" style="font-size: var(--font-size-base);">
                     Nueva Prioridad
                 </h3>
 
@@ -42,7 +71,7 @@
                         id="name"
                         type="text"
                         placeholder="Nombre"
-                        class="border rounded-xl p-3"
+                        class="input"
                         required
                     >
 
@@ -50,7 +79,7 @@
                         id="description"
                         type="text"
                         placeholder="Descripción"
-                        class="border rounded-xl p-3"
+                        class="input"
                     >
 
                     <div class="grid grid-cols-2 gap-2">
@@ -59,13 +88,13 @@
                             type="number"
                             min="1"
                             placeholder="Tiempo"
-                            class="border rounded-xl p-3"
+                            class="input"
                             required
                         >
 
                         <select
                             id="slaUnit"
-                            class="border rounded-xl p-3"
+                            class="select"
                             required
                         >
                             <option value="minutes">Minutos</option>
@@ -78,7 +107,7 @@
                         id="color"
                         type="color"
                         value="#EF4444"
-                        class="border rounded-xl p-2 h-[52px]"
+                        class="input" style="padding: 4px; height: 44px;"
                     >
 
                     <input
@@ -87,11 +116,12 @@
                         value="1"
                         min="1"
                         placeholder="Orden"
-                        class="border rounded-xl p-3"
+                        class="input"
                     >
 
                     <button
-                        class="w-full bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800">
+                        class="btn btn-primary btn-block">
+                        <i data-lucide="plus" class="icon-sm"></i>
                         Crear
                     </button>
 
@@ -99,17 +129,17 @@
 
             </div>
 
-            <div class="bg-white rounded-2xl shadow p-6">
+            <div class="card">
 
                 <div class="flex justify-between items-center mb-5">
 
                     <div>
 
-                        <h3 class="text-xl font-bold">
+                        <h3 class="card-title" style="font-size: var(--font-size-base);">
                             Prioridades Registradas
                         </h3>
 
-                        <p class="text-slate-500 text-sm">
+                        <p class="field-help">
                             Gestión del catálogo de prioridades del sistema.
                         </p>
 
@@ -117,27 +147,26 @@
 
                 </div>
 
-                <div class="w-full overflow-x-auto">
+                <div class="table-wrap">
 
-                    <table class="min-w-[1200px] w-full text-left text-sm">
+                    <table class="table min-w-[1200px]">
 
-                        <thead class="bg-slate-900 text-white">
+                        <thead>
 
                             <tr>
 
-                                <th class="p-4">Nombre</th>
-                                <th class="p-4">Descripción</th>
-                                <th class="p-4">SLA</th>
-                                
-                                <th class="p-4">Orden</th>
-                                <th class="p-4">Estado</th>
-                                <th class="p-4">Acciones</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>SLA</th>
+                                <th>Orden</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
 
                             </tr>
 
                         </thead>
 
-                        <tbody id="prioritiesList" class="divide-y"></tbody>
+                        <tbody id="prioritiesList"></tbody>
 
                     </table>
 
@@ -150,145 +179,153 @@
     </main>
 
 </div>
-<div id="editPriorityModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg">
+<div id="editPriorityModal" class="hidden modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50">
+    <div class="modal-panel">
+        <div class="modal-body">
 
-        <h3 class="text-2xl font-bold mb-5">
-            Editar Prioridad
-        </h3>
+            <h3 class="text-2xl font-bold mb-5" style="color: var(--text-primary);">
+                Editar Prioridad
+            </h3>
 
-        <input type="hidden" id="editPriorityId">
+            <input type="hidden" id="editPriorityId">
 
-        <div class="space-y-4">
-            <input
-                id="editPriorityName"
-                type="text"
-                placeholder="Nombre"
-                class="w-full border rounded-xl p-3"
-            >
-
-            <input
-                id="editPriorityDescription"
-                type="text"
-                placeholder="Descripción"
-                class="w-full border rounded-xl p-3"
-            >
-
-            <div class="grid grid-cols-2 gap-2">
+            <div class="space-y-4">
                 <input
-                    id="editSlaValue"
+                    id="editPriorityName"
+                    type="text"
+                    placeholder="Nombre"
+                    class="input"
+                >
+
+                <input
+                    id="editPriorityDescription"
+                    type="text"
+                    placeholder="Descripción"
+                    class="input"
+                >
+
+                <div class="grid grid-cols-2 gap-2">
+                    <input
+                        id="editSlaValue"
+                        type="number"
+                        min="1"
+                        placeholder="Tiempo"
+                        class="input"
+                    >
+
+                    <select
+                        id="editSlaUnit"
+                        class="select"
+                    >
+                        <option value="minutes">Minutos</option>
+                        <option value="hours">Horas</option>
+                        <option value="days">Días</option>
+                    </select>
+                </div>
+
+                <input
+                    id="editPriorityColor"
+                    type="color"
+                    class="input" style="padding: 4px; height: 44px;"
+                >
+
+                <input
+                    id="editPriorityOrder"
                     type="number"
                     min="1"
-                    placeholder="Tiempo"
-                    class="border rounded-xl p-3"
+                    placeholder="Orden"
+                    class="input"
                 >
-
-                <select
-                    id="editSlaUnit"
-                    class="border rounded-xl p-3"
-                >
-                    <option value="minutes">Minutos</option>
-                    <option value="hours">Horas</option>
-                    <option value="days">Días</option>
-                </select>
             </div>
 
-            <input
-                id="editPriorityColor"
-                type="color"
-                class="w-full border rounded-xl p-2 h-[52px]"
-            >
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="closeEditPriorityModal()" class="btn btn-outline">
+                    Cancelar
+                </button>
 
-            <input
-                id="editPriorityOrder"
-                type="number"
-                min="1"
-                placeholder="Orden"
-                class="w-full border rounded-xl p-3"
-            >
+                <button onclick="savePriorityChanges()" class="btn btn-primary">
+                    Guardar cambios
+                </button>
+            </div>
+
         </div>
-
-        <div class="flex justify-end gap-3 mt-6">
-            <button onclick="closeEditPriorityModal()" class="px-4 py-2 border rounded-xl">
-                Cancelar
-            </button>
-
-            <button onclick="savePriorityChanges()" class="px-4 py-2 bg-slate-900 text-white rounded-xl">
-                Guardar cambios
-            </button>
-        </div>
-
     </div>
 </div>
 
-<div id="successPriorityModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
-    <div id="successPriorityModalContent" class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md text-center transform scale-95 opacity-0 transition-all duration-300">
+<div id="successPriorityModal" class="hidden modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50">
+    <div id="successPriorityModalContent" class="modal-panel text-center" style="max-width: 28rem;">
+        <div class="modal-body">
 
-        <div class="w-20 h-20 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-4xl mx-auto mb-5">
-            ✓
-        </div>
+            <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style="background-color: rgba(16,185,129,0.14); color: var(--color-success-green);">
+                <i data-lucide="check" class="icon-lg"></i>
+            </div>
 
-        <h3 id="successPriorityTitle" class="text-2xl font-bold text-slate-800 mb-2">
-            Operación realizada correctamente
-        </h3>
+            <h3 id="successPriorityTitle" class="text-2xl font-bold mb-2" style="color: var(--text-primary);">
+                Operación realizada correctamente
+            </h3>
 
-        <p id="successPriorityText" class="text-slate-500 mb-6"></p>
-
-        <button
-            onclick="closeSuccessPriorityModal()"
-            class="w-full bg-slate-900 text-white py-3 rounded-2xl hover:bg-slate-800">
-            Entendido
-        </button>
-
-    </div>
-</div>
-<div id="errorPriorityModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
-    <div id="errorPriorityModalContent" class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md text-center transform scale-95 opacity-0 transition-all duration-300">
-
-        <div class="w-20 h-20 bg-red-100 text-red-700 rounded-full flex items-center justify-center text-4xl mx-auto mb-5">
-            !
-        </div>
-
-        <h3 class="text-2xl font-bold text-slate-800 mb-2">
-            No se pudo completar la acción
-        </h3>
-
-        <p id="errorPriorityText" class="text-slate-500 mb-6"></p>
-
-        <button
-            onclick="closeErrorPriorityModal()"
-            class="w-full bg-slate-900 text-white py-3 rounded-2xl hover:bg-slate-800">
-            Entendido
-        </button>
-
-    </div>
-</div>
-
-<div id="deletePriorityModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
-    <div id="deletePriorityModalContent" class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md transform scale-95 opacity-0 transition-all duration-300">
-
-        <h3 class="text-2xl font-bold text-slate-800 mb-2">
-            Eliminar prioridad
-        </h3>
-
-        <p id="deletePriorityText" class="text-slate-500 mb-6"></p>
-
-        <input type="hidden" id="deletePriorityId">
-
-        <div class="flex justify-end gap-3">
-            <button
-                onclick="closeDeletePriorityModal()"
-                class="px-5 py-3 border rounded-xl hover:bg-slate-50">
-                Cancelar
-            </button>
+            <p id="successPriorityText" class="field-help mb-6"></p>
 
             <button
-                onclick="confirmDeletePriority()"
-                class="px-5 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700">
-                Eliminar
+                onclick="closeSuccessPriorityModal()"
+                class="btn btn-primary btn-block">
+                Entendido
             </button>
-        </div>
 
+        </div>
+    </div>
+</div>
+<div id="errorPriorityModal" class="hidden modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50">
+    <div id="errorPriorityModalContent" class="modal-panel text-center" style="max-width: 28rem;">
+        <div class="modal-body">
+
+            <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style="background-color: rgba(239,68,68,0.14); color: var(--color-danger);">
+                <i data-lucide="alert-triangle" class="icon-lg"></i>
+            </div>
+
+            <h3 class="text-2xl font-bold mb-2" style="color: var(--text-primary);">
+                No se pudo completar la acción
+            </h3>
+
+            <p id="errorPriorityText" class="field-help mb-6"></p>
+
+            <button
+                onclick="closeErrorPriorityModal()"
+                class="btn btn-primary btn-block">
+                Entendido
+            </button>
+
+        </div>
+    </div>
+</div>
+
+<div id="deletePriorityModal" class="hidden modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50">
+    <div id="deletePriorityModalContent" class="modal-panel" style="max-width: 28rem;">
+        <div class="modal-body">
+
+            <h3 class="text-2xl font-bold mb-2" style="color: var(--text-primary);">
+                Eliminar prioridad
+            </h3>
+
+            <p id="deletePriorityText" class="field-help mb-6"></p>
+
+            <input type="hidden" id="deletePriorityId">
+
+            <div class="flex justify-end gap-3">
+                <button
+                    onclick="closeDeletePriorityModal()"
+                    class="btn btn-outline">
+                    Cancelar
+                </button>
+
+                <button
+                    onclick="confirmDeletePriority()"
+                    class="btn btn-danger">
+                    Eliminar
+                </button>
+            </div>
+
+        </div>
     </div>
 </div>
 
@@ -298,6 +335,7 @@
 
 <script>
     renderLayout('priorities');
+    lucide.createIcons();
 </script>
 
 </body>

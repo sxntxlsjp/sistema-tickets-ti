@@ -249,7 +249,49 @@ const getFileIcon = (mimeType) => {
     return '📎';
 };
 
-const renderAttachments = (attachments) => {
+const escapeHtml = (value) => {
+    if (value === null || value === undefined) return '';
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+};
+
+const downloadTicketAttachment = async (attachmentId, fileName, openInNewTab = false) => {
+    try {
+        const response = await fetch(`${API_URL}/ticket-attachments/${attachmentId}/download`, {
+            headers: authHeaders()
+        });
+
+        if (!response.ok) {
+            throw new Error('No se pudo descargar el archivo');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        if (openInNewTab) {
+            window.open(url, '_blank');
+            return;
+        }
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName || 'archivo';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+        console.error(error);
+        alert('No se pudo descargar el archivo');
+    }
+};
+
+const renderAttachments = async (attachments) => {
     const container = document.getElementById('attachmentsList');
     container.innerHTML = '';
 
@@ -263,7 +305,6 @@ const renderAttachments = (attachments) => {
     }
 
     attachments.forEach(file => {
-        const fileUrl = `/uploads/${file.filePath}`;
         const isImage = file.mimeType?.includes('image');
 
         container.innerHTML += `
@@ -272,12 +313,11 @@ const renderAttachments = (attachments) => {
                 ${
                     isImage
                         ? `
-                            <a href="${fileUrl}" target="_blank">
-                                <img
-                                    src="${fileUrl}"
-                                    class="w-full h-32 object-cover rounded-xl mb-3 border"
-                                >
-                            </a>
+                            <div
+                                id="attachment-preview-${file.id}"
+                                class="w-full h-32 rounded-xl mb-3 border bg-slate-100 flex items-center justify-center text-slate-400 text-xs cursor-pointer">
+                                Cargando vista previa...
+                            </div>
                         `
                         : ''
                 }
@@ -337,11 +377,13 @@ const renderAttachments = (attachments) => {
                                     `
                             }
 
-                        <a href="${fileUrl}"
-                           target="_blank"
-                           class="inline-block mt-3 text-sm font-semibold text-slate-900 hover:underline">
+                        <button
+                            type="button"
+                            class="download-attachment-btn inline-block mt-3 text-sm font-semibold text-slate-900 hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                            data-attachment-id="${file.id}"
+                            data-file-name="${escapeHtml(file.fileName)}">
                             Ver / Descargar
-                        </a>
+                        </button>
 
                     </div>
 
@@ -350,6 +392,46 @@ const renderAttachments = (attachments) => {
             </div>
         `;
     });
+
+    container.querySelectorAll('.download-attachment-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            downloadTicketAttachment(
+                Number(button.dataset.attachmentId),
+                button.dataset.fileName,
+                false
+            );
+        });
+    });
+
+    const imageAttachments = attachments.filter(file => file.mimeType?.includes('image'));
+
+    for (const file of imageAttachments) {
+        const preview = document.getElementById(`attachment-preview-${file.id}`);
+
+        try {
+            const response = await fetch(`${API_URL}/ticket-attachments/${file.id}/download`, {
+                headers: authHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error('No se pudo cargar la vista previa');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            if (preview) {
+                preview.classList.remove('bg-slate-100', 'flex', 'items-center', 'justify-center', 'text-slate-400', 'text-xs');
+                preview.innerHTML = `<img src="${url}" class="w-full h-32 object-cover rounded-xl">`;
+                preview.onclick = () => downloadTicketAttachment(file.id, file.fileName, true);
+            }
+        } catch (error) {
+            console.error(error);
+            if (preview) {
+                preview.textContent = 'Vista previa no disponible';
+            }
+        }
+    }
 };
 
 const renderHistory = (histories) => {
@@ -569,12 +651,11 @@ document.querySelectorAll('.rating-btn').forEach(button => {
         selectedRating = Number(button.dataset.rating);
 
         document.querySelectorAll('.rating-btn').forEach(btn => {
-            btn.classList.remove('scale-125', 'opacity-100');
-            btn.classList.add('opacity-60');
+            const isFilled = Number(btn.dataset.rating) <= selectedRating;
+            const icon = btn.querySelector('[data-lucide]');
+            btn.style.color = isFilled ? '#ffffff' : 'rgba(255,255,255,0.4)';
+            if (icon) icon.style.fill = isFilled ? 'currentColor' : 'none';
         });
-
-        button.classList.remove('opacity-60');
-        button.classList.add('scale-125', 'opacity-100');
     });
 });
 
@@ -822,23 +903,24 @@ const openPriorityModal = async () => {
             <button
                 onclick="selectPriority(${priority.id})"
                 id="priority-${priority.id}"
-                class="border-2 border-slate-200 rounded-2xl p-5 text-left hover:border-slate-900 transition">
+                style="border: 2px solid var(--border-default); border-radius: var(--radius-2xl); background-color: transparent;"
+                class="p-5 text-left transition">
 
                 <div class="flex items-center justify-between mb-3">
 
                     <span
-                        class="px-3 py-1 rounded-full text-white font-semibold"
-                        style="background:${priority.color}">
+                        class="badge"
+                        style="background:${priority.color}; color: #fff;">
                         ${priority.name}
                     </span>
 
-                    <span class="text-sm text-slate-500">
+                    <span class="text-sm" style="color: var(--text-muted);">
                         ${formatSla(priority.slaDurationMinutes)}
                     </span>
 
                 </div>
 
-                <p class="text-slate-600">
+                <p style="color: var(--text-secondary);">
                     ${priority.description || ''}
                 </p>
 
@@ -847,18 +929,16 @@ const openPriorityModal = async () => {
 
     });
 
+    lucide.createIcons();
+
     const modal =
         document.getElementById('priorityModal');
 
-    const content =
-        document.getElementById('priorityModalContent');
-
     modal.classList.remove('hidden');
 
-    setTimeout(() => {
-        content.classList.remove('scale-95', 'opacity-0');
-        content.classList.add('scale-100', 'opacity-100');
-    }, 10);
+    requestAnimationFrame(() => {
+        modal.classList.add('is-open');
+    });
 
 };
 const closePriorityModal = () => {
@@ -866,11 +946,7 @@ const closePriorityModal = () => {
     const modal =
         document.getElementById('priorityModal');
 
-    const content =
-        document.getElementById('priorityModalContent');
-
-    content.classList.remove('scale-100', 'opacity-100');
-    content.classList.add('scale-95', 'opacity-0');
+    modal.classList.remove('is-open');
 
     setTimeout(() => {
         modal.classList.add('hidden');
@@ -887,26 +963,16 @@ const selectPriority = (priorityId) => {
         const card =
             document.getElementById(`priority-${priority.id}`);
 
-        card.classList.remove(
-            'border-slate-900',
-            'bg-slate-50'
-        );
-
-        card.classList.add(
-            'border-slate-200'
-        );
+        card.style.borderColor = 'var(--border-default)';
+        card.style.backgroundColor = 'transparent';
 
     });
 
     const selected =
         document.getElementById(`priority-${priorityId}`);
 
-    selected.classList.remove('border-slate-200');
-
-    selected.classList.add(
-        'border-slate-900',
-        'bg-slate-50'
-    );
+    selected.style.borderColor = 'var(--color-primary-blue)';
+    selected.style.backgroundColor = 'var(--surface-card-alt)';
 
     const button =
         document.getElementById('assignPriorityBtn');
@@ -954,22 +1020,18 @@ const assignPriority = async () => {
 
 const openPrioritySuccessModal = () => {
     const modal = document.getElementById('prioritySuccessModal');
-    const content = document.getElementById('prioritySuccessModalContent');
 
     modal.classList.remove('hidden');
 
-    setTimeout(() => {
-        content.classList.remove('scale-95', 'opacity-0');
-        content.classList.add('scale-100', 'opacity-100');
-    }, 10);
+    requestAnimationFrame(() => {
+        modal.classList.add('is-open');
+    });
 };
 
 const closePrioritySuccessModal = () => {
     const modal = document.getElementById('prioritySuccessModal');
-    const content = document.getElementById('prioritySuccessModalContent');
 
-    content.classList.remove('scale-100', 'opacity-100');
-    content.classList.add('scale-95', 'opacity-0');
+    modal.classList.remove('is-open');
 
     setTimeout(() => {
         modal.classList.add('hidden');

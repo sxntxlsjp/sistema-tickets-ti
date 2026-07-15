@@ -2,37 +2,69 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Tickets | Sistema de Tickets</title>
+    <title>Tickets | MasterDiv Desk</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        'primary-navy': '#0D1B2A',
+                        'secondary-navy': '#1E293B',
+                        'primary-blue': '#2563EB',
+                        'accent-cyan': '#06B6D4',
+                        'success-green': '#10B981',
+                        surface: '#F1F5F9'
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/modal-behavior.js"></script>
 </head>
 
-<body class="bg-slate-100" data-page="tickets">
+<body data-page="tickets">
 
 <div class="min-h-screen">
 
     <aside id="sidebar"></aside>
 
-    <main class="flex-1 p-8 min-w-0">
-        <div class="flex justify-between items-center mb-8">
+    <main class="flex-1 p-5 md:p-8 min-w-0">
+        <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
             <div>
-                <h2 class="text-3xl font-bold text-slate-800">Gestión de Tickets</h2>
-                <p class="text-slate-500">Consulta, seguimiento y administración de solicitudes</p>
+                <h2 class="text-3xl font-bold" style="color: var(--text-primary);">Gestión de Tickets</h2>
+                <p class="field-help">Consulta, seguimiento y administración de solicitudes</p>
             </div>
 
-            <a href="create-ticket.html" class="bg-slate-900 text-white px-5 py-3 rounded-xl hover:bg-slate-800">
+            <a href="create-ticket.html" class="btn btn-primary">
+                <i data-lucide="circle-plus" class="icon-sm"></i>
                 Nuevo Ticket
             </a>
         </div>
 
-        <div class="bg-white p-6 rounded-2xl shadow mb-6">
+        <div class="card mb-6">
             <div class="flex items-center justify-between mb-5">
-                <h3 class="text-lg font-bold text-slate-800">
+                <h3 class="card-title" style="font-size: var(--font-size-base);">
                     Búsqueda Avanzada
                 </h3>
 
                 <button
                     id="clearFiltersBtn"
-                    class="px-4 py-2 border rounded-xl hover:bg-slate-50">
+                    class="btn btn-outline btn-sm">
+                    <i data-lucide="rotate-ccw" class="icon-sm"></i>
                     Limpiar filtros
                 </button>
             </div>
@@ -42,51 +74,51 @@
                     id="searchInput"
                     type="text"
                     placeholder="Ticket, asunto o usuario..."
-                    class="border rounded-xl p-3"
+                    class="input"
                 >
 
-                <select id="statusFilter" class="border rounded-xl p-3">
+                <select id="statusFilter" class="select">
                     <option value="">Todos los estados</option>
                     <option value="PENDIENTE">Pendiente</option>
                     <option value="EN_REVISION">En revisión</option>
                     <option value="FINALIZADO">Finalizado</option>
                 </select>
 
-                <select id="priorityFilter" class="border rounded-xl p-3">
+                <select id="priorityFilter" class="select">
                     <option value="">Todas las prioridades</option>
                     <option value="BAJA">Baja</option>
                     <option value="MEDIA">Media</option>
                     <option value="ALTA">Alta</option>
                 </select>
 
-                <select id="typeFilter" class="border rounded-xl p-3">
+                <select id="typeFilter" class="select">
                     <option value="">Todos los tipos</option>
                 </select>
 
-                <select id="assigneeFilter" class="border rounded-xl p-3">
+                <select id="assigneeFilter" class="select">
                     <option value="">Todos los responsables</option>
                 </select>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow overflow-hidden">
-            <div class="w-full overflow-x-auto">
-                <table class="min-w-[1100px] w-full text-left text-sm">
-                    <thead class="bg-slate-900 text-white">
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <div class="table-wrap">
+                <table class="table min-w-[1100px]">
+                    <thead>
                         <tr>
-                            <th class="p-4 whitespace-nowrap">Solicitud</th>
-                            <th class="p-4 whitespace-nowrap">Prioridad</th>
-                            <th class="p-4 whitespace-nowrap">País</th>
-                            <th id="requesterHeader" class="p-4 whitespace-nowrap">Solicitante</th>
-                            <th class="p-4 whitespace-nowrap">Responsable</th>
-                            <th class="p-4 whitespace-nowrap">Estado</th>
-                            <th class="p-4 whitespace-nowrap">SLA</th>
-                            <th class="p-4 whitespace-nowrap">Fecha</th>
-                            <th class="p-4 whitespace-nowrap">Acciones</th>
+                            <th class="whitespace-nowrap">Solicitud</th>
+                            <th class="whitespace-nowrap">Prioridad</th>
+                            <th class="whitespace-nowrap">País</th>
+                            <th id="requesterHeader" class="whitespace-nowrap">Solicitante</th>
+                            <th class="whitespace-nowrap">Responsable</th>
+                            <th class="whitespace-nowrap">Estado</th>
+                            <th class="whitespace-nowrap">SLA</th>
+                            <th class="whitespace-nowrap">Fecha</th>
+                            <th class="whitespace-nowrap">Acciones</th>
                         </tr>
                     </thead>
 
-                    <tbody id="ticketsTable" class="divide-y"></tbody>
+                    <tbody id="ticketsTable"></tbody>
                 </table>
             </div>
         </div>
@@ -100,6 +132,7 @@
 
 <script>
     renderLayout('tickets');
+    lucide.createIcons();
 </script>
 
 </body>

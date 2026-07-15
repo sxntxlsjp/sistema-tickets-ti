@@ -1,6 +1,7 @@
 const prisma = require('../config/prisma');
 const {
-    getDateRange
+    getDateRange,
+    VALID_RANGES
 } = require('../utils/dateRange.util');
 
 const SLA_DUE_SOON_MINUTES = 60;
@@ -9,6 +10,12 @@ const getDashboardSummary = async (req, res) => {
     try {
         const range =
             req.query.range || 'all';
+
+        if (!VALID_RANGES.includes(range)) {
+            return res.status(400).json({
+                message: `Rango inválido. Valores permitidos: ${VALID_RANGES.join(', ')}`
+            });
+        }
 
         const startDate =
             getDateRange(range);
@@ -111,6 +118,7 @@ const getDashboardSummary = async (req, res) => {
                 select: {
                     status: true,
                     priorityId: true,
+                    slaStartedAt: true,
                     slaDueAt: true,
                     createdAt: true,
                     closedAt: true
@@ -185,14 +193,18 @@ const getDashboardSummary = async (req, res) => {
         slaTickets.forEach(ticket => {
             if (ticket.status === 'FINALIZADO') {
                 if (ticket.closedAt) {
-                    resolvedCount += 1;
-                    resolutionMinutesSum +=
+                    const resolutionMinutes =
                         (new Date(ticket.closedAt).getTime() - new Date(ticket.createdAt).getTime()) / 60000;
+
+                    if (resolutionMinutes >= 0) {
+                        resolvedCount += 1;
+                        resolutionMinutesSum += resolutionMinutes;
+                    }
                 }
                 return;
             }
 
-            if (!ticket.priorityId || !ticket.slaDueAt) {
+            if (!ticket.priorityId || !ticket.slaStartedAt || !ticket.slaDueAt) {
                 slaNotStarted += 1;
                 return;
             }

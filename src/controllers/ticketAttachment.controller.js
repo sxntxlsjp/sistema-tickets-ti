@@ -1,5 +1,10 @@
+const fs = require('fs');
+const path = require('path');
 const prisma = require('../config/prisma');
 const { findTenantTicket } = require('../utils/ticketTenant.util');
+const { canAccessTicket } = require('../utils/ticketAccess.util');
+
+const ticketUploadsPath = path.join(__dirname, '../uploads');
 
 const uploadAttachment = async (req, res) => {
     try {
@@ -7,7 +12,7 @@ const uploadAttachment = async (req, res) => {
 
         const ticket = await findTenantTicket(Number(id), req.tenantId);
 
-        if (!ticket) {
+        if (!ticket || !canAccessTicket(req, ticket)) {
             return res.status(404).json({
                 message: 'Ticket no encontrado'
             });
@@ -50,7 +55,7 @@ const getAttachments = async (req, res) => {
 
         const ticket = await findTenantTicket(Number(id), req.tenantId);
 
-        if (!ticket) {
+        if (!ticket || !canAccessTicket(req, ticket)) {
             return res.status(404).json({
                 message: 'Ticket no encontrado'
             });
@@ -88,7 +93,42 @@ const getAttachments = async (req, res) => {
     }
 };
 
+const downloadAttachment = async (req, res) => {
+    try {
+        const attachmentId = Number(req.params.id);
+
+        const attachment = await prisma.ticketAttachment.findUnique({
+            where: { id: attachmentId },
+            include: { ticket: true }
+        });
+
+        if (!attachment || !attachment.ticket || !canAccessTicket(req, attachment.ticket)) {
+            return res.status(404).json({
+                message: 'Archivo no encontrado'
+            });
+        }
+
+        const absolutePath = path.join(ticketUploadsPath, path.basename(attachment.filePath));
+
+        if (!fs.existsSync(absolutePath)) {
+            return res.status(404).json({
+                message: 'Archivo no encontrado'
+            });
+        }
+
+        return res.download(absolutePath, attachment.fileName);
+
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            message: 'Error al descargar el archivo'
+        });
+    }
+};
+
 module.exports = {
     uploadAttachment,
-    getAttachments
+    getAttachments,
+    downloadAttachment
 };

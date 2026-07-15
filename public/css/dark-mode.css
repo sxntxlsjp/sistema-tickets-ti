@@ -1,0 +1,121 @@
+/*
+  MasterDiv Desk — Dark Mode overrides (Fase 14)
+
+  El proyecto usa Tailwind vía CDN (sin build step) con utilidades de color
+  ya escritas en cada página (bg-white, text-slate-500, etc.) y en el HTML
+  generado dinámicamente por los módulos JS. En vez de reescribir cada clase
+  en cada archivo, este stylesheet reasigna esas utilidades cuando el tema
+  oscuro está activo, para que TODO el sistema (incluido el contenido
+  renderizado por JS) se adapte sin duplicar lógica de render por tema.
+*/
+
+:root[data-theme="dark"] {
+    color-scheme: dark;
+}
+
+:root[data-theme="dark"] .bg-white,
+:root[data-theme="dark"] .bg-slate-50,
+:root[data-theme="dark"] .bg-slate-100 {
+    background-color: var(--surface-card) !important;
+}
+
+:root[data-theme="dark"] .bg-slate-200 {
+    background-color: var(--surface-sunken) !important;
+}
+
+:root[data-theme="dark"] .bg-slate-300 {
+    background-color: var(--border-strong) !important;
+}
+
+:root[data-theme="dark"] .bg-amber-50 {
+    background-color: rgba(245, 158, 11, 0.12) !important;
+}
+
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] .bg-\[\#f1f4f8\] {
+    background-color: var(--surface-page) !important;
+}
+
+:root[data-theme="dark"] .text-slate-800,
+:root[data-theme="dark"] .text-slate-900 {
+    color: var(--text-primary) !important;
+}
+
+:root[data-theme="dark"] .text-slate-700,
+:root[data-theme="dark"] .text-slate-600 {
+    color: var(--text-secondary) !important;
+}
+
+:root[data-theme="dark"] .text-slate-500,
+:root[data-theme="dark"] .text-slate-400 {
+    color: var(--text-muted) !important;
+}
+
+:root[data-theme="dark"] .border,
+:root[data-theme="dark"] .border-slate-100,
+:root[data-theme="dark"] .border-slate-200,
+:root[data-theme="dark"] .border-slate-300 {
+    border-color: var(--border-default) !important;
+}
+
+:root[data-theme="dark"] .divide-y > :not([hidden]) ~ :not([hidden]),
+:root[data-theme="dark"] .divide-slate-100,
+:root[data-theme="dark"] .divide-slate-200 {
+    border-color: var(--border-default) !important;
+}
+
+:root[data-theme="dark"] .shadow,
+:root[data-theme="dark"] .shadow-sm,
+:root[data-theme="dark"] .shadow-md,
+:root[data-theme="dark"] .shadow-lg,
+:root[data-theme="dark"] .shadow-xl {
+    --tw-shadow-color: rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme="dark"] .hover\:bg-slate-50:hover,
+:root[data-theme="dark"] .hover\:bg-slate-100:hover,
+:root[data-theme="dark"] .hover\:bg-white:hover {
+    background-color: var(--surface-card-alt) !important;
+}
+
+:root[data-theme="dark"] .hover\:bg-slate-200:hover {
+    background-color: var(--surface-sunken) !important;
+}
+
+/* Botones/superficies que ya son oscuras en claro: mantener contraste con la marca */
+:root[data-theme="dark"] .bg-slate-800,
+:root[data-theme="dark"] .bg-slate-900,
+:root[data-theme="dark"] .hover\:bg-slate-800:hover {
+    background-color: var(--color-secondary-navy) !important;
+}
+
+:root[data-theme="dark"] .from-slate-900 {
+    --tw-gradient-from: var(--color-primary-navy) !important;
+}
+:root[data-theme="dark"] .to-slate-700 {
+    --tw-gradient-to: var(--color-secondary-navy) !important;
+}
+
+:root[data-theme="dark"] .bg-green-100 { background-color: rgba(16, 185, 129, 0.16) !important; }
+:root[data-theme="dark"] .text-green-700 { color: #6EE7B7 !important; }
+:root[data-theme="dark"] .bg-red-100 { background-color: rgba(239, 68, 68, 0.16) !important; }
+:root[data-theme="dark"] .text-red-700,
+:root[data-theme="dark"] .text-red-600 { color: #FCA5A5 !important; }
+:root[data-theme="dark"] .bg-yellow-100 { background-color: rgba(245, 158, 11, 0.16) !important; }
+:root[data-theme="dark"] .text-yellow-700 { color: #FCD34D !important; }
+:root[data-theme="dark"] .bg-blue-100 { background-color: rgba(37, 99, 235, 0.16) !important; }
+:root[data-theme="dark"] .text-blue-700 { color: #93C5FD !important; }
+:root[data-theme="dark"] .bg-sky-100 { background-color: rgba(6, 182, 212, 0.16) !important; }
+:root[data-theme="dark"] .text-sky-700 { color: #67E8F9 !important; }
+
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea {
+    background-color: var(--surface-card);
+    color: var(--text-primary);
+}
+
+:root[data-theme="dark"] ::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+}

@@ -1,5 +1,7 @@
 const prisma = require('../config/prisma');
 
+const HEX_COLOR_REGEX = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
+
 // Listar todas las prioridades
 const getTicketPriorities = async (req, res) => {
     try {
@@ -98,6 +100,13 @@ const createTicketPriority = async (req, res) => {
             });
         }
 
+        if (color && !HEX_COLOR_REGEX.test(color)) {
+            return res.status(400).json({
+                success: false,
+                message: 'El color debe ser un valor hexadecimal válido (ej: #EF4444)'
+            });
+        }
+
         const exists = await prisma.ticketPriority.findFirst({
             where: {
                 tenantId: req.tenantId,
@@ -165,6 +174,13 @@ const updateTicketPriority = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: 'El SLA debe ser mayor a cero minutos'
+            });
+        }
+
+        if (color && !HEX_COLOR_REGEX.test(color)) {
+            return res.status(400).json({
+                success: false,
+                message: 'El color debe ser un valor hexadecimal válido (ej: #EF4444)'
             });
         }
 

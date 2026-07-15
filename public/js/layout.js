@@ -10,6 +10,28 @@ const escapeLayoutHtml = (value) => {
         .replace(/'/g, '&#39;');
 };
 
+const refreshIcons = () => {
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+    }
+};
+
+const themeToggleMarkup = () => {
+    const resolved = typeof resolveTheme === 'function' && typeof getThemePreference === 'function'
+        ? resolveTheme(getThemePreference())
+        : 'light';
+
+    return `
+        <button
+            onclick="toggleTheme()"
+            title="Cambiar tema"
+            aria-label="Cambiar entre modo claro y oscuro"
+            class="btn btn-icon">
+            <i data-lucide="${resolved === 'dark' ? 'sun' : 'moon'}"></i>
+        </button>
+    `;
+};
+
 const renderLayout = (activePage = '') => {
     const sidebar = document.getElementById('sidebar');
 
@@ -31,222 +53,215 @@ const renderLayout = (activePage = '') => {
             .toUpperCase()
         : 'US';
 
-const activeTenant = typeof getActiveTenant === 'function' ? getActiveTenant() : null;
+    const activeTenant = typeof getActiveTenant === 'function' ? getActiveTenant() : null;
+    const homeHref = user.role === 'ADMIN' ? 'dashboard.html' : 'user-home.html';
 
-const adminChildren = [
-    { key: 'users', label: 'Usuarios', icon: '👥', href: 'users.html' },
-    { key: 'countries', label: 'Países', icon: '🌎', href: 'countries.html' },
-    { key: 'ticket-types', label: 'Tipos de Ticket', icon: '🏷️', href: 'ticket-types.html' },
-    { key: 'priorities', label: 'Prioridades', icon: '🚦', href: 'priorities.html' },
-    { key: 'settings', label: 'Configuración', icon: '⚙️', href: 'settings.html' }
-];
+    const adminChildren = [
+        { key: 'users', label: 'Usuarios', icon: 'users', href: 'users.html' },
+        { key: 'countries', label: 'Países', icon: 'globe', href: 'countries.html' },
+        { key: 'ticket-types', label: 'Tipos de Ticket', icon: 'tags', href: 'ticket-types.html' },
+        { key: 'priorities', label: 'Prioridades', icon: 'flag', href: 'priorities.html' },
+        { key: 'settings', label: 'Configuración', icon: 'settings', href: 'settings.html' }
+    ];
 
-if (user.isSuperAdmin) {
-    adminChildren.push({ key: 'tenants', label: 'Empresas', icon: '🏢', href: 'tenants.html' });
-}
+    if (user.isSuperAdmin) {
+        adminChildren.push({ key: 'tenants', label: 'Empresas', icon: 'building-2', href: 'tenants.html' });
+    }
 
-const menuItems = user.role === 'ADMIN'
-    ? [
-        { key: 'dashboard', label: 'Dashboard', icon: '📊', href: 'dashboard.html' },
-        { key: 'tickets', label: 'Tickets', icon: '🎫', href: 'tickets.html' },
-        { key: 'create-ticket', label: 'Nuevo Ticket', icon: '➕', href: 'create-ticket.html' },
-        {
-            key: 'admin',
-            label: 'Administración',
-            icon: '🛠️',
-            children: adminChildren
-        },
-        { key: 'profile', label: 'Mi Perfil', icon: '👤', href: 'profile.html' }
-    ]
+    const menuItems = user.role === 'ADMIN'
+        ? [
+            { key: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard', href: 'dashboard.html' },
+            { key: 'tickets', label: 'Tickets', icon: 'ticket', href: 'tickets.html' },
+            { key: 'create-ticket', label: 'Nuevo Ticket', icon: 'circle-plus', href: 'create-ticket.html' },
+            {
+                key: 'admin',
+                label: 'Administración',
+                icon: 'shield',
+                children: adminChildren
+            },
+            { key: 'profile', label: 'Mi Perfil', icon: 'user-circle', href: 'profile.html' }
+        ]
         : [
-            { key: 'user-home', label: 'Dashboard', icon: '📊', href: 'user-home.html' },
-            { key: 'tickets', label: 'Mis Tickets', icon: '🎫', href: 'tickets.html' },
-            { key: 'create-ticket', label: 'Crear Ticket', icon: '➕', href: 'create-ticket.html' },
-            { key: 'profile', label: 'Mi Perfil', icon: '👤', href: 'profile.html' }
+            { key: 'user-home', label: 'Dashboard', icon: 'layout-dashboard', href: 'user-home.html' },
+            { key: 'tickets', label: 'Mis Tickets', icon: 'ticket', href: 'tickets.html' },
+            { key: 'create-ticket', label: 'Crear Ticket', icon: 'circle-plus', href: 'create-ticket.html' },
+            { key: 'profile', label: 'Mi Perfil', icon: 'user-circle', href: 'profile.html' }
         ];
 
-    sidebar.className =
-        'w-full bg-[#f1f4f8] text-slate-800 px-6 py-4 shadow-sm sticky top-0 z-40';
+    sidebar.className = 'sticky top-0 z-40';
+    sidebar.style.zIndex = 'var(--z-sticky)';
 
     sidebar.innerHTML = `
-        <div class="flex items-center justify-between gap-6">
+        <div
+            style="background-color: var(--surface-card); border-bottom: 1px solid var(--border-default);"
+            class="px-4 md:px-6 py-3 shadow-sm">
 
-            <a href="${user.role === 'ADMIN' ? 'dashboard.html' : 'user-home.html'}" class="flex items-center shrink-0">
-                <img
-                    src="assets/logoprovefabrica.svg"
-                    alt="Logo"
-                    class="h-12 object-contain"
-                >
-            </a>
+            <div class="flex items-center justify-between gap-4">
 
-            <nav class="hidden lg:flex items-center gap-2 ml-auto">
-            ${menuItems.map(item => {
+                <a href="${homeHref}" class="logo-chip shrink-0" aria-label="Ir al inicio">
+                    <img
+                        src="assets/logo.png"
+                        alt="MasterDiv Desk"
+                        class="h-8 object-contain"
+                    >
+                </a>
 
-                if (item.children) {
+                <nav class="hidden lg:flex items-center gap-1 ml-auto">
+                ${menuItems.map(item => {
 
-                    const childActive = item.children.some(
-                        child => child.key === activePage
-                    );
+                    if (item.children) {
 
-                    return `
-                        <div class="relative group">
+                        const childActive = item.children.some(
+                            child => child.key === activePage
+                        );
 
-                            <button
-                                class="flex items-center gap-2 px-4 py-3 rounded-xl transition-all ${
-                                    childActive
-                                        ? 'bg-white shadow-sm'
-                                        : 'hover:bg-white hover:shadow-sm'
-                                }">
+                        return `
+                            <div class="relative group">
 
-                                <span class="text-xl">${item.icon}</span>
+                                <button
+                                    class="btn btn-ghost"
+                                    style="${childActive ? 'background-color: var(--surface-sunken); color: var(--text-primary);' : ''}">
 
-                                <span class="font-semibold">
-                                    ${item.label}
-                                </span>
+                                    <i data-lucide="${item.icon}"></i>
+                                    <span>${item.label}</span>
+                                    <i data-lucide="chevron-down" class="icon-sm transition-transform group-hover:rotate-180"></i>
 
-                                <svg
-                                    class="w-4 h-4 transition-transform group-hover:rotate-180"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    viewBox="0 0 24 24">
+                                </button>
 
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M19 9l-7 7-7-7">
-                                    </path>
+                                <div
+                                    style="background-color: var(--surface-card); border: 1px solid var(--border-default);"
+                                    class="absolute right-0 mt-2 w-60 rounded-2xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200"
+                                    role="menu">
 
-                                </svg>
+                                    ${item.children.map(child => `
+                                        <a
+                                            href="${child.href}"
+                                            role="menuitem"
+                                            style="color: var(--text-secondary);"
+                                            class="flex items-center gap-3 px-4 py-3 hover:bg-[var(--surface-sunken)] first:rounded-t-2xl last:rounded-b-2xl transition">
 
-                            </button>
+                                            <i data-lucide="${child.icon}" class="icon-sm"></i>
+                                            <span class="font-medium text-sm">${child.label}</span>
 
-                            <div
-                                class="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                        </a>
+                                    `).join('')}
 
-                                ${item.children.map(child => `
-                                    <a
-                                        href="${child.href}"
-                                        class="flex items-center gap-3 px-5 py-3 hover:bg-slate-100 first:rounded-t-2xl last:rounded-b-2xl transition">
-
-                                        <span class="text-lg">
-                                            ${child.icon}
-                                        </span>
-
-                                        <span class="font-medium">
-                                            ${child.label}
-                                        </span>
-
-                                    </a>
-                                `).join('')}
+                                </div>
 
                             </div>
+                        `;
+                    }
 
-                        </div>
+                    const isActive = activePage === item.key;
+
+                    return `
+                        <a href="${item.href}"
+                        title="${item.label}"
+                        class="btn btn-ghost"
+                        style="${isActive ? 'background-color: var(--surface-sunken); color: var(--text-primary);' : ''}">
+
+                            <i data-lucide="${item.icon}"></i>
+                            <span>${item.label}</span>
+
+                        </a>
                     `;
-                }
 
-                return `
+                }).join('')}
+
+                    ${activeTenant ? `
+                        <a href="select-tenant.html"
+                           title="Cambiar de empresa"
+                           class="btn btn-ghost hidden md:inline-flex ml-1">
+                            <i data-lucide="repeat" class="icon-sm"></i>
+                            <span class="max-w-[9rem] truncate">${escapeLayoutHtml(activeTenant.name)}</span>
+                        </a>
+                    ` : ''}
+
+                    ${themeToggleMarkup()}
+
+                    <button onclick="logout()"
+                            title="Cerrar sesión"
+                            aria-label="Cerrar sesión"
+                            class="btn btn-ghost">
+                        <i data-lucide="log-out" class="icon-sm"></i>
+                        <span class="hidden xl:inline">Cerrar sesión</span>
+                    </button>
+
+                    <div
+                        style="background-color: var(--surface-sunken);"
+                        class="flex items-center gap-3 rounded-2xl py-1.5 px-3 ml-1">
+                        ${
+                            user.profileImage
+                                ? `
+                                <img
+                                    src="${user.profileImage}"
+                                    class="w-8 h-8 rounded-full object-cover border shrink-0"
+                                    style="border-color: var(--border-default);"
+                                >
+                                `
+                                : `
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-xs shrink-0"
+                                     style="background-color: var(--color-primary-blue);">
+                                    ${initials}
+                                </div>
+                                `
+                        }
+
+                        <div class="hidden xl:block leading-tight">
+                            <p class="text-sm font-semibold" style="color: var(--text-primary);">${escapeLayoutHtml(user.name)}</p>
+                            <p class="text-xs" style="color: var(--text-muted);">
+                                ${escapeLayoutHtml(user.jobTitle || (user.role === 'ADMIN' ? 'Administrador' : 'Usuario'))}
+                            </p>
+                        </div>
+                    </div>
+                </nav>
+
+                <div class="flex items-center gap-2 lg:hidden">
+                    ${themeToggleMarkup()}
+
+                    <button onclick="toggleMobileMenu()"
+                            aria-label="Abrir menú"
+                            aria-expanded="${mobileMenuOpen}"
+                            class="btn btn-icon">
+                        <i data-lucide="${mobileMenuOpen ? 'x' : 'menu'}"></i>
+                    </button>
+                </div>
+
+            </div>
+
+            <nav id="mobileMenu" class="${mobileMenuOpen ? 'block' : 'hidden'} lg:hidden mt-3 space-y-1 pb-2">
+                ${menuItems.flatMap(item => item.children
+                    ? item.children.map(child => ({ ...child }))
+                    : [item]
+                ).map(item => `
                     <a href="${item.href}"
-                    title="${item.label}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                            activePage === item.key
-                                ? 'bg-white shadow-sm'
-                                : 'hover:bg-white hover:shadow-sm'
-                        }">
-
-                        <span class="text-xl">
-                            ${item.icon}
-                        </span>
-
-                        <span class="font-semibold">
-                            ${item.label}
-                        </span>
-
+                       title="${item.label}"
+                       class="btn btn-ghost btn-block justify-start"
+                       style="${activePage === item.key ? 'background-color: var(--surface-sunken); color: var(--text-primary);' : ''}">
+                        <i data-lucide="${item.icon}"></i>
+                        <span>${item.label}</span>
                     </a>
-                `;
-
-            }).join('')}
+                `).join('')}
 
                 ${activeTenant ? `
                     <a href="select-tenant.html"
-                       title="Cambiar de empresa"
-                       class="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-white hover:shadow-sm transition-all text-sm">
-                        <span>🏢</span>
-                        <span class="font-semibold">${escapeLayoutHtml(activeTenant.name)}</span>
-                        <span class="text-xs text-slate-400">· Cambiar</span>
+                       class="btn btn-ghost btn-block justify-start">
+                        <i data-lucide="repeat"></i>
+                        <span>Cambiar empresa (${escapeLayoutHtml(activeTenant.name)})</span>
                     </a>
                 ` : ''}
 
                 <button onclick="logout()"
-                        title="Cerrar sesión"
-                        class="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-white hover:shadow-sm transition-all text-sm font-semibold">
-                    <span>🚪</span>
+                        class="btn btn-ghost btn-block justify-start">
+                    <i data-lucide="log-out"></i>
                     <span>Cerrar sesión</span>
                 </button>
-
-                <div class="flex items-center gap-3 bg-white rounded-2xl py-2 px-3 shadow-sm ml-2">
-                    ${
-                        user.profileImage
-                            ? `
-                            <img
-                                src="${user.profileImage}"
-                                class="w-9 h-9 rounded-full object-cover border border-slate-200 shrink-0"
-                            >
-                            `
-                            : `
-                            <div class="w-9 h-9 rounded-full bg-slate-300 flex items-center justify-center font-bold text-white shrink-0">
-                                ${initials}
-                            </div>
-                            `
-                    }
-
-                    <div class="hidden xl:block">
-                        <p class="text-sm font-semibold leading-tight">${user.name}</p>
-                        <p class="text-xs text-slate-500">
-                            ${user.jobTitle || (user.role === 'ADMIN' ? 'Administrador' : 'Usuario')}
-                        </p>
-                    </div>
-                </div>
             </nav>
 
-            <button onclick="toggleMobileMenu()"
-                    class="lg:hidden w-10 h-10 rounded-xl bg-white hover:bg-slate-200 text-slate-800 flex items-center justify-center shadow-sm">
-                ☰
-            </button>
-
         </div>
-
-        <nav id="mobileMenu" class="${mobileMenuOpen ? 'block' : 'hidden'} lg:hidden mt-4 space-y-2">
-            ${menuItems.map(item => `
-                <a href="${item.href}"
-                   title="${item.label}"
-                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                        activePage === item.key
-                            ? 'bg-white shadow-sm'
-                            : 'hover:bg-white hover:shadow-sm'
-                    }">
-                    <span class="text-xl">${item.icon}</span>
-                    <span class="font-semibold">${item.label}</span>
-                </a>
-            `).join('')}
-
-            ${activeTenant ? `
-                <a href="select-tenant.html"
-                   class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white hover:shadow-sm transition-all">
-                    <span class="text-xl">🏢</span>
-                    <span class="font-semibold">Cambiar empresa (${escapeLayoutHtml(activeTenant.name)})</span>
-                </a>
-            ` : ''}
-
-            <button onclick="logout()"
-                    title="Cerrar sesión"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white hover:shadow-sm w-full transition-all">
-                <span class="text-xl">🚪</span>
-                <span class="font-semibold">Cerrar sesión</span>
-            </button>
-        </nav>
     `;
+
+    refreshIcons();
 };
 
 const toggleMobileMenu = () => {
@@ -266,3 +281,7 @@ const logout = () => {
     }
     window.location.href = 'index.html';
 };
+
+document.addEventListener('themechange', () => {
+    renderLayout(document.body.dataset.page || '');
+});

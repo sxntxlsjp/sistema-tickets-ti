@@ -3,26 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Usuarios | Sistema de Tickets</title>
+    <title>Usuarios | MasterDiv Desk</title>
 
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        'primary-navy': '#0D1B2A',
+                        'secondary-navy': '#1E293B',
+                        'primary-blue': '#2563EB',
+                        'accent-cyan': '#06B6D4',
+                        'success-green': '#10B981',
+                        surface: '#F1F5F9'
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/modal-behavior.js"></script>
 </head>
 
-<body class="bg-slate-100" data-page="user">
+<body data-page="users">
 
 <div class="min-h-screen">
 
 <aside id="sidebar"></aside>
 
-    <main class="flex-1 p-8 min-w-0">
+    <main class="flex-1 p-5 md:p-8 min-w-0">
 
         <div class="mb-8">
 
-            <h2 class="text-3xl font-bold text-slate-800">
+            <h2 class="text-3xl font-bold" style="color: var(--text-primary);">
                 Administración de Usuarios
             </h2>
 
-            <p class="text-slate-500">
+            <p class="field-help">
                 Gestión de usuarios del sistema
             </p>
 
@@ -30,9 +60,9 @@
 
 <div class="space-y-6">
 
-    <div class="bg-white rounded-2xl shadow p-6">
+    <div class="card">
 
-        <h3 class="text-xl font-bold mb-4">
+        <h3 class="card-title mb-4" style="font-size: var(--font-size-base);">
             Nuevo Usuario
         </h3>
 
@@ -42,7 +72,7 @@
                 id="name"
                 type="text"
                 placeholder="Nombre y Apellido"
-                class="w-full border rounded-xl p-3"
+                class="input"
                 required
             >
 
@@ -50,21 +80,21 @@
                 id="department"
                 type="text"
                 placeholder="Departamento"
-                class="w-full border rounded-xl p-3"
+                class="input"
             >
 
             <input
                 id="jobTitle"
                 type="text"
                 placeholder="Cargo / Puesto"
-                class="w-full border rounded-xl p-3"
+                class="input"
             >
 
             <input
                 id="email"
                 type="email"
                 placeholder="Correo electrónico"
-                class="w-full border rounded-xl p-3"
+                class="input"
                 required
             >
 
@@ -72,20 +102,20 @@
                 id="phone"
                 type="text"
                 placeholder="Celular"
-                class="w-full border rounded-xl p-3"
+                class="input"
             >
 
             <input
                 id="password"
                 type="password"
                 placeholder="Contraseña"
-                class="w-full border rounded-xl p-3"
+                class="input"
                 required
             >
 
             <select
                 id="role"
-                class="w-full border rounded-xl p-3">
+                class="select">
 
                 <option value="USER">
                     Usuario
@@ -98,7 +128,8 @@
             </select>
 
             <button
-                class="w-full bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800">
+                class="btn btn-primary btn-block">
+                <i data-lucide="user-plus" class="icon-sm"></i>
                 Crear Usuario
             </button>
 
@@ -106,37 +137,37 @@
 
     </div>
 
-    <div class="bg-white rounded-2xl shadow p-6">
+    <div class="card">
 
         <div class="flex justify-between items-center mb-5">
             <div>
-                <h3 class="text-xl font-bold">
+                <h3 class="card-title" style="font-size: var(--font-size-base);">
                     Usuarios Registrados
                 </h3>
 
-                <p class="text-slate-500 text-sm">
+                <p class="field-help">
                     Administración de cuentas, roles y estado de acceso
                 </p>
             </div>
         </div>
 
-        <div class="w-full overflow-x-auto">
-            <table class="min-w-[1100px] w-full text-left text-sm">
+        <div class="table-wrap">
+            <table class="table min-w-[1100px]">
 
-                <thead class="bg-slate-900 text-white">
+                <thead>
                     <tr>
-                        <th class="p-4 whitespace-nowrap">Usuario</th>
-                        <th class="p-4 whitespace-nowrap">Departamento</th>
-                        <th class="p-4 whitespace-nowrap">Cargo</th>
-                        <th class="p-4 whitespace-nowrap">Correo</th>
-                        <th class="p-4 whitespace-nowrap">Celular</th>
-                        <th class="p-4 whitespace-nowrap">Rol</th>
-                        <th class="p-4 whitespace-nowrap">Estado</th>
-                        <th class="p-4 whitespace-nowrap">Acciones</th>
+                        <th class="whitespace-nowrap">Usuario</th>
+                        <th class="whitespace-nowrap">Departamento</th>
+                        <th class="whitespace-nowrap">Cargo</th>
+                        <th class="whitespace-nowrap">Correo</th>
+                        <th class="whitespace-nowrap">Celular</th>
+                        <th class="whitespace-nowrap">Rol</th>
+                        <th class="whitespace-nowrap">Estado</th>
+                        <th class="whitespace-nowrap">Acciones</th>
                     </tr>
                 </thead>
 
-                <tbody id="usersList" class="divide-y"></tbody>
+                <tbody id="usersList"></tbody>
 
             </table>
         </div>
@@ -148,99 +179,106 @@
     </main>
 
 </div>
-<div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg">
+<div id="editModal" class="hidden modal-overlay fixed inset-0 flex items-center justify-center p-4">
+    <div class="modal-panel">
+        <div class="modal-body">
 
-        <h3 class="text-2xl font-bold mb-5">Editar Usuario</h3>
+            <h3 class="text-2xl font-bold mb-5" style="color: var(--text-primary);">Editar Usuario</h3>
 
-        <input type="hidden" id="editUserId">
+            <input type="hidden" id="editUserId">
 
-        <div class="space-y-4">
-            <input id="editName" type="text" placeholder="Nombre" class="w-full border rounded-xl p-3">
-            <input id="editDepartment" type="text" placeholder="Departamento" class="w-full border rounded-xl p-3">
-            <input id="editJobTitle" type="text" placeholder="Cargo" class="w-full border rounded-xl p-3">
-            <input id="editEmail" type="email" placeholder="Correo" class="w-full border rounded-xl p-3">
-            <input id="editPhone" type="text" placeholder="Celular" class="w-full border rounded-xl p-3">
+            <div class="space-y-4">
+                <input id="editName" type="text" placeholder="Nombre" class="input">
+                <input id="editDepartment" type="text" placeholder="Departamento" class="input">
+                <input id="editJobTitle" type="text" placeholder="Cargo" class="input">
+                <input id="editEmail" type="email" placeholder="Correo" class="input">
+                <input id="editPhone" type="text" placeholder="Celular" class="input">
 
-            <select id="editRole" class="w-full border rounded-xl p-3">
-                <option value="USER">Usuario</option>
-                <option value="ADMIN">Administrador</option>
-            </select>
+                <select id="editRole" class="select">
+                    <option value="USER">Usuario</option>
+                    <option value="ADMIN">Administrador</option>
+                </select>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="closeEditModal()" class="btn btn-outline">
+                    Cancelar
+                </button>
+
+                <button onclick="saveUserChanges()" class="btn btn-primary">
+                    Guardar cambios
+                </button>
+            </div>
+
         </div>
-
-        <div class="flex justify-end gap-3 mt-6">
-            <button onclick="closeEditModal()" class="px-4 py-2 border rounded-xl">
-                Cancelar
-            </button>
-
-            <button onclick="saveUserChanges()" class="px-4 py-2 bg-slate-900 text-white rounded-xl">
-                Guardar cambios
-            </button>
-        </div>
-
     </div>
 </div>
-<div id="passwordModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+<div id="passwordModal" class="hidden modal-overlay fixed inset-0 flex items-center justify-center p-4">
+    <div class="modal-panel" style="max-width: 28rem;">
+        <div class="modal-body">
 
-        <h3 class="text-2xl font-bold mb-2">Resetear contraseña</h3>
+            <h3 class="text-2xl font-bold mb-2" style="color: var(--text-primary);">Resetear contraseña</h3>
 
-        <p id="passwordModalUser" class="text-slate-500 mb-5"></p>
+            <p id="passwordModalUser" class="field-help mb-5"></p>
 
-        <input type="hidden" id="passwordUserId">
+            <input type="hidden" id="passwordUserId">
 
-        <input
-            id="newPassword"
-            type="password"
-            placeholder="Nueva contraseña"
-            class="w-full border rounded-xl p-3 mb-4"
-        >
+            <input
+                id="newPassword"
+                type="password"
+                placeholder="Nueva contraseña"
+                class="input mb-4"
+            >
 
-        <input
-            id="confirmPassword"
-            type="password"
-            placeholder="Confirmar contraseña"
-            class="w-full border rounded-xl p-3 mb-4"
-        >
+            <input
+                id="confirmPassword"
+                type="password"
+                placeholder="Confirmar contraseña"
+                class="input mb-4"
+            >
 
-        <p id="passwordMessage" class="hidden text-sm mb-4"></p>
+            <p id="passwordMessage" class="hidden text-sm mb-4"></p>
 
-        <div class="flex justify-end gap-3">
-            <button onclick="closePasswordModal()" class="px-4 py-2 border rounded-xl">
-                Cancelar
-            </button>
+            <div class="flex justify-end gap-3">
+                <button onclick="closePasswordModal()" class="btn btn-outline">
+                    Cancelar
+                </button>
 
-            <button onclick="saveNewPassword()" class="px-4 py-2 bg-slate-900 text-white rounded-xl">
-                Guardar contraseña
-            </button>
+                <button onclick="saveNewPassword()" class="btn btn-primary">
+                    Guardar contraseña
+                </button>
+            </div>
+
         </div>
-
     </div>
 </div>
-<div id="statusModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+<div id="statusModal" class="hidden modal-overlay fixed inset-0 flex items-center justify-center p-4">
+    <div class="modal-panel" style="max-width: 28rem;">
+        <div class="modal-body">
 
-        <h3 id="statusModalTitle" class="text-2xl font-bold mb-2">
-            Confirmar acción
-        </h3>
+            <h3 id="statusModalTitle" class="text-2xl font-bold mb-2" style="color: var(--text-primary);">
+                Confirmar acción
+            </h3>
 
-        <p id="statusModalText" class="text-slate-500 mb-5"></p>
+            <p id="statusModalText" class="field-help mb-5"></p>
 
-        <input type="hidden" id="statusUserId">
+            <input type="hidden" id="statusUserId">
 
-        <div class="flex justify-end gap-3">
-            <button onclick="closeStatusModal()" class="px-4 py-2 border rounded-xl">
-                Cancelar
-            </button>
+            <div class="flex justify-end gap-3">
+                <button onclick="closeStatusModal()" class="btn btn-outline">
+                    Cancelar
+                </button>
 
-            <button
-                id="confirmStatusBtn"
-                onclick="confirmToggleUser()"
-                class="px-4 py-2 text-white rounded-xl">
-                Confirmar
-            </button>
+                <button
+                    id="confirmStatusBtn"
+                    onclick="confirmToggleUser()"
+                    class="btn"
+                    style="color: #fff;">
+                    Confirmar
+                </button>
+            </div>
+
         </div>
-
     </div>
 </div>
 <script src="js/layout.js"></script>
@@ -248,6 +286,7 @@
 <script src="js/users.js"></script>
 <script>
     renderLayout('users');
+    lucide.createIcons();
 </script>
 </body>
 </html>

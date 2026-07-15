@@ -35,8 +35,8 @@ const loadPriorities = async () => {
 
                 <td class="p-4 font-semibold">
                     <span
-                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold text-white"
-                        style="background:${priority.color}">
+                        class="badge"
+                        style="background:${priority.color}; color: #fff;">
                         ${priority.name}
                     </span>
                 </td>
@@ -57,13 +57,13 @@ const loadPriorities = async () => {
                 <td class="p-4">
                     ${
                         priority.isActive
-                            ? '<span class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-semibold">Activo</span>'
-                            : '<span class="px-3 py-1 rounded-full bg-red-100 text-red-700 text-sm font-semibold">Inactivo</span>'
+                            ? '<span class="badge badge-success">Activo</span>'
+                            : '<span class="badge badge-danger">Inactivo</span>'
                     }
                 </td>
 
                 <td class="p-4">
-                <div class="flex items-center gap-2">
+                <div class="table-actions">
 
                     <button
                         onclick="openEditPriorityModal(
@@ -75,22 +75,25 @@ const loadPriorities = async () => {
                             ${priority.displayOrder || 1}
                         )"
                         title="Editar"
-                        class="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
-                        ✏️
+                        aria-label="Editar prioridad"
+                        class="btn btn-icon" style="background-color: rgba(37,99,235,0.12); color: var(--color-primary-blue);">
+                        <i data-lucide="pencil" class="icon-sm"></i>
                     </button>
 
                     <button
                         onclick="togglePriorityStatus(${priority.id}, ${priority.isActive})"
                         title="${priority.isActive ? 'Desactivar' : 'Activar'}"
-                        class="w-10 h-10 flex items-center justify-center rounded-xl bg-amber-100 text-amber-700 hover:bg-amber-200 transition">
-                        ${priority.isActive ? '⏸️' : '▶️'}
+                        aria-label="${priority.isActive ? 'Desactivar prioridad' : 'Activar prioridad'}"
+                        class="btn btn-icon" style="background-color: rgba(245,158,11,0.14); color: #B45309;">
+                        <i data-lucide="${priority.isActive ? 'pause' : 'play'}" class="icon-sm"></i>
                     </button>
 
                 <button
                     onclick="openDeletePriorityModal(${priority.id}, '${priority.name.replace(/'/g, "\\'")}')"
                     title="Eliminar"
-                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition">
-                    🗑️
+                    aria-label="Eliminar prioridad"
+                    class="btn btn-icon" style="background-color: rgba(239,68,68,0.12); color: var(--color-danger);">
+                    <i data-lucide="trash-2" class="icon-sm"></i>
                 </button>
 
                 </div>
@@ -101,6 +104,7 @@ const loadPriorities = async () => {
 
     });
 
+    refreshIcons();
 };
 const convertSlaToMinutes = (value, unit) => {
     const numericValue = Number(value);

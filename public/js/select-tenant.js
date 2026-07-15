@@ -55,38 +55,44 @@ const loadTenants = async () => {
         return;
     }
 
-    container.innerHTML = tenants.map(tenant => `
+    container.innerHTML = tenants.map((tenant, index) => `
         <button
             data-tenant-id="${tenant.id}"
-            class="tenant-card text-left bg-white rounded-2xl shadow p-6 hover:shadow-lg hover:-translate-y-0.5 transition border border-transparent hover:border-slate-300">
+            style="animation-delay: ${index * 60}ms;"
+            class="tenant-card card text-left hover:shadow-lg transition-all duration-200">
 
             <div class="flex items-center gap-4 mb-4">
                 ${
                     tenant.logoUrl
                         ? `<img src="${escapeHtml(tenant.logoUrl)}" class="w-12 h-12 rounded-xl object-cover border">`
-                        : `<div class="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-lg">
+                        : `<div class="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg text-white" style="background-color: var(--color-primary-navy);">
                                 ${escapeHtml((tenant.name || '?').substring(0, 2).toUpperCase())}
                            </div>`
                 }
 
                 <div>
-                    <h3 class="text-lg font-bold text-slate-800">${escapeHtml(tenant.name)}</h3>
-                    <span class="inline-block mt-1 px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
+                    <h3 class="text-lg font-bold" style="color: var(--text-primary);">${escapeHtml(tenant.name)}</h3>
+                    <span class="badge badge-success mt-1">
+                        <i data-lucide="check-circle-2" class="icon-sm"></i>
                         Activa
                     </span>
                 </div>
             </div>
 
             <div class="flex items-center justify-between text-sm">
-                <span class="font-semibold text-slate-600">
+                <span class="badge badge-blue">
+                    <i data-lucide="user" class="icon-sm"></i>
                     ${roleLabels[tenant.role] || tenant.role}
                 </span>
-                <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 font-semibold">
-                    ${tenant.openTickets} ticket(s) abierto(s)
+                <span class="badge badge-neutral">
+                    <i data-lucide="ticket" class="icon-sm"></i>
+                    ${tenant.openTickets} abierto(s)
                 </span>
             </div>
         </button>
     `).join('');
+
+    lucide.createIcons();
 
     document.querySelectorAll('.tenant-card').forEach(card => {
         card.addEventListener('click', () => {

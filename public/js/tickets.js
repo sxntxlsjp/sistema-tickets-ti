@@ -9,9 +9,9 @@ let tickets = [];
 
 const statusBadge = (status) => {
     const styles = {
-        EN_REVISION: 'bg-blue-100 text-blue-700',
-        PENDIENTE: 'bg-yellow-100 text-yellow-700',
-        FINALIZADO: 'bg-green-100 text-green-700'
+        EN_REVISION: 'badge-blue',
+        PENDIENTE: 'badge-warning',
+        FINALIZADO: 'badge-success'
     };
 
     const labels = {
@@ -21,7 +21,7 @@ const statusBadge = (status) => {
     };
 
     return `
-        <span class="px-3 py-1 rounded-full text-sm font-semibold ${styles[status]}">
+        <span class="badge ${styles[status]}">
             ${labels[status]}
         </span>
     `;
@@ -29,15 +29,16 @@ const statusBadge = (status) => {
 const slaBadge = (ticket) => {
     if (ticket.status === 'FINALIZADO') {
         return `
-            <span class="px-3 py-1 rounded-full text-sm font-semibold bg-slate-100 text-slate-600">
-                ⚪ Resuelto
+            <span class="badge badge-neutral">
+                <i data-lucide="circle" class="icon-sm"></i>
+                Resuelto
             </span>
         `;
     }
 
     if (!ticket.slaDueAt) {
         return `
-            <span class="px-3 py-1 rounded-full text-sm font-semibold bg-slate-100 text-slate-600">
+            <span class="badge badge-neutral">
                 Sin SLA
             </span>
         `;
@@ -50,23 +51,26 @@ const slaBadge = (ticket) => {
 
     if (diffHours < 0) {
         return `
-            <span class="px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-700">
-                🔴 Vencido
+            <span class="badge badge-danger">
+                <i data-lucide="alert-circle" class="icon-sm"></i>
+                Vencido
             </span>
         `;
     }
 
     if (diffHours <= 1) {
         return `
-            <span class="px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-700">
-                🟡 Por vencer
+            <span class="badge badge-warning">
+                <i data-lucide="clock" class="icon-sm"></i>
+                Por vencer
             </span>
         `;
     }
 
     return `
-        <span class="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700">
-            🟢 En tiempo
+        <span class="badge badge-success">
+            <i data-lucide="check-circle-2" class="icon-sm"></i>
+            En tiempo
         </span>
     `;
 };
@@ -96,14 +100,15 @@ const renderTickets = (data) => {
         </div>
 
         <div class="flex flex-wrap gap-2">
-            <span class="inline-flex items-center px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-xs font-semibold">
-                🏷️ ${ticket.type?.name || '—'}
+            <span class="badge badge-cyan">
+                <i data-lucide="tag" class="icon-sm"></i>
+                ${ticket.type?.name || '—'}
             </span>
 
             ${
                 ticket.ticketSubtype
                     ? `
-                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium">
+                        <span class="badge badge-neutral">
                             ${ticket.ticketSubtype.name}
                         </span>
                     `
@@ -125,7 +130,7 @@ const renderTickets = (data) => {
                                 </span>
                             `
                             : `
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-slate-200 text-slate-700">
+                                <span class="badge badge-neutral">
                                     Sin asignar
                                 </span>
                             `
@@ -158,13 +163,15 @@ const renderTickets = (data) => {
                 <td class="p-4 whitespace-nowrap">${formatDate(ticket.createdAt)}</td>
                 <td class="p-4">
                     <a href="ticket-detail.html?id=${ticket.id}"
-                       class="text-slate-900 font-semibold hover:underline">
+                       class="font-semibold hover:underline" style="color: var(--color-primary-blue);">
                         Ver detalle
                     </a>
                 </td>
             </tr>
         `;
     });
+
+    refreshIcons();
 };
 const populateFilters = (ticketsData) => {
     const typeFilter = document.getElementById('typeFilter');

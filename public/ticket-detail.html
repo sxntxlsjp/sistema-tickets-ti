@@ -2,35 +2,66 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Detalle Ticket | Sistema de Tickets</title>
+    <title>Detalle Ticket | MasterDiv Desk</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        'primary-navy': '#0D1B2A',
+                        'secondary-navy': '#1E293B',
+                        'primary-blue': '#2563EB',
+                        'accent-cyan': '#06B6D4',
+                        'success-green': '#10B981',
+                        surface: '#F1F5F9'
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/modal-behavior.js"></script>
 </head>
 
-<body class="bg-slate-100" data-page="tickets">
+<body data-page="tickets">
 
 <div class="min-h-screen">
 
 <aside id="sidebar"></aside>
 
-    <main class="flex-1 p-8 min-w-0">
+    <main class="flex-1 p-5 md:p-8 min-w-0">
 
         <div class="mb-6">
-            <a href="tickets.html" class="text-slate-600 hover:underline">
-                ← Volver a tickets
+            <a href="tickets.html" class="inline-flex items-center gap-2 text-sm font-semibold hover:underline" style="color: var(--text-secondary);">
+                <i data-lucide="arrow-left" class="icon-sm"></i>
+                Volver a tickets
             </a>
         </div>
 
-        <div id="ticketHeader" class="bg-white rounded-2xl shadow p-8 mb-6"></div>
+        <div id="ticketHeader" class="card card-lg mb-6"></div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             <section class="lg:col-span-2 space-y-6">
 
-                <div class="bg-white rounded-2xl shadow p-6">
-                    <h3 class="text-xl font-bold mb-4">Descripción</h3>
-                    <p id="ticketDescription" class="text-slate-600 leading-relaxed"></p>
+                <div class="card">
+                    <h3 class="card-title mb-4" style="font-size: var(--font-size-base);">Descripción</h3>
+                    <p id="ticketDescription" style="color: var(--text-secondary); line-height: 1.7;"></p>
                 </div>
-                <div id="satisfactionCard" class="hidden bg-gradient-to-br from-slate-900 to-slate-700 text-white rounded-2xl shadow p-6">
+                <div id="satisfactionCard" class="hidden card" style="background: linear-gradient(135deg, var(--color-primary-navy), var(--color-secondary-navy)); color: #fff; border: none;">
                     <h3 class="text-2xl font-bold mb-2">
                         ¿Cómo fue tu experiencia?
                     </h3>
@@ -39,31 +70,33 @@
                         Tu opinión nos ayuda a mejorar el servicio de soporte.
                     </p>
 
-                    <div id="ratingOptions" class="flex gap-3 mb-5">
-                        <button type="button" data-rating="1" class="rating-btn text-4xl opacity-60 hover:opacity-100 transition">😡</button>
-                        <button type="button" data-rating="2" class="rating-btn text-4xl opacity-60 hover:opacity-100 transition">😕</button>
-                        <button type="button" data-rating="3" class="rating-btn text-4xl opacity-60 hover:opacity-100 transition">😐</button>
-                        <button type="button" data-rating="4" class="rating-btn text-4xl opacity-60 hover:opacity-100 transition">😊</button>
-                        <button type="button" data-rating="5" class="rating-btn text-4xl opacity-60 hover:opacity-100 transition">🤩</button>
+                    <div id="ratingOptions" class="flex gap-2 mb-5">
+                        <button type="button" data-rating="1" aria-label="1 estrella" class="rating-btn btn btn-icon" style="color: rgba(255,255,255,0.5);"><i data-lucide="star"></i></button>
+                        <button type="button" data-rating="2" aria-label="2 estrellas" class="rating-btn btn btn-icon" style="color: rgba(255,255,255,0.5);"><i data-lucide="star"></i></button>
+                        <button type="button" data-rating="3" aria-label="3 estrellas" class="rating-btn btn btn-icon" style="color: rgba(255,255,255,0.5);"><i data-lucide="star"></i></button>
+                        <button type="button" data-rating="4" aria-label="4 estrellas" class="rating-btn btn btn-icon" style="color: rgba(255,255,255,0.5);"><i data-lucide="star"></i></button>
+                        <button type="button" data-rating="5" aria-label="5 estrellas" class="rating-btn btn btn-icon" style="color: rgba(255,255,255,0.5);"><i data-lucide="star"></i></button>
                     </div>
 
                     <textarea
                         id="satisfactionComment"
                         rows="3"
-                        class="w-full text-slate-800 border rounded-xl p-3 mb-4"
+                        class="textarea mb-4"
+                        style="color: var(--color-primary-navy);"
                         placeholder="Cuéntanos brevemente cómo fue la atención..."
                     ></textarea>
 
                     <button
                         id="sendSatisfactionBtn"
-                        class="bg-white text-slate-900 font-semibold px-5 py-3 rounded-xl hover:bg-slate-100">
+                        class="btn"
+                        style="background-color: #fff; color: var(--color-primary-navy);">
                         Enviar evaluación
                     </button>
 
                     <p id="satisfactionMessage" class="mt-4 text-sm"></p>
                 </div>
-                <div class="bg-white rounded-2xl shadow p-6">
-                    <h3 class="text-xl font-bold mb-4">Comentarios</h3>
+                <div class="card">
+                    <h3 class="card-title mb-4" style="font-size: var(--font-size-base);">Comentarios</h3>
 
                     <div id="commentsList" class="space-y-4 mb-6"></div>
 
@@ -71,12 +104,13 @@
                         <textarea
                             id="commentText"
                             rows="4"
-                            class="w-full border rounded-xl p-3 mb-3"
+                            class="textarea mb-3"
                             placeholder="Escribe un comentario..."
                             required
                         ></textarea>
 
-                        <button class="bg-slate-900 text-white px-5 py-3 rounded-xl hover:bg-slate-800">
+                        <button class="btn btn-primary">
+                            <i data-lucide="send" class="icon-sm"></i>
                             Agregar comentario
                         </button>
                     </form>
@@ -86,10 +120,10 @@
 
             <aside class="space-y-6">
 
-                <div id="statusCard" class="bg-white rounded-2xl shadow p-6">
-                    <h3 class="text-xl font-bold mb-4">Estado</h3>
+                <div id="statusCard" class="card">
+                    <h3 class="card-title mb-4" style="font-size: var(--font-size-base);">Estado</h3>
 
-                    <select id="statusSelect" class="w-full border rounded-xl p-3 mb-4">
+                    <select id="statusSelect" class="select mb-4">
                         <option value="EN_REVISION">En revisión</option>
                         <option value="PENDIENTE">Pendiente</option>
                         <option value="FINALIZADO">Finalizado</option>
@@ -97,42 +131,41 @@
 
                     <button
                         onclick="updateStatus()"
-                        class="w-full bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800">
+                        class="btn btn-secondary btn-block">
                         Actualizar estado
                     </button>
                 </div>
-                <div id="assignCard" class="bg-white rounded-2xl shadow p-6">
-                    <h3 class="text-xl font-bold mb-4">Responsable</h3>
+                <div id="assignCard" class="card">
+                    <h3 class="card-title mb-4" style="font-size: var(--font-size-base);">Responsable</h3>
 
-                    <p id="currentAssignee" class="text-slate-600 mb-4"></p>
+                    <p id="currentAssignee" class="field-help mb-4"></p>
 
-                    <select id="assignSelect" class="w-full border rounded-xl p-3 mb-4">
+                    <select id="assignSelect" class="select mb-4">
                     </select>
 
                     <button
                         onclick="reassignTicket()"
-                        class="w-full bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800">
+                        class="btn btn-secondary btn-block">
                         Reasignar responsable
                     </button>
                 </div>
-                <div class="bg-white rounded-2xl shadow p-6">
-                    <h3 class="text-xl font-bold mb-4">Adjuntos</h3>
+                <div class="card">
+                    <h3 class="card-title mb-4" style="font-size: var(--font-size-base);">Adjuntos</h3>
 
                 <form id="attachmentForm" class="mb-4">
 
                     <div
                         id="dropZone"
-                        class="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center cursor-pointer hover:bg-slate-50 transition">
+                        class="rounded-2xl p-6 text-center cursor-pointer transition"
+                        style="border: 2px dashed var(--border-strong);">
 
-                        <div class="text-4xl mb-3">
-                            📁
-                        </div>
+                        <i data-lucide="upload-cloud" class="icon-lg mx-auto mb-3" style="color: var(--text-muted); width: 32px; height: 32px;"></i>
 
-                        <p class="font-semibold text-slate-700">
+                        <p class="font-semibold" style="color: var(--text-secondary);">
                             Arrastra archivos aquí
                         </p>
 
-                        <p class="text-sm text-slate-500 mt-1">
+                        <p class="text-sm mt-1" style="color: var(--text-muted);">
                             o haz clic para seleccionarlos
                         </p>
 
@@ -152,7 +185,7 @@
                     <button
                         id="uploadFilesBtn"
                         type="submit"
-                        class="hidden w-full bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800 mt-4">
+                        class="hidden btn btn-secondary btn-block mt-4">
                         Subir archivos
                     </button>
 
@@ -166,8 +199,8 @@
                     <div id="attachmentsList" class="space-y-3"></div>
                 </div>
 
-                <div class="bg-white rounded-2xl shadow p-6">
-                    <h3 class="text-xl font-bold mb-4">Historial</h3>
+                <div class="card">
+                    <h3 class="card-title mb-4" style="font-size: var(--font-size-base);">Historial</h3>
                     <div id="historyList" class="space-y-3 text-sm"></div>
                 </div>
 
@@ -179,33 +212,37 @@
 
 </div>
 
-<div id="priorityModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
-    <div id="priorityModalContent" class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-3xl transform scale-95 opacity-0 transition-all duration-300">
+<div id="priorityModal" class="hidden modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50">
+    <div id="priorityModalContent" class="modal-panel" style="max-width: 48rem;">
 
-        <div class="flex items-start justify-between mb-6">
+        <div class="modal-header">
             <div>
-                <h3 class="text-2xl font-bold text-slate-800">
+                <h3 class="text-2xl font-bold" style="color: var(--text-primary);">
                     Asignar prioridad
                 </h3>
 
-                <p class="text-slate-500 mt-1">
+                <p class="field-help mt-1">
                     Selecciona la prioridad que tendrá este ticket y se iniciará el SLA correspondiente.
                 </p>
             </div>
 
             <button
                 onclick="closePriorityModal()"
-                class="w-10 h-10 rounded-xl hover:bg-slate-100 text-slate-500">
-                ✕
+                aria-label="Cerrar"
+                class="btn btn-icon">
+                <i data-lucide="x"></i>
             </button>
         </div>
 
-        <div id="priorityOptions" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-        <div class="flex justify-end mt-6 gap-3">
+        <div class="modal-body">
+            <div id="priorityOptions" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+
+        <div class="modal-footer">
 
             <button
                 onclick="closePriorityModal()"
-                class="px-5 py-3 border rounded-xl hover:bg-slate-50">
+                class="btn btn-outline">
                 Cancelar
             </button>
 
@@ -213,7 +250,7 @@
                 id="assignPriorityBtn"
                 onclick="assignPriority()"
                 disabled
-                class="px-5 py-3 bg-slate-900 text-white rounded-xl opacity-50 cursor-not-allowed">
+                class="btn btn-primary">
                 Asignar prioridad
             </button>
 
@@ -221,27 +258,27 @@
 
     </div>
 </div>
-<div id="prioritySuccessModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
-    <div id="prioritySuccessModalContent" class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md text-center transform scale-95 opacity-0 transition-all duration-300">
+<div id="prioritySuccessModal" class="hidden modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50">
+    <div id="prioritySuccessModalContent" class="modal-panel text-center" style="max-width: 28rem;">
+        <div class="modal-body">
+            <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style="background-color: rgba(16, 185, 129, 0.14); color: var(--color-success-green);">
+                <i data-lucide="check" class="icon-lg"></i>
+            </div>
 
-        <div class="w-20 h-20 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-4xl mx-auto mb-5">
-            ✓
+            <h3 class="text-2xl font-bold mb-2" style="color: var(--text-primary);">
+                Prioridad asignada
+            </h3>
+
+            <p class="field-help mb-6">
+                La prioridad fue asignada correctamente y el SLA ha iniciado.
+            </p>
+
+            <button
+                onclick="closePrioritySuccessModal()"
+                class="btn btn-primary btn-block">
+                Entendido
+            </button>
         </div>
-
-        <h3 class="text-2xl font-bold text-slate-800 mb-2">
-            Prioridad asignada
-        </h3>
-
-        <p class="text-slate-500 mb-6">
-            La prioridad fue asignada correctamente y el SLA ha iniciado.
-        </p>
-
-        <button
-            onclick="closePrioritySuccessModal()"
-            class="w-full bg-slate-900 text-white py-3 rounded-2xl hover:bg-slate-800">
-            Entendido
-        </button>
-
     </div>
 </div>
 <script src="js/layout.js"></script>
@@ -249,6 +286,7 @@
 <script src="js/ticket-detail.js"></script>
 <script>
     renderLayout('ticket');
+    lucide.createIcons();
 </script>
 </body>
 </html>

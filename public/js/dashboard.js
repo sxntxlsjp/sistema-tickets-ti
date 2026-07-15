@@ -32,8 +32,19 @@ const setText = (id, value) => {
     if (el) el.textContent = value;
 };
 
+const applyChartTheme = () => {
+    if (typeof Chart === 'undefined') return;
+
+    const isDark = typeof resolveTheme === 'function' && resolveTheme(getThemePreference()) === 'dark';
+
+    Chart.defaults.color = isDark ? '#CBD5E1' : '#475569';
+    Chart.defaults.borderColor = isDark ? '#22324A' : '#E2E8F0';
+    Chart.defaults.font.family = "'Poppins', ui-sans-serif, system-ui, sans-serif";
+};
+
 const loadDashboard = async (range = 'all') => {
     setActiveRangeButton(range);
+    applyChartTheme();
 
     let data;
 
@@ -78,21 +89,30 @@ const loadDashboard = async (range = 'all') => {
             : '-'
     );
 
-    setText(
-        'satisfactionAverage',
-        `${Number(data.satisfactionAverage || 0).toFixed(1)} ⭐`
-    );
+    const satisfactionEl = document.getElementById('satisfactionAverage');
+    if (satisfactionEl) {
+        satisfactionEl.innerHTML = `${Number(data.satisfactionAverage || 0).toFixed(1)} <i data-lucide="star" class="inline icon-sm" style="fill: currentColor;"></i>`;
+        refreshIcons();
+    }
+
+    const statusColors = {
+        EN_REVISION: '#2563EB',
+        PENDIENTE: '#F59E0B',
+        FINALIZADO: '#10B981'
+    };
 
     const statusData = (data.ticketsByStatus || []).map(item => ({
         label: statusLabels[item.status] || item.status,
-        total: item._count
+        total: item._count,
+        color: statusColors[item.status] || '#94A3B8'
     }));
 
     renderChart(
         'statusChart',
         statusData.map(item => item.label),
         statusData.map(item => item.total),
-        'doughnut'
+        'doughnut',
+        statusData.map(item => item.color)
     );
 
     const priorityData = data.ticketsByPriority || [];
@@ -110,7 +130,7 @@ const loadDashboard = async (range = 'all') => {
         ['No iniciado', 'En tiempo', 'Por vencer', 'Vencido'],
         [data.slaNotStarted || 0, data.slaOnTime || 0, data.slaDueSoon || 0, data.slaOverdue || 0],
         'doughnut',
-        ['#94A3B8', '#22C55E', '#F59E0B', '#EF4444']
+        ['#94A3B8', '#10B981', '#F59E0B', '#EF4444']
     );
 
     renderBars(
@@ -151,15 +171,15 @@ const formatMinutes = (minutes) => {
 
 const setActiveRangeButton = (range) => {
     document.querySelectorAll('.range-btn').forEach(button => {
-        button.classList.remove('bg-slate-900', 'text-white');
-        button.classList.add('bg-white', 'text-slate-700');
+        button.classList.remove('btn-secondary');
+        button.classList.add('btn-outline');
     });
 
     const activeButton = document.querySelector(`[data-range="${range}"]`);
 
     if (activeButton) {
-        activeButton.classList.remove('bg-white', 'text-slate-700');
-        activeButton.classList.add('bg-slate-900', 'text-white');
+        activeButton.classList.remove('btn-outline');
+        activeButton.classList.add('btn-secondary');
     }
 };
 
@@ -190,21 +210,25 @@ const loadAdminAlerts = async () => {
     }
 
     container.innerHTML = `
-        <div class="bg-amber-50 border border-amber-200 rounded-2xl shadow p-6">
+        <div class="card" style="background-color: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.35);">
 
             <div class="flex justify-between items-start mb-4">
 
-                <div>
-                    <h3 class="text-xl font-bold text-amber-800">
-                        🔔 Atención requerida
-                    </h3>
+                <div class="flex items-start gap-3">
+                    <i data-lucide="bell-ring" style="color: var(--color-warning);"></i>
 
-                    <p class="text-amber-700 mt-1">
-                        Tienes ${data.totalPendingAssigned} ticket(s) pendiente(s) asignado(s).
-                    </p>
+                    <div>
+                        <h3 class="text-xl font-bold" style="color: var(--text-primary);">
+                            Atención requerida
+                        </h3>
+
+                        <p class="mt-1" style="color: var(--text-secondary);">
+                            Tienes ${data.totalPendingAssigned} ticket(s) pendiente(s) asignado(s).
+                        </p>
+                    </div>
                 </div>
 
-                <span class="bg-amber-200 text-amber-800 px-4 py-2 rounded-full font-bold">
+                <span class="badge badge-warning" style="font-size: var(--font-size-base); padding: var(--space-2) var(--space-4);">
                     ${data.totalPendingAssigned}
                 </span>
 
@@ -213,30 +237,30 @@ const loadAdminAlerts = async () => {
             <div class="space-y-3">
                 ${data.tickets.map(ticket => `
                     <a href="ticket-detail.html?id=${ticket.id}"
-                       class="block bg-white border border-amber-100 rounded-xl p-4 hover:bg-amber-100 transition">
+                       class="block card card-compact hover:shadow-md transition">
 
                         <div class="flex justify-between">
 
                             <div>
-                                <p class="font-bold text-slate-800">
+                                <p class="font-bold" style="color: var(--text-primary);">
                                     ${escapeHtml(ticket.ticketNumber)}
                                 </p>
 
-                                <p class="text-slate-600">
+                                <p style="color: var(--text-secondary);">
                                     ${escapeHtml(ticket.subject)}
                                 </p>
 
-                                <p class="text-sm text-slate-500 mt-1">
+                                <p class="text-sm mt-1" style="color: var(--text-muted);">
                                     ${escapeHtml(ticket.type?.name || '-')} · ${escapeHtml(ticket.requester?.name || '-')}
                                 </p>
                             </div>
 
                             <div class="text-right">
-                                <p class="font-semibold text-amber-700">
+                                <p class="font-semibold" style="color: var(--color-warning);">
                                     Pendiente
                                 </p>
 
-                                <p class="text-xs text-slate-500">
+                                <p class="text-xs" style="color: var(--text-muted);">
                                     ${new Date(ticket.createdAt).toLocaleDateString('es-EC')}
                                 </p>
                             </div>
@@ -249,6 +273,8 @@ const loadAdminAlerts = async () => {
 
         </div>
     `;
+
+    refreshIcons();
 };
 
 const renderChart = (canvasId, labels, values, chartType = 'doughnut', colors = null) => {
@@ -373,7 +399,9 @@ const renderLatestSatisfactions = (items) => {
             <div class="border rounded-xl p-4">
                 <div class="flex justify-between mb-2">
                     <p class="font-bold">${escapeHtml(item.ticket.ticketNumber)}</p>
-                    <p class="font-bold">${'⭐'.repeat(item.rating)}</p>
+                    <p class="font-bold flex items-center" style="color: var(--color-warning);">
+                        ${'<i data-lucide="star" class="icon-sm" style="fill: currentColor;"></i>'.repeat(item.rating)}
+                    </p>
                 </div>
 
                 <p class="text-slate-600">${escapeHtml(item.ticket.subject)}</p>
@@ -390,6 +418,8 @@ const renderLatestSatisfactions = (items) => {
             </div>
         `;
     });
+
+    refreshIcons();
 };
 
 const renderOverdueTickets = (tickets) => {
@@ -488,5 +518,9 @@ document
         exportManagementReport
     );
 
+document.addEventListener('themechange', () => {
+    const activeRange = document.querySelector('.range-btn.btn-secondary')?.dataset.range || 'all';
+    loadDashboard(activeRange);
+});
 
 loadDashboard('all');

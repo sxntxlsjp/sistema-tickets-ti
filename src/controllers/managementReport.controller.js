@@ -15,6 +15,7 @@ const generateManagementReport = async (req, res) => {
                 requester: true,
                 assignee: true,
                 type: true,
+                priority: true,
                 satisfaction: true
             }
         });
@@ -33,6 +34,7 @@ const generateManagementReport = async (req, res) => {
         const overdueTickets =
             tickets.filter(ticket =>
                 ticket.status !== 'FINALIZADO' &&
+                ticket.priorityId &&
                 ticket.slaDueAt &&
                 new Date(ticket.slaDueAt) < new Date()
             ).length;
@@ -74,7 +76,7 @@ const generateManagementReport = async (req, res) => {
                 groupBy(tickets, ticket => ticket.status);
 
             const ticketsByPriority =
-                groupBy(tickets, ticket => ticket.priority);
+                groupBy(tickets, ticket => ticket.priority?.name);
 
             const ticketsByType =
                 groupBy(tickets, ticket => ticket.type?.name);

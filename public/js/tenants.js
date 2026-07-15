@@ -62,20 +62,16 @@ const loadTenants = async () => {
 
     tenantsCache.forEach(tenant => {
         container.innerHTML += `
-            <div class="border rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
+            <div class="card flex flex-wrap items-center justify-between gap-4">
 
                 <div>
                     <div class="flex items-center gap-3">
-                        <h4 class="font-bold text-slate-800">${escapeHtml(tenant.name)}</h4>
-                        <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                            tenant.isActive
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-red-100 text-red-700'
-                        }">
+                        <h4 class="font-bold" style="color: var(--text-primary);">${escapeHtml(tenant.name)}</h4>
+                        <span class="badge ${tenant.isActive ? 'badge-success' : 'badge-danger'}">
                             ${tenant.isActive ? 'Activa' : 'Inactiva'}
                         </span>
                     </div>
-                    <p class="text-sm text-slate-500 mt-1">
+                    <p class="text-sm mt-1" style="color: var(--text-muted);">
                         ${escapeHtml(tenant.slug)} · ${tenant.usersCount} usuario(s) · ${tenant.openTickets} ticket(s) abierto(s)
                     </p>
                 </div>
@@ -83,32 +79,38 @@ const loadTenants = async () => {
                 <div class="flex gap-2">
                     <button
                         onclick="accessTenant(${tenant.id})"
-                        class="px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 text-sm font-semibold">
+                        class="btn btn-secondary btn-sm">
+                        <i data-lucide="log-in" class="icon-sm"></i>
                         Acceder
                     </button>
 
                     <button
                         onclick="editTenant(${tenant.id})"
                         title="Editar empresa"
-                        class="w-10 h-10 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">
-                        ✏️
+                        aria-label="Editar empresa"
+                        class="btn btn-icon" style="background-color: rgba(37,99,235,0.12); color: var(--color-primary-blue);">
+                        <i data-lucide="pencil" class="icon-sm"></i>
                     </button>
 
                     <button
                         onclick="toggleTenant(${tenant.id})"
                         title="${tenant.isActive ? 'Desactivar empresa' : 'Activar empresa'}"
-                        class="w-10 h-10 ${
+                        aria-label="${tenant.isActive ? 'Desactivar empresa' : 'Activar empresa'}"
+                        class="btn btn-icon"
+                        style="${
                             tenant.isActive
-                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                : 'bg-green-100 text-green-700 hover:bg-green-200'
-                        } rounded-lg">
-                        ${tenant.isActive ? '🚫' : '✅'}
+                                ? 'background-color: rgba(239,68,68,0.12); color: var(--color-danger);'
+                                : 'background-color: rgba(16,185,129,0.14); color: var(--color-success-green);'
+                        }">
+                        <i data-lucide="${tenant.isActive ? 'ban' : 'check'}" class="icon-sm"></i>
                     </button>
                 </div>
 
             </div>
         `;
     });
+
+    refreshIcons();
 };
 
 document.getElementById('tenantForm').addEventListener('submit', async (event) => {
