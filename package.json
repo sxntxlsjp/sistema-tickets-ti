@@ -2,19 +2,20 @@
   "name": "sistema-tickets",
   "version": "1.0.0",
   "main": "index.js",
-"scripts": {
-  "dev": "nodemon src/server.js",
-  "start": "node src/server.js",
-  "seed": "node prisma/seed/seed.js",
-  "prisma:generate": "prisma generate",
-  "prisma:migrate": "prisma migrate deploy"
-},
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "seed": "node prisma/seed/seed.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate deploy"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "@prisma/client": "^6.9.0",
+    "@supabase/supabase-js": "^2.110.6",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",

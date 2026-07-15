@@ -1,5 +1,10 @@
 const prisma = require('../config/prisma');
 const bcrypt = require('bcrypt');
+const path = require('path');
+const storageService = require('../services/storage.service');
+
+const PROFILE_IMAGES_BUCKET = process.env.SUPABASE_PROFILE_IMAGES_BUCKET;
+
 const uploadProfileImage = async (req, res) => {
     try {
         if (!req.file) {
@@ -8,16 +13,24 @@ const uploadProfileImage = async (req, res) => {
             });
         }
 
-        const imagePath = `/uploads/profiles/${req.file.filename}`;
+        // profileImage es un atributo del usuario, no del tenant activo:
+        // un mismo usuario puede pertenecer a varias empresas y comparte una sola foto.
+        const extension = path.extname(req.file.originalname).toLowerCase() || '.jpg';
+        const storageKey = `user-${req.user.id}${extension}`;
 
-
+        await storageService.upload(
+            PROFILE_IMAGES_BUCKET,
+            storageKey,
+            req.file.buffer,
+            req.file.mimetype
+        );
 
         const user = await prisma.user.update({
             where: {
                 id: req.user.id
             },
             data: {
-                profileImage: imagePath
+                profileImage: storageKey
             },
             select: {
                 id: true,
@@ -37,7 +50,7 @@ const uploadProfileImage = async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error);
+        console.error('[uploadProfileImage]', error.message);
 
         return res.status(500).json({
             message: 'Error al actualizar foto de perfil'

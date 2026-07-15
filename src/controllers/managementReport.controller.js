@@ -109,21 +109,32 @@ const generateManagementReport = async (req, res) => {
             });
 
             const browser = await puppeteer.launch({
-                headless: true
+                headless: true,
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-gpu'
+                ]
             });
 
-            const page = await browser.newPage();
+            let pdfBuffer;
 
-            await page.setContent(html, {
-                waitUntil: 'networkidle0'
-            });
+            try {
+                const page = await browser.newPage();
 
-            const pdfBuffer = await page.pdf({
-                format: 'A4',
-                printBackground: true
-            });
+                await page.setContent(html, {
+                    waitUntil: 'networkidle0',
+                    timeout: 30000
+                });
 
-            await browser.close();
+                pdfBuffer = await page.pdf({
+                    format: 'A4',
+                    printBackground: true
+                });
+            } finally {
+                await browser.close();
+            }
 
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader(
@@ -135,7 +146,7 @@ const generateManagementReport = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
+        console.error('[generateManagementReport]', error.message);
 
         return res.status(500).json({
             message: 'Error al generar reporte'

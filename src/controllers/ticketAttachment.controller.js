@@ -3,8 +3,10 @@ const path = require('path');
 const prisma = require('../config/prisma');
 const { findTenantTicket } = require('../utils/ticketTenant.util');
 const { canAccessTicket } = require('../utils/ticketAccess.util');
+const storageService = require('../services/storage.service');
 
 const ticketUploadsPath = path.join(__dirname, '../uploads');
+const ATTACHMENTS_BUCKET = process.env.SUPABASE_TICKET_ATTACHMENTS_BUCKET;
 
 const uploadAttachment = async (req, res) => {
     try {
@@ -24,12 +26,23 @@ const uploadAttachment = async (req, res) => {
             });
         }
 
+        const storageKey =
+            `tenant-${ticket.tenantId}/ticket-${ticket.id}/${Date.now()}-${req.file.originalname}`;
+
+        await storageService.upload(
+            ATTACHMENTS_BUCKET,
+            storageKey,
+            req.file.buffer,
+            req.file.mimetype
+        );
+
         const attachment = await prisma.ticketAttachment.create({
             data: {
                 ticketId: Number(id),
                 uploadedBy: req.user.id,
                 fileName: req.file.originalname,
-                filePath: req.file.filename,
+                storageKey,
+                bucket: ATTACHMENTS_BUCKET,
                 mimeType: req.file.mimetype,
                 fileSize: req.file.size
             }
@@ -41,7 +54,7 @@ const uploadAttachment = async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error);
+        console.error('[uploadAttachment]', error.message);
 
         return res.status(500).json({
             message: 'Error al adjuntar archivo'
@@ -108,18 +121,38 @@ const downloadAttachment = async (req, res) => {
             });
         }
 
-        const absolutePath = path.join(ticketUploadsPath, path.basename(attachment.filePath));
+        // Compatibilidad: adjuntos antiguos solo tienen filePath (disco local).
+        if (!attachment.storageKey) {
+            const absolutePath = path.join(ticketUploadsPath, path.basename(attachment.filePath));
 
-        if (!fs.existsSync(absolutePath)) {
-            return res.status(404).json({
-                message: 'Archivo no encontrado'
-            });
+            if (!fs.existsSync(absolutePath)) {
+                return res.status(404).json({
+                    message: 'Archivo no encontrado'
+                });
+            }
+
+            return res.download(absolutePath, attachment.fileName);
         }
 
-        return res.download(absolutePath, attachment.fileName);
+        const fileStream = await storageService.stream(attachment.bucket, attachment.storageKey);
+
+        res.setHeader('Content-Type', attachment.mimeType);
+        res.setHeader(
+            'Content-Disposition',
+            `attachment; filename="${encodeURIComponent(attachment.fileName)}"`
+        );
+
+        fileStream.on('error', (streamError) => {
+            console.error('[downloadAttachment:stream]', streamError.message);
+            if (!res.headersSent) {
+                res.status(500).json({ message: 'Error al descargar el archivo' });
+            }
+        });
+
+        return fileStream.pipe(res);
 
     } catch (error) {
-        console.error(error);
+        console.error('[downloadAttachment]', error.message);
 
         return res.status(500).json({
             message: 'Error al descargar el archivo'

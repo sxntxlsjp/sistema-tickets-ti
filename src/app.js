@@ -23,6 +23,7 @@ const systemSettingRoutes = require('./routes/systemSetting.routes');
 const ticketSubtypeRoutes = require('./routes/ticketSubtype.routes');
 const ticketPriorityRoutes = require('./routes/ticketPriority.routes');
 const tenantRoutes = require('./routes/tenant.routes');
+const attachProfileImageUrls = require('./middlewares/profileImageUrl.middleware');
 
 const app = express();
 const ticketUploadsPath = path.join(__dirname, 'uploads');
@@ -38,6 +39,7 @@ app.use(
     '/uploads/profiles',
     express.static(profileUploadsPath)
 );
+app.use('/api', attachProfileImageUrls);
 
 app.get('/', (req, res) => {
     res.json({
