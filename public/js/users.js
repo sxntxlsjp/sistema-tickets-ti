@@ -14,6 +14,14 @@ const usersList = document.getElementById('usersList');
 let usersCache = [];
 const userForm = document.getElementById('userForm');
 
+// Convención oficial de roles de empresa (TenantUser.role). 'ADMIN' es un valor
+// heredado que ya no debe usarse aquí: ver Sprint 19 (normalizacion de roles).
+const tenantRoleLabels = {
+    TENANT_ADMIN: 'Administrador',
+    AGENT: 'Agente',
+    USER: 'Usuario'
+};
+
 const loadUsers = async () => {
     const response = await fetch(`${API_URL}/users`, {
         headers: {
@@ -81,8 +89,8 @@ users.forEach(item => {
             </td>
 
             <td class="p-4 whitespace-nowrap">
-                <span class="badge ${item.role === 'ADMIN' ? 'badge-navy' : 'badge-blue'}">
-                    ${item.role === 'ADMIN' ? 'Administrador' : 'Usuario'}
+                <span class="badge ${item.role === 'TENANT_ADMIN' ? 'badge-navy' : 'badge-blue'}">
+                    ${tenantRoleLabels[item.role] || item.role}
                 </span>
             </td>
 

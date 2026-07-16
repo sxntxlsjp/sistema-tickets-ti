@@ -54,7 +54,12 @@ const renderLayout = (activePage = '') => {
         : 'US';
 
     const activeTenant = typeof getActiveTenant === 'function' ? getActiveTenant() : null;
-    const homeHref = user.role === 'ADMIN' ? 'dashboard.html' : 'user-home.html';
+
+    // Fuente de autorización oficial (Sprint 19): Super Administrador global via
+    // isSuperAdmin, Administrador de empresa via tenantRole === 'TENANT_ADMIN'.
+    // No usar user.role === 'ADMIN' (valor heredado y ambiguo).
+    const isEffectiveAdmin = Boolean(user.isSuperAdmin || user.tenantRole === 'TENANT_ADMIN');
+    const homeHref = isEffectiveAdmin ? 'dashboard.html' : 'user-home.html';
 
     const adminChildren = [
         { key: 'users', label: 'Usuarios', icon: 'users', href: 'users.html' },
@@ -68,7 +73,7 @@ const renderLayout = (activePage = '') => {
         adminChildren.push({ key: 'tenants', label: 'Empresas', icon: 'building-2', href: 'tenants.html' });
     }
 
-    const menuItems = user.role === 'ADMIN'
+    const menuItems = isEffectiveAdmin
         ? [
             { key: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard', href: 'dashboard.html' },
             { key: 'tickets', label: 'Tickets', icon: 'ticket', href: 'tickets.html' },
@@ -210,7 +215,7 @@ const renderLayout = (activePage = '') => {
                         <div class="hidden 2xl:block leading-tight">
                             <p class="text-sm font-semibold" style="color: var(--text-primary);">${escapeLayoutHtml(user.name)}</p>
                             <p class="text-xs" style="color: var(--text-muted);">
-                                ${escapeLayoutHtml(user.jobTitle || (user.role === 'ADMIN' ? 'Administrador' : 'Usuario'))}
+                                ${escapeLayoutHtml(user.jobTitle || (isEffectiveAdmin ? 'Administrador' : 'Usuario'))}
                             </p>
                         </div>
                     </div>

@@ -3,6 +3,12 @@ const bcrypt = require('bcrypt');
 
 const TENANT_ROLES = ['TENANT_ADMIN', 'AGENT', 'USER'];
 
+// Compatibilidad temporal de entrada (Sprint 19): el Frontend legado y algunos
+// clientes antiguos aún pueden enviar 'ADMIN'. Se normaliza a 'TENANT_ADMIN',
+// el único rol administrativo válido a nivel de empresa (TenantUser.role).
+// 'SUPER_ADMIN' e 'isSuperAdmin' nunca se aceptan por esta vía: ver User.isSuperAdmin.
+const normalizeTenantRole = (role) => (role === 'ADMIN' ? 'TENANT_ADMIN' : role);
+
 const getSupportUsers = async (req, res) => {
     try {
         const memberships = await prisma.tenantUser.findMany({
@@ -65,7 +71,19 @@ const createUser = async (req, res) => {
             });
         }
 
-        const tenantRole = TENANT_ROLES.includes(role) ? role : 'USER';
+        let tenantRole = 'USER';
+
+        if (role !== undefined) {
+            const normalizedRole = normalizeTenantRole(role);
+
+            if (!TENANT_ROLES.includes(normalizedRole)) {
+                return res.status(400).json({
+                    message: 'Rol inválido'
+                });
+            }
+
+            tenantRole = normalizedRole;
+        }
 
         let user = await prisma.user.findUnique({
             where: { email }
@@ -212,6 +230,18 @@ const updateUser = async (req, res) => {
             });
         }
 
+        let normalizedRole = membership.role;
+
+        if (role !== undefined) {
+            normalizedRole = normalizeTenantRole(role);
+
+            if (!TENANT_ROLES.includes(normalizedRole)) {
+                return res.status(400).json({
+                    message: 'Rol inválido'
+                });
+            }
+        }
+
         // Identidad global (nombre, correo) solo la puede modificar un Super Administrador.
         // Un TENANT_ADMIN solo administra datos de contexto laboral dentro de su empresa.
         const globalIdentityData = req.user.isSuperAdmin
@@ -243,7 +273,7 @@ const updateUser = async (req, res) => {
                 id: membership.id
             },
             data: {
-                role: TENANT_ROLES.includes(role) ? role : membership.role,
+                role: normalizedRole,
                 isActive: isActive !== undefined ? Boolean(isActive) : membership.isActive
             }
         });
