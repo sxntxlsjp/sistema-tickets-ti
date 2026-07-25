@@ -145,9 +145,18 @@ const generateManagementReport = async (req, res) => {
                 const page = await browser.newPage();
 
                 await page.setContent(html, {
-                    waitUntil: 'networkidle0',
+                    waitUntil: 'domcontentloaded',
                     timeout: 30000
                 });
+
+                await Promise.race([
+                    page.evaluate(async () => {
+                        if (document.fonts?.ready) {
+                            await document.fonts.ready;
+                        }
+                    }),
+                    new Promise(resolve => setTimeout(resolve, 5000))
+                ]);
 
                 pdfBuffer = await page.pdf({
                     format: 'A4',
