@@ -25,6 +25,7 @@ const ticketPriorityRoutes = require('./routes/ticketPriority.routes');
 const tenantRoutes = require('./routes/tenant.routes');
 const healthRoutes = require('./routes/health.routes');
 const attachProfileImageUrls = require('./middlewares/profileImageUrl.middleware');
+const requireDatabaseReady = require('./middlewares/readiness.middleware');
 
 const app = express();
 const ticketUploadsPath = path.join(__dirname, 'uploads');
@@ -41,10 +42,14 @@ app.use(
     express.static(profileUploadsPath)
 );
 
-// Registrado antes del interceptor de perfil y sin auth: los health checks deben ser
-// lo más independientes y livianos posible (Sprint 20, Bloque I).
+// Registrado antes de cualquier otra cosa y sin auth: los health checks deben ser
+// lo más independientes y livianos posible (Sprint 20, Bloque I) y nunca deben
+// quedar bloqueados por el middleware de readiness (Sprint 21, Fase 7/8) — Hostinger
+// debe poder considerar viva la app vía /api/health aunque la DB no esté lista.
 app.use('/api/health', healthRoutes);
 
+// Todo lo demás bajo /api requiere DB lista antes de intentar resolver la ruta.
+app.use('/api', requireDatabaseReady);
 app.use('/api', attachProfileImageUrls);
 
 app.get('/', (req, res) => {

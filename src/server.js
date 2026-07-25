@@ -2,6 +2,7 @@ require('dotenv').config({ quiet: true });
 
 const runtimeLogger = require('./utils/runtimeLogger.util');
 const prisma = require('./config/prisma');
+const readinessService = require('./services/readiness.service');
 const app = require('./app');
 
 const PORT = process.env.PORT || 3000;
@@ -10,37 +11,9 @@ const SHUTDOWN_TIMEOUT_MS = 10_000;
 let server;
 let isShuttingDown = false;
 
-const testPrismaConnection = async () => {
-    const startedAt = Date.now();
-
-    runtimeLogger.log('prisma.connect.start');
-
-    try {
-        await prisma.$queryRaw`SELECT 1`;
-
-        runtimeLogger.log('prisma.connect.success', {
-            durationMs: Date.now() - startedAt
-        });
-
-        return true;
-
-    } catch (error) {
-        runtimeLogger.log('prisma.connect.failure', {
-            durationMs: Date.now() - startedAt
-        });
-
-        runtimeLogger.logError('prisma.connect.failure.detail', error, {
-            clientVersion: error?.clientVersion,
-            isPrismaRustPanic: error?.name === 'PrismaClientRustPanicError'
-        });
-
-        return false;
-    }
-};
-
-// Cierre ordenado (Sprint 20, Bloque G). isShuttingDown evita ejecutar el flujo dos
-// veces si SIGTERM/SIGINT/uncaughtException llegan casi al mismo tiempo. El timeout
-// de seguridad garantiza que el proceso termine aunque el cierre limpio se cuelgue.
+// Cierre ordenado (Sprint 20/21). isShuttingDown evita ejecutar el flujo dos veces.
+// El timeout de seguridad garantiza que el proceso termine aunque el cierre limpio
+// se cuelgue. pool.end() se llama a través de prisma.disconnect(), que es idempotente.
 const shutdown = async (reason, exitCode = 0) => {
     if (isShuttingDown) return;
     isShuttingDown = true;
@@ -53,6 +26,8 @@ const shutdown = async (reason, exitCode = 0) => {
     }, SHUTDOWN_TIMEOUT_MS);
     forceExitTimer.unref();
 
+    readinessService.stop();
+
     if (server) {
         try {
             await new Promise((resolve, reject) => {
@@ -64,7 +39,7 @@ const shutdown = async (reason, exitCode = 0) => {
     }
 
     try {
-        await prisma.$disconnect();
+        await prisma.disconnect();
     } catch (error) {
         runtimeLogger.logError('shutdown.prisma_disconnect_failed', error);
     }
@@ -74,45 +49,38 @@ const shutdown = async (reason, exitCode = 0) => {
     process.exit(exitCode);
 };
 
-// Arranque controlado (Sprint 20, Bloque F): Express nunca escucha en el puerto si
-// Prisma no respondió primero. Sin reintentos, sin bucles internos — si falla, el
-// proceso termina con código distinto de cero y el supervisor del proveedor decide
-// si reinicia (con un bootId nuevo, evidencia de que fue un reinicio real).
-const start = async () => {
+// Arranque inmediato compatible con Hostinger (Sprint 21, Fase 5). Hostinger exige
+// listen() en menos de 3 segundos o levanta procesos adicionales — por eso Express
+// escucha ANTES de saber si Prisma/Neon están disponibles. La comprobación de base
+// corre en segundo plano, sin bloquear, sin bucles agresivos y sin poder terminar
+// el proceso por una indisponibilidad temporal.
+const start = () => {
     runtimeLogger.logRuntimeStart();
-
-    const prismaReady = await testPrismaConnection();
-
-    if (!prismaReady) {
-        runtimeLogger.log('runtime.startup_failed', { reason: 'prisma_unreachable' });
-
-        try {
-            await prisma.$disconnect();
-        } catch (error) {
-            runtimeLogger.logError('runtime.startup_disconnect_failed', error);
-        }
-
-        process.exitCode = 1;
-        return;
-    }
 
     server = app.listen(PORT, () => {
         console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
-        runtimeLogger.log('runtime.listening', { port: Number(PORT) });
+        runtimeLogger.log('runtime.listening', {
+            port: Number(PORT),
+            engineType: 'client',
+            adapter: 'pg',
+            poolMax: 3
+        });
     });
 
     server.on('error', (error) => {
         runtimeLogger.logError('runtime.listen_failed', error);
         shutdown('listen_error', 1);
     });
+
+    readinessService.start();
 };
 
 process.on('SIGTERM', () => shutdown('SIGTERM', 0));
 process.on('SIGINT', () => shutdown('SIGINT', 0));
 
-// Errores globales (Sprint 20, Bloque H). No se intenta seguir funcionando tras un
-// uncaughtException: se registra y se ejecuta el cierre controlado. No se reconstruye
-// PrismaClient en ningún punto de este archivo — siempre la misma instancia importada.
+// Errores globales. No se intenta seguir funcionando tras un uncaughtException: se
+// registra y se ejecuta el cierre controlado. No se reconstruye PrismaClient ni el
+// Pool en ningún punto de este archivo — siempre la misma instancia importada.
 process.on('uncaughtException', (error) => {
     runtimeLogger.logError('runtime.uncaught_exception', error, {
         clientVersion: error?.clientVersion,
