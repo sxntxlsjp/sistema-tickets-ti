@@ -3,8 +3,22 @@ const puppeteer = require('puppeteer');
 const {
     generateManagementReportHtml
 } = require('../utils/managementReportTemplate.util');
+const runtimeLogger = require('../utils/runtimeLogger.util');
+
+// Single-flight por proceso (Sprint 20, Bloque K): evita que dos solicitudes
+// concurrentes abran dos instancias de Chromium a la vez en un servidor de
+// recursos limitados. Es contención local, no una cola — sin dependencias nuevas.
+let isGeneratingReport = false;
 
 const generateManagementReport = async (req, res) => {
+    if (isGeneratingReport) {
+        return res.status(409).json({
+            message: 'Ya hay una generación de reporte en curso. Intenta nuevamente en unos segundos.'
+        });
+    }
+
+    isGeneratingReport = true;
+
     try {
 
         const tickets = await prisma.ticket.findMany({
@@ -108,15 +122,22 @@ const generateManagementReport = async (req, res) => {
                 }
             });
 
-            const browser = await puppeteer.launch({
-                headless: true,
-                args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-gpu'
-                ]
-            });
+            let browser;
+
+            try {
+                browser = await puppeteer.launch({
+                    headless: true,
+                    args: [
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox',
+                        '--disable-dev-shm-usage',
+                        '--disable-gpu'
+                    ]
+                });
+            } catch (launchError) {
+                runtimeLogger.logError('report.puppeteer_launch_failed', launchError);
+                throw launchError;
+            }
 
             let pdfBuffer;
 
@@ -133,7 +154,11 @@ const generateManagementReport = async (req, res) => {
                     printBackground: true
                 });
             } finally {
-                await browser.close();
+                try {
+                    await browser.close();
+                } catch (closeError) {
+                    runtimeLogger.logError('report.puppeteer_close_failed', closeError);
+                }
             }
 
             res.setHeader('Content-Type', 'application/pdf');
@@ -151,6 +176,8 @@ const generateManagementReport = async (req, res) => {
         return res.status(500).json({
             message: 'Error al generar reporte'
         });
+    } finally {
+        isGeneratingReport = false;
     }
 };
 

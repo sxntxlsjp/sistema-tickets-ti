@@ -1,5 +1,5 @@
-require('dotenv').config();
-
+// dotenv se carga una única vez en el entry point (src/server.js). Este módulo
+// consume process.env directamente (Sprint 20, Bloque J).
 const mailConfig = {
     mode: process.env.MAIL_MODE || 'development',
     adminEmail: process.env.ADMIN_EMAIL,

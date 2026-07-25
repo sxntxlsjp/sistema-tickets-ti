@@ -42,9 +42,30 @@ const applyChartTheme = () => {
     Chart.defaults.font.family = "'Poppins', ui-sans-serif, system-ui, sans-serif";
 };
 
+// Sprint 20 (Bloque A) — control de concurrencia del Dashboard.
+// dashboardAbortController: cancela la petición summary anterior cuando empieza una nueva.
+// dashboardRequestId: descarta respuestas obsoletas que lleguen tarde (aunque no se
+// hayan podido abortar a tiempo), evitando que sobrescriban una carga más reciente.
+// lastDashboardPayload: último payload válido, reutilizado por el cambio de tema para
+// redibujar sin volver a llamar a la API.
+let dashboardAbortController = null;
+let dashboardRequestId = 0;
+let isDashboardLoading = false;
+let lastDashboardPayload = null;
+
 const loadDashboard = async (range = 'all') => {
     setActiveRangeButton(range);
     applyChartTheme();
+
+    if (dashboardAbortController) {
+        dashboardAbortController.abort();
+    }
+
+    const abortController = new AbortController();
+    dashboardAbortController = abortController;
+
+    const requestId = ++dashboardRequestId;
+    isDashboardLoading = true;
 
     let data;
 
@@ -52,7 +73,8 @@ const loadDashboard = async (range = 'all') => {
         const response = await fetch(`${API_URL}/dashboard/summary?range=${range}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
-            }
+            },
+            signal: abortController.signal
         });
 
         if (!response.ok) {
@@ -61,12 +83,32 @@ const loadDashboard = async (range = 'all') => {
 
         data = await response.json();
     } catch (error) {
+        if (error.name === 'AbortError') {
+            // Reemplazada por una carga más reciente: no es un error real, no se registra.
+            return;
+        }
         console.error(error);
+        return;
+    } finally {
+        if (requestId === dashboardRequestId) {
+            isDashboardLoading = false;
+        }
+        if (dashboardAbortController === abortController) {
+            dashboardAbortController = null;
+        }
+    }
+
+    // Protección contra respuestas obsoletas: si ya se inició una carga más nueva
+    // mientras esta esperaba su respuesta, se descarta aunque haya llegado completa.
+    if (requestId !== dashboardRequestId) {
         return;
     }
 
-    loadAdminAlerts();
+    lastDashboardPayload = data;
+    renderDashboard(data);
+};
 
+const renderDashboard = (data) => {
     setText('totalTickets', data.totalTickets ?? 0);
     setText('withoutPriorityTickets', data.withoutPriorityTickets ?? 0);
     setText('openTickets', data.openTickets ?? 0);
@@ -470,7 +512,21 @@ const renderOverdueTickets = (tickets) => {
     });
 };
 
+// Sprint 20 (Bloque A.4) — protección single-flight: mientras haya una exportación en
+// curso, nuevos clics no abren una segunda generación de PDF en el backend.
+let isExportingReport = false;
+
 const exportManagementReport = async () => {
+    if (isExportingReport) return;
+
+    isExportingReport = true;
+
+    const btn = document.getElementById('exportManagementReportBtn');
+
+    if (btn) {
+        btn.disabled = true;
+        btn.classList.add('btn-loading');
+    }
 
     try {
 
@@ -515,6 +571,13 @@ const exportManagementReport = async () => {
         alert(
             'Ocurrió un error al generar el reporte'
         );
+    } finally {
+        isExportingReport = false;
+
+        if (btn) {
+            btn.disabled = false;
+            btn.classList.remove('btn-loading');
+        }
     }
 };
 
@@ -525,9 +588,16 @@ document
         exportManagementReport
     );
 
+// Sprint 20 (Bloque A.2) — el cambio de tema ya no vuelve a consultar la API: reutiliza
+// el último payload válido y solo redibuja gráficos/estilos. Si aún no hay datos
+// cargados, no se dispara ninguna consulta adicional (la carga inicial ya en curso se
+// encargará de aplicar el tema correcto al terminar).
 document.addEventListener('themechange', () => {
-    const activeRange = document.querySelector('.range-btn.btn-secondary')?.dataset.range || 'all';
-    loadDashboard(activeRange);
+    applyChartTheme();
+
+    if (lastDashboardPayload) {
+        renderDashboard(lastDashboardPayload);
+    }
 });
 
 let orientationResizeTimeout;
@@ -539,3 +609,4 @@ window.addEventListener('orientationchange', () => {
 });
 
 loadDashboard('all');
+loadAdminAlerts();

@@ -23,6 +23,7 @@ const systemSettingRoutes = require('./routes/systemSetting.routes');
 const ticketSubtypeRoutes = require('./routes/ticketSubtype.routes');
 const ticketPriorityRoutes = require('./routes/ticketPriority.routes');
 const tenantRoutes = require('./routes/tenant.routes');
+const healthRoutes = require('./routes/health.routes');
 const attachProfileImageUrls = require('./middlewares/profileImageUrl.middleware');
 
 const app = express();
@@ -39,6 +40,11 @@ app.use(
     '/uploads/profiles',
     express.static(profileUploadsPath)
 );
+
+// Registrado antes del interceptor de perfil y sin auth: los health checks deben ser
+// lo más independientes y livianos posible (Sprint 20, Bloque I).
+app.use('/api/health', healthRoutes);
+
 app.use('/api', attachProfileImageUrls);
 
 app.get('/', (req, res) => {

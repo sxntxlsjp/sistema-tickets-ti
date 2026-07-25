@@ -6,6 +6,47 @@ const {
 
 const SLA_DUE_SOON_MINUTES = 60;
 
+// Caché en memoria local del proceso (Sprint 20, Bloque L) — no es una solución al
+// panic de Prisma, solo contención para absorber clics dobles/cambios rápidos de rango.
+// No usar Redis ni almacenamiento externo aquí. Aislada por tenant + rango; nunca se
+// comparte entre tenants; nunca cachea respuestas de error; se invalida sola por TTL.
+const DASHBOARD_CACHE_TTL_MS = 10_000;
+const dashboardSummaryCache = new Map();
+
+const getCachedSummary = (cacheKey) => {
+    const entry = dashboardSummaryCache.get(cacheKey);
+    if (!entry) return null;
+
+    if (Date.now() > entry.expiresAt) {
+        dashboardSummaryCache.delete(cacheKey);
+        return null;
+    }
+
+    return entry.payload;
+};
+
+const setCachedSummary = (cacheKey, payload) => {
+    dashboardSummaryCache.set(cacheKey, {
+        expiresAt: Date.now() + DASHBOARD_CACHE_TTL_MS,
+        payload
+    });
+};
+
+// Agrupa y cuenta en memoria replicando la forma de Prisma groupBy: [{ [byField]: value, _count: N }]
+const groupCount = (items, byField, keyFn) => {
+    const map = new Map();
+
+    items.forEach(item => {
+        const key = keyFn(item);
+        map.set(key, (map.get(key) || 0) + 1);
+    });
+
+    return Array.from(map.entries()).map(([key, count]) => ({
+        [byField]: key,
+        _count: count
+    }));
+};
+
 const getDashboardSummary = async (req, res) => {
     try {
         const range =
@@ -15,6 +56,13 @@ const getDashboardSummary = async (req, res) => {
             return res.status(400).json({
                 message: `Rango inválido. Valores permitidos: ${VALID_RANGES.join(', ')}`
             });
+        }
+
+        const cacheKey = `${req.tenantId}:${range}`;
+        const cached = getCachedSummary(cacheKey);
+
+        if (cached) {
+            return res.json(cached);
         }
 
         const startDate =
@@ -36,49 +84,41 @@ const getDashboardSummary = async (req, res) => {
         const startOfWeek = new Date(startOfToday);
         startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
 
+        // Consulta base única: trae solo los campos escalares necesarios para derivar
+        // en memoria todos los conteos, agrupaciones, SLA y listas del rango seleccionado.
+        // Sustituye ~15 operaciones (5 counts + 5 groupBy + slaTickets + ticketsByDepartment
+        // + latestTickets + overdueTicketsList) de la versión anterior.
         const [
-            totalTickets,
-            openTickets,
-            pendingTickets,
-            closedTickets,
-            withoutPriorityTickets,
-            createdToday,
-            createdThisWeek,
-            closedThisWeek,
-            ticketsByStatus,
-            ticketsByPriorityRaw,
-            ticketsByTypeRaw,
-            ticketsBySubtypeRaw,
-            ticketsByCountryRaw,
-            ticketsByAssigneeRaw,
+            ticketsInRange,
             priorities,
             types,
             subtypes,
             countries,
             users,
+            createdToday,
+            createdThisWeek,
+            closedThisWeek,
             satisfactionStats,
-            latestTickets,
-            latestSatisfactions,
-            slaTickets,
-            overdueTicketsList
+            latestSatisfactions
         ] = await Promise.all([
-            prisma.ticket.count({ where: dateFilter }),
-            prisma.ticket.count({ where: { ...dateFilter, status: 'EN_REVISION' } }),
-            prisma.ticket.count({ where: { ...dateFilter, status: 'PENDIENTE' } }),
-            prisma.ticket.count({ where: { ...dateFilter, status: 'FINALIZADO' } }),
-            prisma.ticket.count({ where: { ...dateFilter, priorityId: null } }),
-            prisma.ticket.count({ where: { tenantId: req.tenantId, createdAt: { gte: startOfToday } } }),
-            prisma.ticket.count({ where: { tenantId: req.tenantId, createdAt: { gte: startOfWeek } } }),
-            prisma.ticket.count({ where: { tenantId: req.tenantId, status: 'FINALIZADO', closedAt: { gte: startOfWeek } } }),
-            prisma.ticket.groupBy({ by: ['status'], where: dateFilter, _count: true }),
-            prisma.ticket.groupBy({ by: ['priorityId'], where: dateFilter, _count: true }),
-            prisma.ticket.groupBy({ by: ['typeId'], where: dateFilter, _count: true }),
-            prisma.ticket.groupBy({ by: ['ticketSubtypeId'], where: dateFilter, _count: true }),
-            prisma.ticket.groupBy({ by: ['countryId'], where: dateFilter, _count: true }),
-            prisma.ticket.groupBy({
-                by: ['assignedTo'],
-                where: { ...dateFilter, status: { not: 'FINALIZADO' } },
-                _count: true
+            prisma.ticket.findMany({
+                where: dateFilter,
+                select: {
+                    id: true,
+                    ticketNumber: true,
+                    subject: true,
+                    status: true,
+                    priorityId: true,
+                    typeId: true,
+                    ticketSubtypeId: true,
+                    countryId: true,
+                    assignedTo: true,
+                    requestedBy: true,
+                    slaStartedAt: true,
+                    slaDueAt: true,
+                    createdAt: true,
+                    closedAt: true
+                }
             }),
             prisma.ticketPriority.findMany({ where: { tenantId: req.tenantId }, select: { id: true, name: true, color: true } }),
             prisma.ticketType.findMany({ where: { tenantId: req.tenantId }, select: { id: true, name: true } }),
@@ -86,24 +126,20 @@ const getDashboardSummary = async (req, res) => {
             prisma.country.findMany({ select: { id: true, name: true, flagEmoji: true } }),
             prisma.user.findMany({
                 where: { tenantMemberships: { some: { tenantId: req.tenantId } } },
-                select: { id: true, name: true }
+                select: { id: true, name: true, department: true }
             }),
+            // Estas 3 son deliberadamente independientes del rango seleccionado (siempre
+            // "hoy"/"esta semana" reales), por lo que no pueden derivarse de ticketsInRange.
+            prisma.ticket.count({ where: { tenantId: req.tenantId, createdAt: { gte: startOfToday } } }),
+            prisma.ticket.count({ where: { tenantId: req.tenantId, createdAt: { gte: startOfWeek } } }),
+            prisma.ticket.count({ where: { tenantId: req.tenantId, status: 'FINALIZADO', closedAt: { gte: startOfWeek } } }),
             prisma.ticketSatisfaction.aggregate({
                 where: satisfactionFilter,
                 _avg: { rating: true },
                 _count: { rating: true }
             }),
-            prisma.ticket.findMany({
-                where: dateFilter,
-                take: 5,
-                orderBy: { createdAt: 'desc' },
-                include: {
-                    requester: { select: { name: true, department: true } },
-                    type: { select: { name: true } },
-                    priority: { select: { name: true, color: true } },
-                    country: { select: { name: true, flagEmoji: true } }
-                }
-            }),
+            // Puede referenciar tickets fuera de ticketsInRange (filtra por fecha de la
+            // evaluación, no del ticket), así que se mantiene como consulta propia.
             prisma.ticketSatisfaction.findMany({
                 where: satisfactionFilter,
                 take: 5,
@@ -111,31 +147,6 @@ const getDashboardSummary = async (req, res) => {
                 include: {
                     user: { select: { name: true } },
                     ticket: { select: { ticketNumber: true, subject: true } }
-                }
-            }),
-            prisma.ticket.findMany({
-                where: dateFilter,
-                select: {
-                    status: true,
-                    priorityId: true,
-                    slaStartedAt: true,
-                    slaDueAt: true,
-                    createdAt: true,
-                    closedAt: true
-                }
-            }),
-            prisma.ticket.findMany({
-                where: {
-                    ...dateFilter,
-                    status: { not: 'FINALIZADO' },
-                    priorityId: { not: null },
-                    slaDueAt: { lt: now }
-                },
-                take: 5,
-                orderBy: { slaDueAt: 'asc' },
-                include: {
-                    priority: { select: { name: true, color: true } },
-                    assignee: { select: { name: true } }
                 }
             })
         ]);
@@ -147,6 +158,26 @@ const getDashboardSummary = async (req, res) => {
         const countryName = (id) => countries.find(c => c.id === id)?.name || 'Sin país';
         const countryFlag = (id) => countries.find(c => c.id === id)?.flagEmoji || '';
         const userName = (id) => users.find(u => u.id === id)?.name || 'Sin asignar';
+        const userDepartment = (id) => users.find(u => u.id === id)?.department || null;
+
+        const totalTickets = ticketsInRange.length;
+        const openTickets = ticketsInRange.filter(t => t.status === 'EN_REVISION').length;
+        const pendingTickets = ticketsInRange.filter(t => t.status === 'PENDIENTE').length;
+        const closedTickets = ticketsInRange.filter(t => t.status === 'FINALIZADO').length;
+        const withoutPriorityTickets = ticketsInRange.filter(t => t.priorityId === null).length;
+
+        const ticketsByStatus = groupCount(ticketsInRange, 'status', t => t.status);
+
+        const ticketsByPriorityRaw = groupCount(ticketsInRange, 'priorityId', t => t.priorityId);
+        const ticketsByTypeRaw = groupCount(ticketsInRange, 'typeId', t => t.typeId);
+        const ticketsBySubtypeRaw = groupCount(ticketsInRange, 'ticketSubtypeId', t => t.ticketSubtypeId);
+        const ticketsByCountryRaw = groupCount(ticketsInRange, 'countryId', t => t.countryId);
+
+        const ticketsByAssigneeRaw = groupCount(
+            ticketsInRange.filter(t => t.status !== 'FINALIZADO'),
+            'assignedTo',
+            t => t.assignedTo
+        );
 
         const ticketsByPriority = ticketsByPriorityRaw.map(item => ({
             priorityId: item.priorityId,
@@ -190,7 +221,7 @@ const getDashboardSummary = async (req, res) => {
         let resolvedCount = 0;
         let resolutionMinutesSum = 0;
 
-        slaTickets.forEach(ticket => {
+        ticketsInRange.forEach(ticket => {
             if (ticket.status === 'FINALIZADO') {
                 if (ticket.closedAt) {
                     const resolutionMinutes =
@@ -229,21 +260,10 @@ const getDashboardSummary = async (req, res) => {
             ? Math.round(resolutionMinutesSum / resolvedCount)
             : null;
 
-        const ticketsByDepartmentRaw = await prisma.ticket.findMany({
-            where: dateFilter,
-            include: {
-                requester: {
-                    select: {
-                        department: true
-                    }
-                }
-            }
-        });
-
         const departmentMap = {};
 
-        ticketsByDepartmentRaw.forEach(ticket => {
-            const department = ticket.requester?.department || 'Sin departamento';
+        ticketsInRange.forEach(ticket => {
+            const department = userDepartment(ticket.requestedBy) || 'Sin departamento';
             departmentMap[department] = (departmentMap[department] || 0) + 1;
         });
 
@@ -252,7 +272,40 @@ const getDashboardSummary = async (req, res) => {
             total: departmentMap[department]
         }));
 
-        return res.json({
+        const latestTickets = [...ticketsInRange]
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .slice(0, 5)
+            .map(ticket => ({
+                id: ticket.id,
+                ticketNumber: ticket.ticketNumber,
+                subject: ticket.subject,
+                status: ticket.status,
+                createdAt: ticket.createdAt,
+                requester: { name: userName(ticket.requestedBy), department: userDepartment(ticket.requestedBy) },
+                type: { name: typeName(ticket.typeId) },
+                priority: { name: priorityName(ticket.priorityId), color: priorityColor(ticket.priorityId) },
+                country: { name: countryName(ticket.countryId), flagEmoji: countryFlag(ticket.countryId) }
+            }));
+
+        const overdueTicketsList = ticketsInRange
+            .filter(ticket =>
+                ticket.status !== 'FINALIZADO' &&
+                ticket.priorityId !== null &&
+                ticket.slaDueAt &&
+                new Date(ticket.slaDueAt) < now
+            )
+            .sort((a, b) => new Date(a.slaDueAt) - new Date(b.slaDueAt))
+            .slice(0, 5)
+            .map(ticket => ({
+                id: ticket.id,
+                ticketNumber: ticket.ticketNumber,
+                subject: ticket.subject,
+                slaDueAt: ticket.slaDueAt,
+                assignee: { name: userName(ticket.assignedTo) },
+                priority: { name: priorityName(ticket.priorityId), color: priorityColor(ticket.priorityId) }
+            }));
+
+        const summaryPayload = {
             range,
             totalTickets,
             openTickets,
@@ -281,8 +334,11 @@ const getDashboardSummary = async (req, res) => {
             latestTickets,
             latestSatisfactions,
             overdueTicketsList
+        };
 
-        });
+        setCachedSummary(cacheKey, summaryPayload);
+
+        return res.json(summaryPayload);
 
     } catch (error) {
         console.error(error);
