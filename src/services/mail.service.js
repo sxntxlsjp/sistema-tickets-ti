@@ -35,7 +35,7 @@ const getTransporter = () => {
 
     if (!isSmtpConfigured()) return null;
 
-runtimeLogger.info('smtp.configuration.debug', {
+runtimeLogger.log('smtp.configuration.debug', {
     host: process.env.SMTP_HOST || null,
     port: process.env.SMTP_PORT || null,
     secure: parseBooleanEnv(process.env.SMTP_SECURE, true),
