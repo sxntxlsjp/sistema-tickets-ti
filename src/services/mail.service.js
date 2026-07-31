@@ -34,28 +34,47 @@ const getTransporter = () => {
     if (transporter) return transporter;
 
     if (!isSmtpConfigured()) return null;
+const smtpPassword = process.env.SMTP_PASSWORD || '';
+const smtpPassword = process.env.SMTP_PASSWORD || '';
 
 runtimeLogger.log('smtp.configuration.debug', {
     host: process.env.SMTP_HOST || null,
     port: process.env.SMTP_PORT || null,
     secure: parseBooleanEnv(process.env.SMTP_SECURE, true),
     user: process.env.SMTP_USER || null,
-    passwordConfigured: Boolean(process.env.SMTP_PASSWORD),
-    passwordLength: process.env.SMTP_PASSWORD
-        ? process.env.SMTP_PASSWORD.length
-        : 0,
+
+    passwordConfigured: Boolean(smtpPassword),
+
+    // Cantidad de unidades UTF-16 usadas por JavaScript.
+    passwordLength: smtpPassword.length,
+
+    // Cantidad real de caracteres Unicode.
+    passwordCodePointLength: Array.from(smtpPassword).length,
+
+    // Cantidad de bytes enviados en UTF-8.
+    passwordUtf8ByteLength: Buffer.byteLength(smtpPassword, 'utf8'),
+
+    // Solo valida que el último carácter sea "$" (código Unicode 36).
+    passwordLastCharacterCodePoint:
+        smtpPassword.length > 0
+            ? smtpPassword.codePointAt(smtpPassword.length - 1)
+            : null,
+
     userLength: process.env.SMTP_USER
         ? process.env.SMTP_USER.length
         : 0,
+
     userHasWhitespace:
         Boolean(process.env.SMTP_USER) &&
         process.env.SMTP_USER !== process.env.SMTP_USER.trim(),
+
     passwordHasLeadingWhitespace:
-        Boolean(process.env.SMTP_PASSWORD) &&
-        process.env.SMTP_PASSWORD !== process.env.SMTP_PASSWORD.trimStart(),
+        Boolean(smtpPassword) &&
+        smtpPassword !== smtpPassword.trimStart(),
+
     passwordHasTrailingWhitespace:
-        Boolean(process.env.SMTP_PASSWORD) &&
-        process.env.SMTP_PASSWORD !== process.env.SMTP_PASSWORD.trimEnd()
+        Boolean(smtpPassword) &&
+        smtpPassword !== smtpPassword.trimEnd()
 });
 
     transporter = nodemailer.createTransport({
@@ -71,7 +90,7 @@ runtimeLogger.log('smtp.configuration.debug', {
         },
 
         authMethod: 'LOGIN',
-        
+
         ...SMTP_TIMEOUTS_MS
     });
 
