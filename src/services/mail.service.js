@@ -69,6 +69,9 @@ runtimeLogger.log('smtp.configuration.debug', {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASSWORD
         },
+
+        authMethod: 'LOGIN',
+        
         ...SMTP_TIMEOUTS_MS
     });
 
