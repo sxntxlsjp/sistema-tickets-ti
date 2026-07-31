@@ -35,6 +35,29 @@ const getTransporter = () => {
 
     if (!isSmtpConfigured()) return null;
 
+runtimeLogger.info('smtp.configuration.debug', {
+    host: process.env.SMTP_HOST || null,
+    port: process.env.SMTP_PORT || null,
+    secure: parseBooleanEnv(process.env.SMTP_SECURE, true),
+    user: process.env.SMTP_USER || null,
+    passwordConfigured: Boolean(process.env.SMTP_PASSWORD),
+    passwordLength: process.env.SMTP_PASSWORD
+        ? process.env.SMTP_PASSWORD.length
+        : 0,
+    userLength: process.env.SMTP_USER
+        ? process.env.SMTP_USER.length
+        : 0,
+    userHasWhitespace:
+        Boolean(process.env.SMTP_USER) &&
+        process.env.SMTP_USER !== process.env.SMTP_USER.trim(),
+    passwordHasLeadingWhitespace:
+        Boolean(process.env.SMTP_PASSWORD) &&
+        process.env.SMTP_PASSWORD !== process.env.SMTP_PASSWORD.trimStart(),
+    passwordHasTrailingWhitespace:
+        Boolean(process.env.SMTP_PASSWORD) &&
+        process.env.SMTP_PASSWORD !== process.env.SMTP_PASSWORD.trimEnd()
+});
+
     transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: Number(process.env.SMTP_PORT || 465),
