@@ -35,7 +35,6 @@ const getTransporter = () => {
 
     if (!isSmtpConfigured()) return null;
 const smtpPassword = process.env.SMTP_PASSWORD || '';
-const smtpPassword = process.env.SMTP_PASSWORD || '';
 
 runtimeLogger.log('smtp.configuration.debug', {
     host: process.env.SMTP_HOST || null,
