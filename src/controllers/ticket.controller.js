@@ -1,10 +1,8 @@
 const prisma = require('../config/prisma');
 const ticketInclude = require('../utils/ticketInclude.util');
 const { findTenantTicket } = require('../utils/ticketTenant.util');
-
-const {
-    notifyAdminNewTicket
-} = require('../services/mail.service');
+const notificationService = require('../services/notification.service');
+const runtimeLogger = require('../utils/runtimeLogger.util');
 
 const generateTicketNumber = async () => {
     const lastTicket = await prisma.ticket.findFirst({
@@ -129,7 +127,16 @@ const {
             },
             include: ticketInclude
         });
-        await notifyAdminNewTicket(ticket);
+
+        // Operación secundaria: el ticket ya está guardado y la respuesta exitosa no
+        // debe esperar al SMTP. notifyTicketCreated nunca rechaza (atrapa sus propios
+        // errores); el .catch() es una red de seguridad adicional.
+        notificationService.notifyTicketCreated(ticket, req.tenant?.name).catch((error) => {
+            runtimeLogger.logError('notification.ticket_created.unexpected_error', error, {
+                ticketId: ticket.id
+            });
+        });
+
         return res.status(201).json({
             message: 'Ticket creado correctamente',
             ticket
@@ -179,6 +186,17 @@ const takeTicket = async (req, res) => {
                 oldAssignedTo: ticket.assignedTo,
                 newAssignedTo: ticket.assignedTo
             }
+        });
+
+        // Cambio real de estado (PENDIENTE -> EN_REVISION), ya confirmado en base de
+        // datos. Operación secundaria, no bloqueante.
+        notificationService.notifyTicketStatusChanged({
+            ticketId,
+            tenantId: req.tenantId,
+            oldStatus: 'PENDIENTE',
+            newStatus: 'EN_REVISION'
+        }).catch((error) => {
+            runtimeLogger.logError('notification.ticket_status_changed.unexpected_error', error, { ticketId });
         });
 
         return res.json({

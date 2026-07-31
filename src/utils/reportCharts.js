@@ -128,5 +128,6 @@ function donutChart(title, data = [], labelKey = 'label', valueKey = 'total') {
 
 module.exports = {
   barChart,
-  donutChart
+  donutChart,
+  escapeHtml
 };

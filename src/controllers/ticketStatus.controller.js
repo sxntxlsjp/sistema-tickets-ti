@@ -1,5 +1,7 @@
 const prisma = require('../config/prisma');
 const { findTenantTicket } = require('../utils/ticketTenant.util');
+const notificationService = require('../services/notification.service');
+const runtimeLogger = require('../utils/runtimeLogger.util');
 
 const updateTicketStatus = async (req, res) => {
     try {
@@ -50,6 +52,22 @@ const updateTicketStatus = async (req, res) => {
                 newAssignedTo: existingTicket.assignedTo
             }
         });
+
+        // Solo notificar si el estado realmente cambió (comparación de valores del
+        // backend, nunca del texto visible del frontend) y ya confirmado en base de
+        // datos. Operación secundaria, no bloqueante.
+        if (existingTicket.status !== status) {
+            notificationService.notifyTicketStatusChanged({
+                ticketId: existingTicket.id,
+                tenantId: req.tenantId,
+                oldStatus: existingTicket.status,
+                newStatus: status
+            }).catch((error) => {
+                runtimeLogger.logError('notification.ticket_status_changed.unexpected_error', error, {
+                    ticketId: existingTicket.id
+                });
+            });
+        }
 
         return res.json({
             message: 'Estado del ticket actualizado correctamente',
